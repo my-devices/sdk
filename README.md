@@ -68,7 +68,7 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 ### The Easy Way
 
 The easy way to build the SDK on Linux or OS X is to run the
-buildsdk.sh script:
+*buildsdk.sh* script:
 
     ./buildsdk.sh
 
@@ -85,7 +85,7 @@ do a manual build if your target does not have OpenSSL.
 The resulting executables will be located in the *bin* directory.
 
 For cross-compiling for an embedded platform, pass the name of a
-build configuration to the buildsdk.sh script. For example, to build
+build configuration to the *buildsdk.sh* script. For example, to build
 for Angstrom:
 
     ./buildsdk.sh Angstrom
@@ -157,9 +157,11 @@ For Windows, you'll need Visual C++. Any version from 2008 to 2015 is fine.
 
 The easiest way to build on Windows is to run one of the build_vsNNN.cmd scripts, depending on the
 Visual Studio version you'll want to build with. For Visual Studio 2008, run build_vs90.cmd, for 
-Visual Studio 2015 run buidl_vs140.cmd:
+Visual Studio 2013 run *build_vs120.cmd*:
 
-    build_vs140
+    build_vs120
+
+The executables will be located in *WebTunnel\WebTunnelAgent\bin\static_mt*, *WebTunnel\WebTunnelClient\bin\static_mt*, etc.
 
 You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
 Also, see README_POCO for more information.
