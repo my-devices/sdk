@@ -7,7 +7,7 @@ Net
 Crypto
 NetSSL_OpenSSL
 WebTunnel
-WebTunnel/Agent
-WebTunnel/Client
-WebTunnel/SSH
-WebTunnel/VNC
+WebTunnel/WebTunnelAgent
+WebTunnel/WebTunnelClient
+WebTunnel/WebTunnelSSH
+WebTunnel/WebTunnelVNC

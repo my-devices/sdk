@@ -1,2 +1,2 @@
 @echo off
-buildwin 90 build static_mt both WinCE samples
+buildwin 90 build static_mt release WinCE nosamples
