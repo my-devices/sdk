@@ -26,6 +26,8 @@ The my-devices.net Device SDK is based on the POCO C++ Libraries
 contains important information regarding the directory structure
 and the build system of the SDK.
 
+The my-devices.net SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
+
 
 ## External Dependecies
 
