@@ -5,8 +5,10 @@
 [my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices 
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or 
 Virtual Network Computing (VNC). With my-devices.net, any network-connected device 
-running the my-devices.net Agent software can be securely accessed remotely over the 
-internet from browsers, mobile apps, desktop, server or cloud applications. 
+running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
+can be securely accessed remotely over theinternet from browsers, mobile apps, desktop, 
+server or cloud applications. 
+
 This even works if the device is behind a NAT router, firewall or proxy server. 
 The device becomes just another host on the internet, addressable via its own URL and 
 protected by the my-devices.net server against unauthorized or malicious access. 
@@ -15,16 +17,27 @@ as well as for providing secure remote access to devices for end-users via web o
 mobile apps.
 
 Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
-Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page for 
-information on how to use this SDK and the included WebTunnelAgent executable.
+Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
+[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for 
+information on how to use this SDK and the included *WebTunnelAgent* executable.
+
+There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
 
 
-## About this SDK
+## About This SDK
 
-The my-devices.net Device SDK is based on the POCO C++ Libraries
-<http://pocoproject.org>. Please read README_POCO first as it
-contains important information regarding the directory structure
+The my-devices.net Device SDK is based on the 
+[POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO 
+first as it contains important information regarding the directory structure
 and the build system of the SDK.
+
+The SDK contains the WebTunnel library, which implements the tunnel protocol used by my-devices.net.
+Furthermore, the following executables are included:
+
+  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the my-devices.net server. This is the most important component of the my-devices.net SDK.
+  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the my-devices.net server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the my-devices.net server.
+  - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to the device, then launches a SSH client using that tunnel connection.
+  - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to the device, then launches a VNC viewer using that tunnel connection.
 
 The my-devices.net SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
@@ -55,7 +68,11 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 ### The Easy Way
 
 The easy way to build the SDK on Linux or OS X is to run the
-buildsdk.sh script. It will make the necessary invocations of
+buildsdk.sh script:
+
+    ./buildsdk.sh
+
+It will make the necessary invocations of
 the configure script and GNU make to build WebTunnelAgent and
 WebTunnelClient, along with the required libraries. With this
 build, the required POCO libraries (Foundation, Net, Util, WebTunnel,
@@ -64,6 +81,8 @@ applications. If you don't want this, because you want to use other
 parts of POCO in your project and link the shared libraries, you'll
 have to run the necessary commands manually. You'll also have to
 do a manual build if your target does not have OpenSSL.
+
+The resulting executables will be located in the *bin* directory.
 
 For cross-compiling for an embedded platform, pass the name of a
 build configuration to the buildsdk.sh script. For example, to build
@@ -134,7 +153,13 @@ call to ./configure and the final call to GNU make.
 
 ## Building on Windows
 
-For Windows, you'll need Visual C++. Any version from .NET 2003 to 2012 is fine.
-Project and solution files for all those versions are included.
-You can also use the buildwin.cmd script to build everything in one batch. 
-See README_POCO for more information.
+For Windows, you'll need Visual C++. Any version from 2008 to 2015 is fine.
+
+The easiest way to build on Windows is to run one of the build_vsNNN.cmd scripts, depending on the
+Visual Studio version you'll want to build with. For Visual Studio 2008, run build_vs90.cmd, for 
+Visual Studio 2015 run buidl_vs140.cmd:
+
+    build_vs140
+
+You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
+Also, see README_POCO for more information.
