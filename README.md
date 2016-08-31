@@ -26,6 +26,14 @@ The my-devices.net Device SDK is based on the POCO C++ Libraries
 contains important information regarding the directory structure
 and the build system of the SDK.
 
+The SDK contains the WebTunnel library, which implements the tunnel protocol used by my-devices.net.
+Furthermore, the following executables are included:
+
+  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the my-devices.net server. This is the most important component of the my-devices.net SDK.
+  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the my-devices.net server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the my-devices.net server.
+  - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to the device, then launches a SSH client using that tunnel connection.
+  - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to the device, then launches a VNC viewer using that tunnel connection.
+
 The my-devices.net SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
@@ -55,7 +63,11 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 ### The Easy Way
 
 The easy way to build the SDK on Linux or OS X is to run the
-buildsdk.sh script. It will make the necessary invocations of
+buildsdk.sh script:
+
+    ./buildsdk.sh
+
+It will make the necessary invocations of
 the configure script and GNU make to build WebTunnelAgent and
 WebTunnelClient, along with the required libraries. With this
 build, the required POCO libraries (Foundation, Net, Util, WebTunnel,
@@ -134,7 +146,13 @@ call to ./configure and the final call to GNU make.
 
 ## Building on Windows
 
-For Windows, you'll need Visual C++. Any version from .NET 2003 to 2012 is fine.
-Project and solution files for all those versions are included.
-You can also use the buildwin.cmd script to build everything in one batch. 
-See README_POCO for more information.
+For Windows, you'll need Visual C++. Any version from 2008 to 2015 is fine.
+
+The easiest way to build on Windows is to run one of the build_vsNNN.cmd scripts, depending on the
+Visual Studio version you'll want to build with. For Visual Studio 2008, run build_vs90.cmd, for 
+Visual Studio 2015 run buidl_vs140.cmd:
+
+    build_vs140
+
+You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
+Also, see README_POCO for more information.
