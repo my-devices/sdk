@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{1e246bcc-650f-473a-803c-0273d0335d8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Header Files">
+      <UniqueIdentifier>{07f41c5c-c4b9-4c1d-8ad9-4373b1dea21d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Source Files">
+      <UniqueIdentifier>{ba7ecf4d-eb62-4617-99c7-b62eedb5f9bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{8a55349c-aa2a-4cd3-b4e1-b9a0297af458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Header Files">
+      <UniqueIdentifier>{2d96327b-e4e7-4d10-98c2-eb3115c905b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Source Files">
+      <UniqueIdentifier>{a46982ce-5700-4fd2-872c-dc5dc55af0fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{9c6643a2-b172-4c3a-9321-697dc580f43b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Header Files">
+      <UniqueIdentifier>{c7016ffe-a401-44de-8807-02c1774b06e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server\Source Files">
+      <UniqueIdentifier>{572da025-5079-43e8-9c6e-ed796afdb85b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflector">
+      <UniqueIdentifier>{df2cee37-3cad-4b44-9d5e-e84fa4399843}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflector\Header Files">
+      <UniqueIdentifier>{87470fd0-78a6-438f-9606-d1456025ac40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Reflector\Source Files">
+      <UniqueIdentifier>{1cae731d-6f4c-428d-8155-95942c9d5e1f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Poco\WebTunnel\PollSet.h">
+      <Filter>Core\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\Protocol.h">
+      <Filter>Core\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\SocketDispatcher.h">
+      <Filter>Core\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\WebTunnel.h">
+      <Filter>Core\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\LocalPortForwarder.h">
+      <Filter>Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\RemotePortForwarder.h">
+      <Filter>Server\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\PortReflector.h">
+      <Filter>Reflector\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\TunnelSocket.h">
+      <Filter>Reflector\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Poco\WebTunnel\TunnelSocketImpl.h">
+      <Filter>Reflector\Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\PollSet.cpp">
+      <Filter>Core\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Protocol.cpp">
+      <Filter>Core\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SocketDispatcher.cpp">
+      <Filter>Core\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LocalPortForwarder.cpp">
+      <Filter>Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RemotePortForwarder.cpp">
+      <Filter>Server\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PortReflector.cpp">
+      <Filter>Reflector\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TunnelSocket.cpp">
+      <Filter>Reflector\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TunnelSocketImpl.cpp">
+      <Filter>Reflector\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
