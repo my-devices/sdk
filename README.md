@@ -5,8 +5,9 @@
 [my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices 
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or 
 Virtual Network Computing (VNC). With my-devices.net, any network-connected device 
-running the my-devices.net Agent software can be securely accessed remotely over the 
-internet from browsers, mobile apps, desktop, server or cloud applications. 
+running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
+can be securely accessed remotely over theinternet from browsers, mobile apps, desktop, 
+server or cloud applications. 
 This even works if the device is behind a NAT router, firewall or proxy server. 
 The device becomes just another host on the internet, addressable via its own URL and 
 protected by the my-devices.net server against unauthorized or malicious access. 
@@ -15,7 +16,8 @@ as well as for providing secure remote access to devices for end-users via web o
 mobile apps.
 
 Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
-Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page for 
+Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
+[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for 
 information on how to use this SDK and the included WebTunnelAgent executable.
 
 
@@ -76,6 +78,8 @@ applications. If you don't want this, because you want to use other
 parts of POCO in your project and link the shared libraries, you'll
 have to run the necessary commands manually. You'll also have to
 do a manual build if your target does not have OpenSSL.
+
+The resulting executables will be located in the *bin* directory.
 
 For cross-compiling for an embedded platform, pass the name of a
 build configuration to the buildsdk.sh script. For example, to build
