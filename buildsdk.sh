@@ -32,14 +32,15 @@ fi
 
 mkdir -p bin
 
-for app in "Agent Client SSH VNC"; do
+for app in Agent Client SSH VNC; do
+	echo "Building: $app"
 	make -s DEFAULT_TARGET=shared_release -C WebTunnel/$app
 	if [ $? -ne 0 ] ; then
 		echo "SDK build failed."
 		exit 1
 	fi
-	cp WebTunnel/$app/bin/*/* bin
-end
+	cp -R WebTunnel/$app/bin/* bin
+done
 
 echo ""
 echo "my-devices.net SDK build is complete."
