@@ -155,8 +155,8 @@ call to ./configure and the final call to GNU make.
 
 For Windows, you'll need Visual C++. Any version from 2008 to 2015 is fine.
 
-The easiest way to build on Windows is to run one of the build_vsNNN.cmd scripts, depending on the
-Visual Studio version you'll want to build with. For Visual Studio 2008, run build_vs90.cmd, for 
+The easiest way to build on Windows is to run one of the *build_vsNNN.cmd* scripts, depending on the
+Visual Studio version you'll want to build with. For Visual Studio 2008, run *build_vs90.cmd*, for 
 Visual Studio 2013 run *build_vs120.cmd*:
 
     build_vs120
