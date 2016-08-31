@@ -2,8 +2,8 @@
 
 ## About my-devices.net
 
-my-devices.net provides secure remote access to connected devices via HTTP or other 
-TCP-based protocols and applications such as secure shell (SSH) or 
+[my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices 
+via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or 
 Virtual Network Computing (VNC). With my-devices.net, any network-connected device 
 running the my-devices.net Agent software can be securely accessed remotely over the 
 internet from browsers, mobile apps, desktop, server or cloud applications. 
@@ -13,6 +13,11 @@ protected by the my-devices.net server against unauthorized or malicious access.
 my-devices.net is a great solution for secure remote support and maintenance, 
 as well as for providing secure remote access to devices for end-users via web or 
 mobile apps.
+
+Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
+Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page for 
+information on how to use this SDK and the included WebTunnelAgent executable.
+
 
 ## About this SDK
 
@@ -45,7 +50,7 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 
 ## Building on Linux and OS X
 
-# The Easy Way
+### The Easy Way
 
 The easy way to build the SDK on Linux or OS X is to run the
 buildsdk.sh script. It will make the necessary invocations of
@@ -79,16 +84,16 @@ A final note: buildsdk.sh only builds the release configuration.
 If you need a debug build, see below.
 
 
-# Customizing The SDK Build
+### Customizing The SDK Build
 
 To customize the SDK build, invoke the configure script and GNU make
 manually, as described in README_POCO.
 
-> ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
-> make -s -j8 DEFAULT_TARGET=static_release
-> export POCO_BASE=`pwd`
-> cd WebTunnel/Agent
-> make -s DEFAULT_TARGET=shared_release
+    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
+    make -s -j8 DEFAULT_TARGET=static_release
+    export POCO_BASE=`pwd`
+    cd WebTunnel/Agent
+    make -s DEFAULT_TARGET=shared_release
 
 A few notes on the arguments:
 
@@ -109,25 +114,23 @@ A few notes on the arguments:
   
 If your system does not have OpenSSL, run configure and GNU make as follows:
 
-> ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL \
-  --no-tests --no-samples --static
-> make -s -j8 DEFAULT_TARGET=static_release
-> export POCO_BASE=`pwd`
-> cd WebTunnel/Agent
-> make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
+    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
+    make -s -j8 DEFAULT_TARGET=static_release
+    export POCO_BASE=`pwd`
+    cd WebTunnel/Agent
+    make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
 
 For a cross-build for an embedded target, you must specify the build configuration in the
 call to ./configure and the final call to GNU make. 
 
-> ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static \
-  --config=Angstrom
-> make -s -j8 DEFAULT_TARGET=static_release
-> export POCO_BASE=`pwd`
-> cd WebTunnel/Agent
-> make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release 
+    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
+    make -s -j8 DEFAULT_TARGET=static_release
+    export POCO_BASE=`pwd`
+    cd WebTunnel/Agent
+    make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release 
 
 
-# Building on Windows
+## Building on Windows
 
 For Windows, you'll need Visual C++. Any version from .NET 2003 to 2012 is fine.
 Project and solution files for all those versions are included.
