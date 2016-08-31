@@ -8,6 +8,7 @@ Virtual Network Computing (VNC). With my-devices.net, any network-connected devi
 running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
 can be securely accessed remotely over theinternet from browsers, mobile apps, desktop, 
 server or cloud applications. 
+
 This even works if the device is behind a NAT router, firewall or proxy server. 
 The device becomes just another host on the internet, addressable via its own URL and 
 protected by the my-devices.net server against unauthorized or malicious access. 
@@ -18,10 +19,12 @@ mobile apps.
 Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
 Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
 [Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for 
-information on how to use this SDK and the included WebTunnelAgent executable.
+information on how to use this SDK and the included *WebTunnelAgent* executable.
+
+There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
 
 
-## About this SDK
+## About This SDK
 
 The my-devices.net Device SDK is based on the 
 [POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO 
