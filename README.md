@@ -24,7 +24,7 @@ information on how to use this SDK and the included WebTunnelAgent executable.
 ## About this SDK
 
 The my-devices.net Device SDK is based on the 
-[POCO C++ Libraries](http://pocoproject.org). You may wanat to read README_POCO 
+[POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO 
 first as it contains important information regarding the directory structure
 and the build system of the SDK.
 
