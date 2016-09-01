@@ -70,6 +70,8 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 The easy way to build the SDK on Linux or OS X is to run the
 *buildsdk.sh* script:
 
+    git clone https://github.com/my-devices/sdk.git
+    cd sdk
     ./buildsdk.sh
 
 It will make the necessary invocations of
@@ -159,9 +161,11 @@ The easiest way to build on Windows is to run one of the *build_vsNNN.cmd* scrip
 Visual Studio version you'll want to build with. For Visual Studio 2008, run *build_vs90.cmd*, for 
 Visual Studio 2013 run *build_vs120.cmd*:
 
+    git clone https://github.com/my-devices/sdk.git
+    cd sdk
     build_vs120
 
-The executables will be located in *WebTunnel\WebTunnelAgent\bin\static_mt*, *WebTunnel\WebTunnelClient\bin\static_mt*, etc.
+The statically linked executables will be located in *WebTunnel\WebTunnelAgent\bin\static_mt*, *WebTunnel\WebTunnelClient\bin\static_mt*, etc.
 
 You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
 Also, see README_POCO for more information.
