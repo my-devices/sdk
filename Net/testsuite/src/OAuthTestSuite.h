@@ -1,7 +1,7 @@
 //
 // OAuthTestSuite.h
 //
-// $Id: //poco/1.7/Net/testsuite/src/OAuthTestSuite.h#1 $
+// $Id$
 //
 // Definition of the OAuthTestSuite class.
 //

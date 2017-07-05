@@ -1,7 +1,7 @@
 //
 // TestRunnerDlg.h
 //
-// $Id: //poco/1.7/CppUnit/WinTestRunner/src/TestRunnerDlg.h#1 $
+// $Id: //poco/1.4/CppUnit/WinTestRunner/src/TestRunnerDlg.h#1 $
 //
 
 

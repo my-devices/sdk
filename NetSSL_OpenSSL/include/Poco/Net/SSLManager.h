@@ -1,7 +1,7 @@
 //
 // SSLManager.h
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/include/Poco/Net/SSLManager.h#2 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/include/Poco/Net/SSLManager.h#4 $
 //
 // Library: NetSSL_OpenSSL
 // Package: SSLCore

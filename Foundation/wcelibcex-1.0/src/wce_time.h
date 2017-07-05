@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_time.h#1 $
+ * $Id: wce_time.h,v 1.2 2006/04/09 16:48:18 mloskot Exp $
  *
  * time.h and sys/time.h - time types and functions
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_winbase.h#1 $
+ * $Id: wce_winbase.h,v 1.0 2006/04/12 15:11:36 sdunand Exp $
  *
  * Created by Stéphane Dunand (sdunand@sirap.fr)
  *

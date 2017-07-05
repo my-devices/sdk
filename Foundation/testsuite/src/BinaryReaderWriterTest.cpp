@@ -1,7 +1,7 @@
 //
 // BinaryReaderWriterTest.cpp
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/BinaryReaderWriterTest.cpp#1 $
+// $Id: //poco/1.4/Foundation/testsuite/src/BinaryReaderWriterTest.cpp#2 $
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

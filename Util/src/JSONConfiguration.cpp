@@ -1,7 +1,7 @@
 //
 // JSONConfiguration.cpp
 //
-// $Id: //poco/1.7/Util/src/JSONConfiguration.cpp#1 $
+// $Id$
 //
 // Library: Util
 // Package: JSON

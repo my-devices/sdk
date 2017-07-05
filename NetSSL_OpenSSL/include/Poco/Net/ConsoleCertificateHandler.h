@@ -1,7 +1,7 @@
 //
 // ConsoleCertificateHandler.h
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/include/Poco/Net/ConsoleCertificateHandler.h#1 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/include/Poco/Net/ConsoleCertificateHandler.h#1 $
 //
 // Library: NetSSL_OpenSSL
 // Package: SSLCore

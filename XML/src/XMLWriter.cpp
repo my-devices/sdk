@@ -1,7 +1,7 @@
 //
 // XMLWriter.cpp
 //
-// $Id: //poco/1.7/XML/src/XMLWriter.cpp#3 $
+// $Id: //poco/1.4/XML/src/XMLWriter.cpp#5 $
 //
 // Library: XML
 // Package: XML

@@ -1,7 +1,7 @@
 //
 // OAuth20CredentialsTest.cpp
 //
-// $Id: //poco/1.7/Net/testsuite/src/OAuth20CredentialsTest.cpp#1 $
+// $Id$
 //
 // Copyright (c) 2014, Applied Informatics Software Engineering GmbH.
 // and Contributors.

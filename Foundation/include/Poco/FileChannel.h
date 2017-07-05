@@ -1,7 +1,7 @@
 //
 // FileChannel.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/FileChannel.h#2 $
+// $Id: //poco/1.4/Foundation/include/Poco/FileChannel.h#5 $
 //
 // Library: Foundation
 // Package: Logging

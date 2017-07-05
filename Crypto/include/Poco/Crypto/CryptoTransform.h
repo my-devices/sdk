@@ -1,7 +1,7 @@
 //
 // CryptoTransform.h
 //
-// $Id: //poco/1.7/Crypto/include/Poco/Crypto/CryptoTransform.h#1 $
+// $Id: //poco/1.4/Crypto/include/Poco/Crypto/CryptoTransform.h#2 $
 //
 // Library: Crypto
 // Package: Cipher

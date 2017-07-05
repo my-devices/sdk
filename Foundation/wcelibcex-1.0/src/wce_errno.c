@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_errno.c#1 $
+ * $Id: wce_errno.c,v 1.1 2006/02/19 22:04:53 mloskot Exp $
  *
  * Global errno variable.
  *

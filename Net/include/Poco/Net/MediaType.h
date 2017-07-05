@@ -1,7 +1,7 @@
 //
 // MediaType.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/MediaType.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/MediaType.h#2 $
 //
 // Library: Net
 // Package: Messages
@@ -109,7 +109,7 @@ public:
 		/// Returns true if the type and subtype match
 		/// the type and subtype of the given media type.
 		/// If the MIME type is a range of types it matches
-		/// any media type withing the range (e.g. "image/*" matches
+		/// any media type within the range (e.g. "image/*" matches
 		/// any image media type, "*/*" matches anything).
 		/// Matching is case insensitive.
 
@@ -117,7 +117,7 @@ public:
 		/// Returns true if the type and subtype match
 		/// the given type and subtype.
 		/// If the MIME type is a range of types it matches
-		/// any media type withing the range (e.g. "image/*" matches
+		/// any media type within the range (e.g. "image/*" matches
 		/// any image media type, "*/*" matches anything).
 		/// Matching is case insensitive.
 

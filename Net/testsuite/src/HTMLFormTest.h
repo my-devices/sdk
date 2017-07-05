@@ -1,7 +1,7 @@
 //
 // HTMLFormTest.h
 //
-// $Id: //poco/1.7/Net/testsuite/src/HTMLFormTest.h#1 $
+// $Id: //poco/1.4/Net/testsuite/src/HTMLFormTest.h#2 $
 //
 // Definition of the HTMLFormTest class.
 //

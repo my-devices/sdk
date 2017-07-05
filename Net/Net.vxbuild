@@ -1,7 +1,7 @@
 #
 # Net.vxbuild
 #
-# $Id: //poco/1.7/Net/Net.vxbuild#1 $
+# $Id$
 #
 TARGET=pocoNet
 CFLAGS="-I../../../Foundation/include"

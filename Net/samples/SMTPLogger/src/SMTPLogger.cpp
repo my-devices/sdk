@@ -1,7 +1,7 @@
 //
 // Mail.cpp
 //
-// $Id: //poco/1.7/Net/samples/SMTPLogger/src/SMTPLogger.cpp#1 $
+// $Id: //poco/svn/Net/samples/SMTPLogger/src/SMTPLogger.cpp#1 $
 //
 // This sample demonstrates the SMTPChannel class.
 //

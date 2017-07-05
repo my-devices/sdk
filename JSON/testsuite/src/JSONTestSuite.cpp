@@ -1,7 +1,7 @@
 //
 // JSONTestSuite.cpp
 //
-// $Id: //poco/1.7/JSON/testsuite/src/JSONTestSuite.cpp#1 $
+// $Id: //poco/1.4/JSON/testsuite/src/JSONTestSuite.cpp#1 $
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

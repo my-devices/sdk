@@ -1,7 +1,7 @@
 //
 // TestDecorator.cpp
 //
-// $Id: //poco/1.7/CppUnit/src/TestDecorator.cpp#1 $
+// $Id: //poco/1.4/CppUnit/src/TestDecorator.cpp#1 $
 //
 
 

@@ -1,7 +1,7 @@
 //
 // OAuth10Credentials.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/OAuth10Credentials.h#1 $
+// $Id$
 //
 // Library: Net
 // Package: OAuth

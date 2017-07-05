@@ -1,7 +1,7 @@
 //
 // JSONConfiguration.h
 //
-// $Id: //poco/1.7/Util/include/Poco/Util/JSONConfiguration.h#1 $
+// $Id$
 //
 // Library: Util
 // Package: Util

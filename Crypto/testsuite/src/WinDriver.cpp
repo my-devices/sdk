@@ -1,7 +1,7 @@
 //
 // WinDriver.cpp
 //
-// $Id: //poco/1.7/Crypto/testsuite/src/WinDriver.cpp#1 $
+// $Id: //poco/1.4/Crypto/testsuite/src/WinDriver.cpp#1 $
 //
 // Windows test driver for Poco Crypto.
 //

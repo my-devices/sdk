@@ -1,7 +1,7 @@
 //
 // JSONTest.cpp
 //
-// $Id: //poco/1.7/JSON/testsuite/src/JSONTest.cpp#1 $
+// $Id: //poco/1.4/XML/testsuite/src/JSONTest.cpp#1 $
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.
@@ -366,6 +366,37 @@ void JSONTest::testEmptyObject()
 
 	const DynamicStruct& rds = *object;
 	assert (rds.size() == 0);
+}
+
+
+void JSONTest::testEmptyPropertyName()
+{
+	std::string json = "{\"\": 42}";
+	Parser parser;
+	Var result;
+
+	try
+	{
+		result = parser.parse(json);
+	}
+	catch(JSONException& jsone)
+	{
+		std::cout << jsone.message() << std::endl;
+		assert(false);
+	}
+
+	assert(result.type() == typeid(Object::Ptr));
+
+	Object::Ptr object = result.extract<Object::Ptr>();
+	assert(object->size() == 1);
+
+	DynamicStruct ds = *object;
+	assert (ds.size() == 1);
+
+	const DynamicStruct& rds = *object;
+	assert (rds.size() == 1);
+	
+	assert (ds[""] == 42);
 }
 
 
@@ -1822,6 +1853,7 @@ CppUnit::Test* JSONTest::suite()
 #endif
 	CppUnit_addTest(pSuite, JSONTest, testStringProperty);
 	CppUnit_addTest(pSuite, JSONTest, testEmptyObject);
+	CppUnit_addTest(pSuite, JSONTest, testEmptyPropertyName);
 	CppUnit_addTest(pSuite, JSONTest, testComplexObject);
 	CppUnit_addTest(pSuite, JSONTest, testDoubleProperty);
 	CppUnit_addTest(pSuite, JSONTest, testDouble2Property);

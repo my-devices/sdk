@@ -1,7 +1,7 @@
 //
 // VarTest.h
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/VarTest.h#2 $
+// $Id: //poco/svn/Foundation/testsuite/src/VarTest.h#2 $
 //
 // Tests for Any types
 //

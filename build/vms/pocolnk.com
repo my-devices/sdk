@@ -1,7 +1,7 @@
 $ !
 $ ! POCOLNK.COM
 $ !
-$ ! $Id: //poco/1.7/build/vms/pocolnk.com#2 $
+$ ! $Id: //poco/1.4/build/vms/pocolnk.com#1 $
 $ !
 $ ! C++ link procedure for Poco
 $ !

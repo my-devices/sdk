@@ -1,7 +1,7 @@
 //
 // JSON.h
 //
-// $Id: //poco/1.7/JSON/include/Poco/JSON/JSON.h#1 $
+// $Id$
 //
 // Library: JSON
 // Package: JSON

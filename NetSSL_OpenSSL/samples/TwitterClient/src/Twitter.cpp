@@ -1,7 +1,7 @@
 //
 // Twitter.cpp
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/samples/TwitterClient/src/Twitter.cpp#1 $
+// $Id: //poco/1.4/Net/samples/TwitterClient/src/Twitter.cpp#2 $
 //
 // A C++ implementation of a Twitter client based on the POCO Net library.
 //

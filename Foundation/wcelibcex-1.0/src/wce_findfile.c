@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_findfile.c#1 $
+ * $Id: wce_findfile.c,v 1.2 2006/04/09 16:48:18 mloskot Exp $
  *
  * Defines functions to find files.
  *

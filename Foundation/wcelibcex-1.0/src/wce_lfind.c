@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_lfind.c#1 $
+ * $Id: wce_lfind.c 20 2006-11-18 17:00:30Z mloskot $
  *
  * Defines lfind() function.
  *

@@ -1,7 +1,7 @@
 //
 // NumericString.h
 //
-// $Id: //poco/1.7/Foundation/src/NumericString.cpp#2 $
+// $Id: //poco/1.4/Foundation/src/NumericString.cpp#1 $
 //
 // Library: Foundation
 // Package: Core
@@ -59,7 +59,11 @@ void pad(std::string& str, int precision, int width, char prefix = ' ', char dec
 	std::string::size_type frac = str.length() - decSepPos - 1;
 
 	std::string::size_type ePos = str.find_first_of("eE");
+#if __cplusplus < 201103L
 	std::auto_ptr<std::string> eStr;
+#else
+	std::unique_ptr<std::string> eStr;
+#endif
 	if (ePos != std::string::npos)
 	{
 		eStr.reset(new std::string(str.substr(ePos, std::string::npos)));

@@ -1,7 +1,7 @@
 //
 // NTPClient.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/NTPClient.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/NTPClient.h#1 $
 //
 // Library: Net
 // Package: NTP

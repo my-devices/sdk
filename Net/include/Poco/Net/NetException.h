@@ -1,7 +1,7 @@
 //
 // NetException.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/NetException.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/NetException.h#4 $
 //
 // Library: Net
 // Package: NetCore

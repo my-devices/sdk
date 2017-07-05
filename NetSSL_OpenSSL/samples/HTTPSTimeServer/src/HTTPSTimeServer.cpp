@@ -1,7 +1,7 @@
 //
 // TimeServer.cpp
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/samples/HTTPSTimeServer/src/HTTPSTimeServer.cpp#1 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/samples/HTTPSTimeServer/src/HTTPSTimeServer.cpp#2 $
 //
 // This sample demonstrates the HTTPServer and related classes.
 //

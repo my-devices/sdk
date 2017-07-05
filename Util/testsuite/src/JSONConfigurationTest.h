@@ -1,7 +1,7 @@
 //
 // JSONConfigurationTest.h
 //
-// $Id: //poco/1.7/Util/testsuite/src/JSONConfigurationTest.h#1 $
+// $Id$
 //
 // Definition of the JSONConfigurationTest class.
 //

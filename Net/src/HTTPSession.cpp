@@ -1,7 +1,7 @@
 //
 // HTTPSession.cpp
 //
-// $Id: //poco/1.7/Net/src/HTTPSession.cpp#1 $
+// $Id: //poco/1.4/Net/src/HTTPSession.cpp#2 $
 //
 // Library: Net
 // Package: HTTP
@@ -235,6 +235,13 @@ void HTTPSession::attachSocket(const StreamSocket& socket)
 void HTTPSession::attachSessionData(const Poco::Any& data)
 {
 	_data = data;
+}
+
+
+void HTTPSession::drainBuffer(Poco::Buffer<char>& buffer)
+{
+	buffer.assign(_pCurrent, static_cast<std::size_t>(_pEnd - _pCurrent));
+	_pCurrent = _pEnd;
 }
 
 

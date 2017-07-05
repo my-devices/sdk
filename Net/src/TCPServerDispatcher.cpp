@@ -1,7 +1,7 @@
 //
 // TCPServerDispatcher.cpp
 //
-// $Id: //poco/1.7/Net/src/TCPServerDispatcher.cpp#1 $
+// $Id: //poco/1.4/Net/src/TCPServerDispatcher.cpp#1 $
 //
 // Library: Net
 // Package: TCPServer
@@ -110,7 +110,11 @@ void TCPServerDispatcher::run()
 			TCPConnectionNotification* pCNf = dynamic_cast<TCPConnectionNotification*>(pNf.get());
 			if (pCNf)
 			{
+#if __cplusplus < 201103L
 				std::auto_ptr<TCPServerConnection> pConnection(_pConnectionFactory->createConnection(pCNf->socket()));
+#else
+				std::unique_ptr<TCPServerConnection> pConnection(_pConnectionFactory->createConnection(pCNf->socket()));
+#endif
 				poco_check_ptr(pConnection.get());
 				beginConnection();
 				pConnection->start();

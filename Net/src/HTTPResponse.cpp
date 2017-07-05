@@ -1,7 +1,7 @@
 //
 // HTTPResponse.cpp
 //
-// $Id: //poco/1.7/Net/src/HTTPResponse.cpp#1 $
+// $Id: //poco/1.4/Net/src/HTTPResponse.cpp#2 $
 //
 // Library: Net
 // Package: HTTP
@@ -221,6 +221,7 @@ void HTTPResponse::read(std::istream& istr)
 	while (ch != '\r' && ch != '\n' && ch != eof && reason.length() < MAX_REASON_LENGTH) { reason += (char) ch; ch = istr.get(); }
 	if (!Poco::Ascii::isSpace(ch)) throw MessageException("HTTP reason string too long");
 	if (ch == '\r') ch = istr.get();
+	if (ch != '\n') throw MessageException("Unterminated HTTP response line");
 
 	HTTPMessage::read(istr);
 	ch = istr.get();

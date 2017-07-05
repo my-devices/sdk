@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_unistd.h#1 $
+ * $Id$
  *
  * unistd.h - defines symbolic constants, types, and declares miscellaneous functions
  *

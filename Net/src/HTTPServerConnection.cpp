@@ -1,7 +1,7 @@
 //
 // HTTPServerConnection.cpp
 //
-// $Id: //poco/1.7/Net/src/HTTPServerConnection.cpp#1 $
+// $Id: //poco/1.4/Net/src/HTTPServerConnection.cpp#1 $
 //
 // Library: Net
 // Package: HTTPServer
@@ -78,7 +78,11 @@ void HTTPServerConnection::run()
 					response.set("Server", server);
 				try
 				{
+#if __cplusplus < 201103L
 					std::auto_ptr<HTTPRequestHandler> pHandler(_pFactory->createRequestHandler(request));
+#else
+					std::unique_ptr<HTTPRequestHandler> pHandler(_pFactory->createRequestHandler(request));
+#endif
 					if (pHandler.get())
 					{
 						if (request.expectContinue())

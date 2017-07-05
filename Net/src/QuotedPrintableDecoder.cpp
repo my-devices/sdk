@@ -1,7 +1,7 @@
 //
 // QuotedPrintableDecoder.cpp
 //
-// $Id: //poco/1.7/Net/src/QuotedPrintableDecoder.cpp#1 $
+// $Id: //poco/1.4/Net/src/QuotedPrintableDecoder.cpp#2 $
 //
 // Library: Net
 // Package: Messages
@@ -48,7 +48,7 @@ int QuotedPrintableDecoderBuf::readFromDevice()
 		ch = _buf.sbumpc();
 		if (ch == '\r')
 		{
-			ch = _buf.sbumpc(); // read \n
+			_buf.sbumpc(); // read \n
 		}
 		else if (Poco::Ascii::isHexDigit(ch))
 		{

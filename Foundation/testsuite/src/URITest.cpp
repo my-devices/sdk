@@ -1,7 +1,7 @@
 //
 // URITest.cpp
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/URITest.cpp#2 $
+// $Id: //poco/1.4/Foundation/testsuite/src/URITest.cpp#3 $
 //
 // Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

@@ -1,7 +1,7 @@
 //
 // JSONConfigurationTest.cpp
 //
-// $Id: //poco/1.7/Util/testsuite/src/JSONConfigurationTest.cpp#1 $
+// $Id$
 //
 // Copyright (c) 2004-2012, Applied Informatics Software Engineering GmbH.
 // and Contributors.

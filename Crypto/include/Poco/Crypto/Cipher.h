@@ -1,7 +1,7 @@
 //
 // Cipher.h
 //
-// $Id: //poco/1.7/Crypto/include/Poco/Crypto/Cipher.h#1 $
+// $Id: //poco/1.4/Crypto/include/Poco/Crypto/Cipher.h#3 $
 //
 // Library: Crypto
 // Package: Cipher
@@ -96,7 +96,7 @@ public:
 		ENC_BASE64       = 0x01, /// Base64-encoded output
 		ENC_BINHEX       = 0x02, /// BinHex-encoded output
 		ENC_BASE64_NO_LF = 0x81, /// Base64-encoded output, no linefeeds
-		ENC_BINHEX_NO_LF = 0x82, /// BinHex-encoded output, no linefeeds
+		ENC_BINHEX_NO_LF = 0x82  /// BinHex-encoded output, no linefeeds
 		
 	};
 

@@ -1,7 +1,7 @@
 //
 // JSONException.h
 //
-// $Id: //poco/1.7/JSON/include/Poco/JSON/JSONException.h#1 $
+// $Id$
 //
 // Library: JSON
 // Package: JSON
@@ -31,7 +31,7 @@ namespace JSON {
 POCO_DECLARE_EXCEPTION(JSON_API, JSONException, Poco::Exception)
 
 
-}} // namespace Poco::JSON
+} } // namespace Poco::JSON
 
 
-#endif //JSON_JSONException_INCLUDED
+#endif // JSON_JSONException_INCLUDED

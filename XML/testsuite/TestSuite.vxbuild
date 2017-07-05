@@ -1,7 +1,7 @@
 #
 # TestSuite.vxbuild
 #
-# $Id: //poco/1.7/XML/testsuite/TestSuite.vxbuild#1 $
+# $Id$
 #
 TARGET=XMLTestSuite
 CFLAGS="-I../../../../Foundation/include \\

@@ -1,7 +1,7 @@
 //
 // OAuthTestSuite.cpp
 //
-// $Id: //poco/1.7/Net/testsuite/src/OAuthTestSuite.cpp#1 $
+// $Id$
 //
 // Copyright (c) 2014, Applied Informatics Software Engineering GmbH.
 // and Contributors.

@@ -1,7 +1,7 @@
 //
 // CertificateHandlerFactoryMgr.cpp
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/src/CertificateHandlerFactoryMgr.cpp#1 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/src/CertificateHandlerFactoryMgr.cpp#1 $
 //
 // Library: NetSSL_OpenSSL
 // Package: SSLCore

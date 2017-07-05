@@ -1,7 +1,7 @@
 //
 // JSONException.cpp
 //
-// $Id: //poco/1.7/JSON/src/JSONException.cpp#1 $
+// $Id$
 //
 // Library: JSON
 // Package: JSON
@@ -25,4 +25,4 @@ namespace JSON {
 POCO_IMPLEMENT_EXCEPTION(JSONException, Exception, "JSON Exception")
 
 
-} } // Namespace Poco::JSON
+} } // namespace Poco::JSON

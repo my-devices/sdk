@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_bsearch.c#1 $
+ * $Id: wce_bsearch.c 20 2006-11-18 17:00:30Z mloskot $
  *
  * Defines bsearch() function.
  *

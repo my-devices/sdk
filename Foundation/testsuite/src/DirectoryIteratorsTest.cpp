@@ -1,7 +1,7 @@
 //
 // DirectoryIteratorsTest.cpp
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/DirectoryIteratorsTest.cpp#1 $
+// $Id: //poco/1.4/Foundation/testsuite/src/DirectoryIteratorsTest.cpp#1 $
 //
 // Copyright (c) 2012, Applied Informatics Software Engineering GmbH.
 // and Contributors.

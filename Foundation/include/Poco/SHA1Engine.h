@@ -1,7 +1,7 @@
 //
 // SHA1Engine.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/SHA1Engine.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/SHA1Engine.h#1 $
 //
 // Library: Foundation
 // Package: Crypt

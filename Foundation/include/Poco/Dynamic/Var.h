@@ -1,7 +1,7 @@
 //
 // Var.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Dynamic/Var.h#1 $
+// $Id: //poco/svn/Foundation/include/Poco/Var.h#2 $
 //
 // Library: Foundation
 // Package: Dynamic

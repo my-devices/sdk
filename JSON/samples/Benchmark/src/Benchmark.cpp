@@ -1,7 +1,7 @@
 //
 // Benchmark.cpp
 //
-// $Id: //poco/1.7/JSON/samples/Benchmark/src/Benchmark.cpp#1 $
+// $Id$
 //
 // This sample shows a benchmark of the JSON parser.
 //

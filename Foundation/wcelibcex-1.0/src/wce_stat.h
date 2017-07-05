@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_stat.h#1 $
+ * $Id: wce_stat.h,v 1.2 2006/04/09 16:48:18 mloskot Exp $
  *
  * sys/stat.h - data returned by the stat() function
  *

@@ -1,7 +1,7 @@
 //
 // StringTokenizer.cpp
 //
-// $Id: //poco/1.7/Foundation/src/StringTokenizer.cpp#2 $
+// $Id: //poco/1.4/Foundation/src/StringTokenizer.cpp#1 $
 //
 // Library: Foundation
 // Package: Core

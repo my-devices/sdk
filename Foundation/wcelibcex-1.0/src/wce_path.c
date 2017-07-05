@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_path.c#1 $
+ * $Id: wce_path.c,v 1.0 2006/11/29 16:56:01 sdunand Exp $
  *
  * Defines _splitpath, _wsplitpath, _makepath, _wmakepath,
  *         wceex_GetFullPathNameW, _fullpath, _wfullpath functions

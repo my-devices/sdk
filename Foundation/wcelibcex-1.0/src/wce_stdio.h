@@ -1,5 +1,5 @@
 /* 
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_stdio.h#1 $
+ * $Id: wce_stdio.h,v 1.2 2006/04/09 16:48:18 mloskot Exp $
  *
  * stdio.h - standard buffered input/output
  *

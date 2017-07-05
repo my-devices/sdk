@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_io.h#1 $
+ * $Id: wce_io.h,v 1.2 2006/04/09 16:48:18 mloskot Exp $
  *
  * io.h - file handling functions
  *

@@ -1,7 +1,7 @@
 #
 # TestSuite.vxbuild
 #
-# $Id: //poco/1.7/Net/testsuite/TestSuite.vxbuild#1 $
+# $Id$
 #
 TARGET=NetTestSuite
 CFLAGS="-I../../../../Foundation/include \\

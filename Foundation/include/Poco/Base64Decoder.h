@@ -1,7 +1,7 @@
 //
 // Base64Decoder.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Base64Decoder.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/Base64Decoder.h#2 $
 //
 // Library: Foundation
 // Package: Streams

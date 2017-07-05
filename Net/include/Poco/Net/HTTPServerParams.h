@@ -1,7 +1,7 @@
 //
 // HTTPServerParams.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/HTTPServerParams.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/HTTPServerParams.h#1 $
 //
 // Library: Net
 // Package: HTTPServer
@@ -88,7 +88,7 @@ public:
 		/// Returns the connection timeout for HTTP connections.
 	
 	void setMaxKeepAliveRequests(int maxKeepAliveRequests);
-		/// Specifies the maximun number of requests allowed
+		/// Specifies the maximum number of requests allowed
 		/// during a persistent connection. 0 means unlimited
 		/// connections.
 		

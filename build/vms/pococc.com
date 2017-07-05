@@ -1,7 +1,7 @@
 $ !
 $ ! POCOCC.COM
 $ !
-$ ! $Id: //poco/1.7/build/vms/pococc.com#2 $
+$ ! $Id: //poco/1.4/build/vms/pococc.com#1 $
 $ !
 $ ! C compile procedure for Poco libraries
 $ !

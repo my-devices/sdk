@@ -1,7 +1,7 @@
 //
 // Struct.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Dynamic/Struct.h#1 $
+// $Id: //poco/Main/Foundation/include/Poco/Dynamic/Struct.h#9 $
 //
 // Library: Foundation
 // Package: Dynamic

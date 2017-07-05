@@ -1,7 +1,7 @@
 //
 // SMTPChannel.cpp
 //
-// $Id: //poco/1.7/Net/src/SMTPChannel.cpp#1 $
+// $Id: //poco/svn/Net/src/SMTPChannel.cpp#2 $
 //
 // Library: Net
 // Package: Logging

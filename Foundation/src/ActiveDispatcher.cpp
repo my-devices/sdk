@@ -1,7 +1,7 @@
 //
 // ActiveDispatcher.cpp
 //
-// $Id: //poco/1.7/Foundation/src/ActiveDispatcher.cpp#3 $
+// $Id: //poco/1.4/Foundation/src/ActiveDispatcher.cpp#1 $
 //
 // Library: Foundation
 // Package: Threading

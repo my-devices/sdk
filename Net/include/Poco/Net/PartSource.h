@@ -1,7 +1,7 @@
 //
 // PartSource.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/PartSource.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/PartSource.h#2 $
 //
 // Library: Net
 // Package: Messages

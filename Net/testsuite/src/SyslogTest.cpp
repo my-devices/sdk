@@ -1,7 +1,7 @@
 //
 // SyslogTest.cpp
 //
-// $Id: //poco/1.7/Net/testsuite/src/SyslogTest.cpp#1 $
+// $Id: //poco/1.4/Net/testsuite/src/SyslogTest.cpp#1 $
 //
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

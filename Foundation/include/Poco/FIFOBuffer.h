@@ -1,7 +1,7 @@
 //
 // FIFOBuffer.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/FIFOBuffer.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/FIFOBuffer.h#2 $
 //
 // Library: Foundation
 // Package: Core
@@ -325,7 +325,7 @@ public:
 		if (!isWritable())
 			throw Poco::InvalidAccessException("Buffer not writable.");
 
-		std::memcpy(&_buffer[_used], ptr, length * sizeof(T));
+		std::memcpy(begin() + _used, ptr, length * sizeof(T));
 		std::size_t usedBefore = _used;
 		_used += length;
 		if (_notify) notify(usedBefore);

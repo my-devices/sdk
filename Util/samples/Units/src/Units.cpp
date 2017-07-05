@@ -1,7 +1,7 @@
 //
 // Units.cpp
 //
-// $Id: //poco/1.7/Util/samples/Units/src/Units.cpp#1 $
+// $Id: //poco/svn/Util/samples/Units/src/Units.cpp#1 $
 //
 // This sample demonstrates the Units.
 //

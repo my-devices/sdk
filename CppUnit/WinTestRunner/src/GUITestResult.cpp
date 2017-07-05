@@ -1,7 +1,7 @@
 //
 // GUITestResult.cpp
 //
-// $Id: //poco/1.7/CppUnit/WinTestRunner/src/GUITestResult.cpp#1 $
+// $Id: //poco/1.4/CppUnit/WinTestRunner/src/GUITestResult.cpp#1 $
 //
 
 

@@ -1,7 +1,7 @@
 //
 // Logger.cpp
 //
-// $Id: //poco/1.7/Foundation/src/Logger.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/Logger.cpp#4 $
 //
 // Library: Foundation
 // Package: Logging

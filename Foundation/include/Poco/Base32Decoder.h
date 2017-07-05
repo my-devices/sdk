@@ -1,7 +1,7 @@
 //
 // Base32Decoder.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Base32Decoder.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/Base32Decoder.h#2 $
 //
 // Library: Foundation
 // Package: Streams

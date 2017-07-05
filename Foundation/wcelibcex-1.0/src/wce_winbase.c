@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_winbase.c#1 $
+ * $Id: wce_winbase.c,v 1.0 2006/11/29 17:00:28 sdunand Exp $
  *
  * Defines GetStdHandle() function with dummy implementation.
  *

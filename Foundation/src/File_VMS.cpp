@@ -1,7 +1,7 @@
 //
 // File_VMS.cpp
 //
-// $Id: //poco/1.7/Foundation/src/File_VMS.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/File_VMS.cpp#1 $
 //
 // Library: Foundation
 // Package: Filesystem
@@ -375,7 +375,7 @@ void FileImpl::handleLastErrorImpl(const std::string& path)
 	case EDQUOT:
 		throw FileException("disk quota exceeded", path);
 	case ENOTEMPTY:
-		throw FileException("directory not empty", path);
+		throw DirectoryNotEmptyException(path, err);
 	case ENAMETOOLONG:
 		throw PathSyntaxException(path);
 	default:

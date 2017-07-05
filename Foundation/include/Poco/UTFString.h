@@ -1,7 +1,7 @@
 //
 // UTFString.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/UTFString.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/UTFString.h#2 $
 //
 // Library: Foundation
 // Package: Text

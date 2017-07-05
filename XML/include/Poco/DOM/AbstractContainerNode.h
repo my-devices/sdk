@@ -1,7 +1,7 @@
 //
 // AbstractContainerNode.h
 //
-// $Id: //poco/1.7/XML/include/Poco/DOM/AbstractContainerNode.h#1 $
+// $Id: //poco/1.4/XML/include/Poco/DOM/AbstractContainerNode.h#2 $
 //
 // Library: XML
 // Package: DOM

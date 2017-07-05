@@ -1,7 +1,7 @@
 //
 // AbstractNode.cpp
 //
-// $Id: //poco/1.7/XML/src/AbstractNode.cpp#1 $
+// $Id: //poco/1.4/XML/src/AbstractNode.cpp#2 $
 //
 // Library: XML
 // Package: DOM

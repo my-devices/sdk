@@ -1,7 +1,7 @@
 //
 // Handler.cpp
 //
-// $Id: //poco/1.7/JSON/src/Handler.cpp#1 $
+// $Id$
 //
 // Library: JSON
 // Package: JSON

@@ -1,7 +1,7 @@
 //
 // CppUnitException.cpp
 //
-// $Id: //poco/1.7/CppUnit/src/CppUnitException.cpp#1 $
+// $Id: //poco/1.4/CppUnit/src/CppUnitException.cpp#1 $
 //
 
 

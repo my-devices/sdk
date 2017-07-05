@@ -1,7 +1,7 @@
 //
 // DatagramSocketImpl.cpp
 //
-// $Id: //poco/1.7/Net/src/DatagramSocketImpl.cpp#1 $
+// $Id: //poco/1.4/Net/src/DatagramSocketImpl.cpp#1 $
 //
 // Library: Net
 // Package: Sockets

@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_access.c#1 $
+ * $Id: wce_access.c,v 1.0 2006/11/29 16:37:06 stephaned Exp $
  *
  * Defines _access(), _waccess() functions.
  *

@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/Net/samples/ifconfig/Makefile#1 $
+# $Id: //poco/Main/template/sample.make#4 $
 #
 # Makefile for Poco download
 #

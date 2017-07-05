@@ -1,7 +1,7 @@
 //
 // HTTPRequestTest.h
 //
-// $Id: //poco/1.7/Net/testsuite/src/HTTPRequestTest.h#1 $
+// $Id: //poco/1.4/Net/testsuite/src/HTTPRequestTest.h#3 $
 //
 // Definition of the HTTPRequestTest class.
 //

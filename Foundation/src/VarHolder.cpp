@@ -1,7 +1,7 @@
 //
 // VarHolder.cpp
 //
-// $Id: //poco/1.7/Foundation/src/VarHolder.cpp#1 $
+// $Id: //poco/svn/Foundation/src/VarHolder.cpp#3 $
 //
 // Library: Foundation
 // Package: Core

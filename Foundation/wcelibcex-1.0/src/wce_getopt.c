@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_getopt.c#1 $
+ * $Id$
  *
  * Copyright (c) 1987, 1993, 1994
  * The Regents of the University of California.  All rights reserved.

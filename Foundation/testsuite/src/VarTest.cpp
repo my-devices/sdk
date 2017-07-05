@@ -1,7 +1,7 @@
 //
 // VarTest.cpp
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/VarTest.cpp#2 $
+// $Id: //poco/svn/Foundation/testsuite/src/VarTest.cpp#2 $
 //
 // Copyright (c) 2006, Applied Informatics Software Engineering GmbH.
 // and Contributors.

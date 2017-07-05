@@ -1,7 +1,7 @@
 //
 // MulticastSocket.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/MulticastSocket.h#2 $
+// $Id: //poco/1.4/Net/include/Poco/Net/MulticastSocket.h#1 $
 //
 // Library: Net
 // Package: Sockets

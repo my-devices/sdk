@@ -1,7 +1,7 @@
 #
 # XML.vxbuild
 #
-# $Id: //poco/1.7/XML/XML.vxbuild#1 $
+# $Id: //poco/1.4/XML/XML.vxbuild#1 $
 #
 TARGET=pocoXML
 CFLAGS="-I../../../Foundation/include \\

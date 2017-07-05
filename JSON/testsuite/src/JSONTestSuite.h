@@ -1,7 +1,7 @@
 //
 // JSONTestSuite.h
 //
-// $Id: //poco/1.7/JSON/testsuite/src/JSONTestSuite.h#1 $
+// $Id$
 //
 // Definition of the JSONTestSuite class.
 //

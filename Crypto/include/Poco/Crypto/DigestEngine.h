@@ -1,7 +1,7 @@
 //
 // DigestEngine.h
 //
-// $Id: //poco/1.7/Crypto/include/Poco/Crypto/DigestEngine.h#1 $
+// $Id: //poco/1.4/Crypto/include/Poco/Crypto/DigestEngine.h#1 $
 //
 // Library: Crypto
 // Package: Digest
@@ -61,7 +61,7 @@ protected:
 	
 private:
 	std::string _name;
-	EVP_MD_CTX* _ctx;
+	EVP_MD_CTX* _pContext;
 	Poco::DigestEngine::Digest _digest;
 	OpenSSLInitializer _openSSLInitializer;
 };

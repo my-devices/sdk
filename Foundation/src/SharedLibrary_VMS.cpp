@@ -1,7 +1,7 @@
 //
 // SharedLibrary_VMS.cpp
 //
-// $Id: //poco/1.7/Foundation/src/SharedLibrary_VMS.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/SharedLibrary_VMS.cpp#2 $
 //
 // Library: Foundation
 // Package: SharedLibrary
@@ -108,7 +108,7 @@ const std::string& SharedLibraryImpl::getPathImpl() const
 
 std::string SharedLibraryImpl::suffixImpl()
 {
-#if defined(_DEBUG)
+#if defined(_DEBUG) && !defined(POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX)
 	return "d.exe";
 #else
 	return ".exe";

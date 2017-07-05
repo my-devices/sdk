@@ -1,7 +1,7 @@
 //
 // SocketAddress.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/SocketAddress.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/SocketAddress.h#2 $
 //
 // Library: Net
 // Package: NetCore
@@ -44,7 +44,7 @@ public:
 	SocketAddress(const IPAddress& hostAddress, Poco::UInt16 portNumber);
 		/// Creates a SocketAddress from an IP address and given port number.
 
-	SocketAddress(Poco::UInt16 port);
+	explicit SocketAddress(Poco::UInt16 port);
 		/// Creates a SocketAddress with unspecified (wildcard) IP address 
 		/// and given port number.
 

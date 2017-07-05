@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/Foundation/samples/Makefile#1 $
+# $Id: //poco/1.4/Foundation/samples/Makefile#1 $
 #
 # Makefile for Poco Foundation Samples
 #

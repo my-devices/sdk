@@ -1,7 +1,7 @@
 //
 // Mail.cpp
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/samples/Mail/src/Mail.cpp#1 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/samples/Mail/src/Mail.cpp#1 $
 //
 // This sample demonstrates the MailMessage and SecureSMTPClientSession classes.
 //

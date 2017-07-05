@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/Crypto/Makefile#1 $
+# $Id: //poco/1.4/Crypto/Makefile#2 $
 #
 # Makefile for Poco Crypto
 #

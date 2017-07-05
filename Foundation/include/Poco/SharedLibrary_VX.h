@@ -1,7 +1,7 @@
 //
 // SharedLibrary_VX.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/SharedLibrary_VX.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/SharedLibrary_VX.h#2 $
 //
 // Library: Foundation
 // Package: SharedLibrary

@@ -1,7 +1,7 @@
 //
 // SSLManager.cpp
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/src/SSLManager.cpp#3 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/src/SSLManager.cpp#3 $
 //
 // Library: NetSSL_OpenSSL
 // Package: SSLCore

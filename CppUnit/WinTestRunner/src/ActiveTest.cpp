@@ -1,7 +1,7 @@
 //
 // ActiveTest.cpp
 //
-// $Id: //poco/1.7/CppUnit/WinTestRunner/src/ActiveTest.cpp#1 $
+// $Id: //poco/1.4/CppUnit/WinTestRunner/src/ActiveTest.cpp#1 $
 //
 
 

@@ -1,7 +1,7 @@
 //
 // SocketNotification.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/SocketNotification.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/SocketNotification.h#1 $
 //
 // Library: Net
 // Package: Reactor
@@ -96,7 +96,7 @@ public:
 
 
 class Net_API TimeoutNotification: public SocketNotification
-	/// This notification is sent if no other event has occured
+	/// This notification is sent if no other event has occurred
 	/// for a specified time.
 {
 public:

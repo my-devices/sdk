@@ -1,7 +1,7 @@
 //
 // FIFOBufferStream.cpp
 //
-// $Id: //poco/1.7/Foundation/src/FIFOBufferStream.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/FIFOBufferStream.cpp#1 $
 //
 // Library: Foundation
 // Package: Streams

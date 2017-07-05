@@ -1,7 +1,7 @@
 //
 // XMLWriter.h
 //
-// $Id: //poco/1.7/XML/include/Poco/XML/XMLWriter.h#2 $
+// $Id: //poco/1.4/XML/include/Poco/XML/XMLWriter.h#3 $
 //
 // Library: XML
 // Package: XML

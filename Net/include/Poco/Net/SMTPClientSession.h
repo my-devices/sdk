@@ -1,7 +1,7 @@
 //
 // SMTPClientSession.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/SMTPClientSession.h#2 $
+// $Id: //poco/1.4/Net/include/Poco/Net/SMTPClientSession.h#1 $
 //
 // Library: Net
 // Package: Mail
@@ -35,7 +35,7 @@ class MailMessage;
 
 class Net_API SMTPClientSession
 	/// This class implements an Simple Mail
-	/// Transfer Procotol (SMTP, RFC 2821)
+	/// Transfer Protocol (SMTP, RFC 2821)
 	/// client for sending e-mail messages.
 {
 public:

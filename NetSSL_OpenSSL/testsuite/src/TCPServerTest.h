@@ -1,7 +1,7 @@
 //
 // TCPServerTest.h
 //
-// $Id: //poco/1.7/NetSSL_OpenSSL/testsuite/src/TCPServerTest.h#1 $
+// $Id: //poco/1.4/NetSSL_OpenSSL/testsuite/src/TCPServerTest.h#1 $
 //
 // Definition of the TCPServerTest class.
 //

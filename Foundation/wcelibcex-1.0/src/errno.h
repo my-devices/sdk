@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/errno.h#1 $
+ * $Id: errno.h 20 2006-11-18 17:00:30Z mloskot $
  *
  * errno.h - system error numbers
  *

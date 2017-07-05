@@ -1,7 +1,7 @@
 //
 // Logger.cpp
 //
-// $Id: //poco/1.7/Foundation/samples/Logger/src/Logger.cpp#1 $
+// $Id: //poco/1.4/Foundation/samples/Logger/src/Logger.cpp#1 $
 //
 // This class demonstrates the Logger, PatternFormatter, FormattingChannel,
 // ConsoleChannel and FileChannel classes.

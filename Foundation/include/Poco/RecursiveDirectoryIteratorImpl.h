@@ -1,7 +1,7 @@
 //
 // RecursiveDirectoryIteratorImpl.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/RecursiveDirectoryIteratorImpl.h#1 $
+// $Id$
 //
 // Library: Foundation
 // Package: Filesystem

@@ -1,7 +1,7 @@
 //
 // Platform_WIN32.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Platform_WIN32.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/Platform_WIN32.h#2 $
 //
 // Library: Foundation
 // Package: Core

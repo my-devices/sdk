@@ -1,7 +1,7 @@
 //
 // EventChannel.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/EventChannel.h#1 $
+// $Id$
 //
 // Library: Foundation
 // Package: Logging

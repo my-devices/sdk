@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/Net/testsuite/Makefile#1 $
+# $Id: //poco/1.4/Net/testsuite/Makefile#2 $
 #
 # Makefile for Poco Net testsuite
 #

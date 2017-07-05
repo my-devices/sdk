@@ -1,7 +1,7 @@
 //
 // SharedLibrary_HPUX.cpp
 //
-// $Id: //poco/1.7/Foundation/src/SharedLibrary_HPUX.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/SharedLibrary_HPUX.cpp#2 $
 //
 // Library: Foundation
 // Package: SharedLibrary
@@ -85,7 +85,7 @@ const std::string& SharedLibraryImpl::getPathImpl() const
 
 std::string SharedLibraryImpl::suffixImpl()
 {
-#if defined(_DEBUG)
+#if defined(_DEBUG) && !defined(POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX)
 	return "d.sl";
 #else
 	return ".sl";

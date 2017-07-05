@@ -1,7 +1,7 @@
 //
 // Units.h
 //
-// $Id: //poco/1.7/Util/include/Poco/Util/Units.h#1 $
+// $Id: //poco/1.4/Util/include/Poco/Util/Units.h#1 $
 //
 // Library: Util
 // Package: Units

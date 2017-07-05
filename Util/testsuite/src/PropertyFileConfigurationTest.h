@@ -1,7 +1,7 @@
 //
 // PropertyFileConfigurationTest.h
 //
-// $Id: //poco/1.7/Util/testsuite/src/PropertyFileConfigurationTest.h#1 $
+// $Id: //poco/1.4/Util/testsuite/src/PropertyFileConfigurationTest.h#1 $
 //
 // Definition of the PropertyFileConfigurationTest class.
 //

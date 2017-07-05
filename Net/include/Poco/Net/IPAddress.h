@@ -1,7 +1,7 @@
 //
 // IPAddress.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/IPAddress.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/IPAddress.h#2 $
 //
 // Library: Net
 // Package: NetCore
@@ -373,21 +373,13 @@ private:
 #endif
 
 	Ptr pImpl() const;
-
 	void newIPv4(const void* hostAddr);
-
 	void newIPv6(const void* hostAddr);
-
 	void newIPv6(const void* hostAddr, Poco::UInt32 scope);
-
 	void newIPv4(unsigned prefix);
-
 	void newIPv6(unsigned prefix);
-
 	void newIPv4();
-
 	void newIPv6();
-
 	void destruct();
 
 #ifdef POCO_HAVE_ALIGNMENT
@@ -413,6 +405,9 @@ private:
 };
 
 
+//
+// inlines
+//
 inline void IPAddress::destruct()
 {
 #ifdef POCO_HAVE_ALIGNMENT

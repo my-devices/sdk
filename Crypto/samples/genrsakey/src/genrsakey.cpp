@@ -1,7 +1,7 @@
 //
 // genrsakey.cpp
 //
-// $Id: //poco/1.7/Crypto/samples/genrsakey/src/genrsakey.cpp#1 $
+// $Id: //poco/1.4/Crypto/samples/genrsakey/src/genrsakey.cpp#1 $
 //
 // This sample demonstrates the XYZ class.
 //

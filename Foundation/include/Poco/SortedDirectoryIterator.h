@@ -1,7 +1,7 @@
 //
 // SortedDirectoryIterator.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/SortedDirectoryIterator.h#1 $
+// $Id$
 //
 // Library: Foundation
 // Package: Filesystem

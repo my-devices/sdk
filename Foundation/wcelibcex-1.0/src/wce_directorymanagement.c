@@ -1,5 +1,5 @@
 /*
- * $Id: //poco/1.7/Foundation/wcelibcex-1.0/src/wce_directorymanagement.c#1 $
+ * $Id: wce_directorymanagement.c,v 1.0 2006/11/29 17:00:28 stephaned Exp $
  *
  * Defines _getcwd(), GetCurrentDirectoryW() _wgetcwd(), 
  *         _chdir(), _wchdir functions.

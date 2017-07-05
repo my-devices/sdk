@@ -1,7 +1,7 @@
 //
 // WebSocketTestSuite.cpp
 //
-// $Id: //poco/1.7/Net/testsuite/src/WebSocketTestSuite.cpp#1 $
+// $Id: //poco/1.4/Net/testsuite/src/WebSocketTestSuite.cpp#1 $
 //
 // Copyright (c) 2012, Applied Informatics Software Engineering GmbH.
 // and Contributors.

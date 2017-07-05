@@ -1,7 +1,7 @@
 //
 // DynamicTestSuite.h
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/DynamicTestSuite.h#1 $
+// $Id: //poco/svn/Foundation/testsuite/src/DynamicTestSuite.h#2 $
 //
 // Definition of the DynamicTestSuite class.
 //

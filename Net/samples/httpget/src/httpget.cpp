@@ -1,7 +1,7 @@
 //
 // httpget.cpp
 //
-// $Id: //poco/1.7/Net/samples/httpget/src/httpget.cpp#1 $
+// $Id: //poco/1.4/Net/samples/httpget/src/httpget.cpp#3 $
 //
 // This sample demonstrates the HTTPClientSession and the HTTPCredentials classes.
 //
@@ -69,17 +69,17 @@ int main(int argc, char** argv)
 		std::string path(uri.getPathAndQuery());
 		if (path.empty()) path = "/";
 
-        std::string username;
-        std::string password;
-        Poco::Net::HTTPCredentials::extractCredentials(uri, username, password);
-        Poco::Net::HTTPCredentials credentials(username, password);
+		std::string username;
+		std::string password;
+		Poco::Net::HTTPCredentials::extractCredentials(uri, username, password);
+		Poco::Net::HTTPCredentials credentials(username, password);
 
 		HTTPClientSession session(uri.getHost(), uri.getPort());
 		HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
 		HTTPResponse response;
 		if (!doRequest(session, request, response))
 		{
-            credentials.authenticate(request, response);
+			credentials.authenticate(request, response);
 			if (!doRequest(session, request, response))
 			{
 				std::cerr << "Invalid username or password" << std::endl;

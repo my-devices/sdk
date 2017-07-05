@@ -1,7 +1,7 @@
 //
 // StringTokenizerTest.h
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/StringTokenizerTest.h#1 $
+// $Id: //poco/svn/Foundation/testsuite/src/StringTokenizerTest.h#2 $
 //
 // Definition of the StringTokenizerTest class.
 //

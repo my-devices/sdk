@@ -1,7 +1,7 @@
 //
 // OAuth20Credentials.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/OAuth20Credentials.h#1 $
+// $Id$
 //
 // Library: Net
 // Package: OAuth

@@ -1,7 +1,7 @@
 //
 // Var.cpp
 //
-// $Id: //poco/1.7/Foundation/src/Var.cpp#1 $
+// $Id: //poco/svn/Foundation/src/Var.cpp#3 $
 //
 // Library: Foundation
 // Package: Core

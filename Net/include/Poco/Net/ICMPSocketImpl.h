@@ -1,7 +1,7 @@
 //
 // ICMPSocketImpl.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/ICMPSocketImpl.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/ICMPSocketImpl.h#1 $
 //
 // Library: Net
 // Package: ICMP
@@ -50,13 +50,44 @@ public:
 		///
 		/// Returns the time elapsed since the originating request was sent.
 
+	int dataSize() const;
+		/// Returns the data size in bytes.
+
+	int ttl() const;
+		/// Returns the Time-To-Live value.
+
+	int timeout() const;
+		/// Returns the socket timeout value.
+
 protected:
 	~ICMPSocketImpl();
 
 private:
 	ICMPPacket _icmpPacket;
+	int _ttl;
 	int _timeout;
 };
+
+
+//
+// inlines
+//
+inline int ICMPSocketImpl::dataSize() const
+{
+	return _icmpPacket.getDataSize();
+}
+
+
+inline int ICMPSocketImpl::ttl() const
+{
+	return _ttl;
+}
+
+
+inline int ICMPSocketImpl::timeout() const
+{
+	return _timeout;
+}
 
 
 } } // namespace Poco::Net

@@ -1,7 +1,7 @@
 //
 // SocketAddressImpl.cpp
 //
-// $Id: //poco/1.7/Net/src/SocketAddressImpl.cpp#1 $
+// $Id: //poco/1.4/Net/src/SocketAddressImpl.cpp#5 $
 //
 // Library: Net
 // Package: NetCore
@@ -22,6 +22,7 @@
 namespace Poco {
 namespace Net {
 namespace Impl {
+
 
 //
 // SocketAddressImpl

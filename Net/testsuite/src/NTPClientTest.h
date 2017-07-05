@@ -1,7 +1,7 @@
 //
 // NTPClientTest.h
 //
-// $Id: //poco/1.7/Net/testsuite/src/NTPClientTest.h#1 $
+// $Id: //poco/1.4/Net/testsuite/src/NTPClientTest.h#1 $
 //
 // Definition of the NTPClientTest class.
 //

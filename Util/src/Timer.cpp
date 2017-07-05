@@ -1,7 +1,7 @@
 //
 // Timer.cpp
 //
-// $Id: //poco/1.7/Util/src/Timer.cpp#1 $
+// $Id: //poco/1.4/Util/src/Timer.cpp#2 $
 //
 // Library: Util
 // Package: Timer

@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/NetSSL_OpenSSL/samples/Mail/Makefile#1 $
+# $Id: //poco/1.4/Net/samples/Mail/Makefile#1 $
 #
 # Makefile for Poco Mail
 #

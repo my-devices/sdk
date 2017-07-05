@@ -1,7 +1,7 @@
 //
 // ArrayTest.h
 //
-// $Id: //poco/1.7/Foundation/testsuite/src/ArrayTest.h#1 $
+// $Id: //poco/svn/Foundation/testsuite/src/ArrayTest.h#2 $
 //
 // Definition of the ArrayTest class.
 //

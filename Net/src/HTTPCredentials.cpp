@@ -1,7 +1,7 @@
 //
 // HTTPCredentials.cpp
 //
-// $Id: //poco/1.7/Net/src/HTTPCredentials.cpp#1 $
+// $Id: //poco/1.4/Net/src/HTTPCredentials.cpp#3 $
 //
 // Library: Net
 // Package: HTTP

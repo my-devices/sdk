@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/JSON/testsuite/Makefile#1 $
+# $Id$
 #
 # Makefile for Poco JSON testsuite
 #

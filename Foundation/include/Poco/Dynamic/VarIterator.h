@@ -1,7 +1,7 @@
 //
 // VarIterator.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/Dynamic/VarIterator.h#1 $
+// $Id: //poco/Main/Foundation/include/Poco/Dynamic/VarIterator.h#1 $
 //
 // Library: Foundation
 // Package: Dynamic

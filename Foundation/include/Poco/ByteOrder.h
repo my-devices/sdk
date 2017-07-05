@@ -1,7 +1,7 @@
 //
 // ByteOrder.h
 //
-// $Id: //poco/1.7/Foundation/include/Poco/ByteOrder.h#1 $
+// $Id: //poco/1.4/Foundation/include/Poco/ByteOrder.h#5 $
 //
 // Library: Foundation
 // Package: Core

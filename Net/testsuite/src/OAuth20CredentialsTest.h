@@ -1,7 +1,7 @@
 //
 // OAuth20CredentialsTest.h
 //
-// $Id: //poco/1.7/Net/testsuite/src/OAuth20CredentialsTest.h#1 $
+// $Id$
 //
 // Definition of the OAuth20CredentialsTest class.
 //

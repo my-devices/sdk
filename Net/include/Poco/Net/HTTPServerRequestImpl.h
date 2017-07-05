@@ -1,7 +1,7 @@
 //
 // HTTPServerRequestImpl.h
 //
-// $Id: //poco/1.7/Net/include/Poco/Net/HTTPServerRequestImpl.h#1 $
+// $Id: //poco/1.4/Net/include/Poco/Net/HTTPServerRequestImpl.h#1 $
 //
 // Library: Net
 // Package: HTTPServer
@@ -81,6 +81,9 @@ public:
 	StreamSocket detachSocket();
 		/// Returns the underlying socket after detaching
 		/// it from the server session.
+		
+	HTTPServerSession& session();
+		/// Returns the underlying HTTPServerSession.
 
 protected:
 	static const std::string EXPECT;
@@ -127,6 +130,12 @@ inline const HTTPServerParams& HTTPServerRequestImpl::serverParams() const
 inline HTTPServerResponse& HTTPServerRequestImpl::response() const
 {
 	return _response;
+}
+
+
+inline HTTPServerSession& HTTPServerRequestImpl::session()
+{
+	return _session;
 }
 
 

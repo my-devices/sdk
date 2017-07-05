@@ -1,7 +1,7 @@
 //
 // StreamCopier.cpp
 //
-// $Id: //poco/1.7/Foundation/src/StreamCopier.cpp#1 $
+// $Id: //poco/1.4/Foundation/src/StreamCopier.cpp#2 $
 //
 // Library: Foundation
 // Package: Streams
@@ -119,7 +119,7 @@ Poco::UInt64 StreamCopier::copyToString64(std::istream& istr, std::string& str, 
 
 std::streamsize StreamCopier::copyStreamUnbuffered(std::istream& istr, std::ostream& ostr)
 {
-	char c;
+	char c = 0;
 	std::streamsize len = 0;
 	istr.get(c);
 	while (istr && ostr)
@@ -135,7 +135,7 @@ std::streamsize StreamCopier::copyStreamUnbuffered(std::istream& istr, std::ostr
 #if defined(POCO_HAVE_INT64)
 Poco::UInt64 StreamCopier::copyStreamUnbuffered64(std::istream& istr, std::ostream& ostr)
 {
-	char c;
+	char c = 0;
 	Poco::UInt64 len = 0;
 	istr.get(c);
 	while (istr && ostr)
