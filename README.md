@@ -155,10 +155,14 @@ call to ./configure and the final call to GNU make.
 
 ## Building on Windows
 
-For Windows, you'll need Visual C++. Any version from 2008 to 2015 is fine.
+For Windows, you'll need Visual C++. Any version from 2008 to 2017 is fine.
 
-The easiest way to build on Windows is to run one of the *build_vsNNN.cmd* scripts, depending on the
-Visual Studio version you'll want to build with. For Visual Studio 2008, run *build_vs90.cmd*, for 
+The easiest way to build on Windows is to open the proper *SDK_vsNNN.sln* solution for you preferred version of Visual Studio.
+*SDK_vs90.sln* is for Visual Studio 2008, *SDK_vs120.sln* is for Visual Studio 2013, etc.
+Then, build the *release_static_mt*, which will produce self-contained statically linked executables for *WebTunnelAgent* and
+the other programs.
+
+Alternatively, you can run one of the *build_vsNNN.cmd* scripts. For Visual Studio 2008, run *build_vs90.cmd*, for 
 Visual Studio 2013 run *build_vs120.cmd*:
 
     git clone https://github.com/my-devices/sdk.git
