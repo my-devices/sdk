@@ -51,7 +51,7 @@ public:
 		Poco::Net::initializeSSL();
 #endif
 	}
-	
+
 	~SSLInitializer()
 	{
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -64,13 +64,13 @@ public:
 class WebTunnelClient: public Poco::Util::ServerApplication
 {
 public:
-	WebTunnelClient(): 
+	WebTunnelClient():
 		_helpRequested(false),
 		_localPort(0),
 		_remotePort(0)
 	{
 	}
-	
+
 	~WebTunnelClient()
 	{
 	}
@@ -85,7 +85,7 @@ protected:
 		Poco::Net::HTTPSSessionInstantiator::registerInstantiator();
 #endif
 	}
-		
+
 	void uninitialize()
 	{
 		Poco::Net::HTTPSessionInstantiator::unregisterInstantiator();
@@ -98,7 +98,7 @@ protected:
 	void defineOptions(OptionSet& options)
 	{
 		Poco::Util::ServerApplication::defineOptions(options);
-		
+
 		options.addOption(
 			Option("help", "h", "Display help information on command line arguments.")
 				.required(false)
@@ -159,12 +159,12 @@ protected:
 	{
 		loadConfiguration(value);
 	}
-	
+
 	void handleLocalPort(const std::string& name, const std::string& value)
 	{
 		_localPort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
 	}
-	
+
 	void handleRemotePort(const std::string& name, const std::string& value)
 	{
 		_remotePort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
@@ -192,7 +192,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI>");
 		helpFormatter.setHeader("\n"
 			"my-devices.net WebTunnel Client.\n"
-			"Copyright (c) 2013-2016 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2017 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward a remote TCP port to the local\n"
 			"host via the my-devices.net reflector server.\n\n"
@@ -202,7 +202,7 @@ protected:
 			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #else
 			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
-#endif			
+#endif
 			"\n\n"
 			"The following command-line options are supported:"
 		);
@@ -244,7 +244,7 @@ protected:
 			std::cout << std::endl;
 		}
 	}
-	
+
 	void echo(bool status)
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
@@ -299,7 +299,7 @@ protected:
 				proxyConfig.password = config().getString("http.proxy.password", "");
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
-			
+
 			promptLogin();
 
 			Poco::URI uri(args[0]);
@@ -311,7 +311,7 @@ protected:
 		}
 		return Poco::Util::Application::EXIT_OK;
 	}
-	
+
 private:
 	bool _helpRequested;
 	Poco::UInt16 _localPort;

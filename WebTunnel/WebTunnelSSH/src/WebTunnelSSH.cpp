@@ -55,7 +55,7 @@ public:
 		Poco::Net::initializeSSL();
 #endif
 	}
-	
+
 	~SSLInitializer()
 	{
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -68,13 +68,13 @@ public:
 class WebTunnelSSH: public Poco::Util::Application
 {
 public:
-	WebTunnelSSH(): 
+	WebTunnelSSH():
 		_helpRequested(false),
 		_localPort(0),
 		_remotePort(22)
 	{
 	}
-	
+
 	~WebTunnelSSH()
 	{
 	}
@@ -89,7 +89,7 @@ protected:
 		Poco::Net::HTTPSSessionInstantiator::registerInstantiator();
 #endif
 	}
-		
+
 	void uninitialize()
 	{
 		Poco::Net::HTTPSessionInstantiator::unregisterInstantiator();
@@ -102,7 +102,7 @@ protected:
 	void defineOptions(OptionSet& options)
 	{
 		Poco::Util::Application::defineOptions(options);
-		
+
 		options.addOption(
 			Option("help", "h", "Display help information on command line arguments.")
 				.required(false)
@@ -170,12 +170,12 @@ protected:
 	{
 		loadConfiguration(value);
 	}
-	
+
 	void handleLocalPort(const std::string& name, const std::string& value)
 	{
 		_localPort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
 	}
-	
+
 	void handleRemotePort(const std::string& name, const std::string& value)
 	{
 		_remotePort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
@@ -208,7 +208,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]");
 		helpFormatter.setHeader("\n"
 			"my-devices.net WebTunnel SSH Client.\n"
-			"Copyright (c) 2014-2016 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2014-2017 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SSH connection to a remote\n"
 			"host via the my-devices.net reflector server.\n\n"
@@ -218,7 +218,7 @@ protected:
 			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #else
 			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
-#endif			
+#endif
 			"\n\n"
 			"The following command-line options are supported:"
 		);
@@ -260,7 +260,7 @@ protected:
 			std::cout << std::endl;
 		}
 	}
-	
+
 	void echo(bool status)
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
@@ -322,9 +322,9 @@ protected:
 			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout));
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
-			
+
 			Poco::UInt16 localPort = forwarder.localPort();
-			
+
 			std::string defaultSSHExecutable;
 #if defined(POCO_OS_FAMILY_WINDOWS)
 			defaultSSHExecutable = "putty";
@@ -345,7 +345,7 @@ protected:
 			}
 			sshArgs.insert(sshArgs.end(), ++args.begin(), args.end());
 			sshArgs.push_back("localhost");
-			
+
 			logger().debug(Poco::format("Launching SSH client: %s", sshExecutable));
 			Poco::ProcessHandle ph = Poco::Process::launch(sshExecutable, sshArgs);
 			rc = ph.wait();
@@ -353,7 +353,7 @@ protected:
 		}
 		return rc;
 	}
-	
+
 private:
 	bool _helpRequested;
 	Poco::UInt16 _localPort;

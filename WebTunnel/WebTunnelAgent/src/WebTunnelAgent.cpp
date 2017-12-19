@@ -63,7 +63,7 @@ public:
 		Poco::Net::initializeSSL();
 #endif
 	}
-	
+
 	~SSLInitializer()
 	{
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -87,7 +87,7 @@ public:
 	Poco::BasicEvent<const std::string> disconnected;
 	Poco::BasicEvent<const std::string> error;
 
-	WebTunnelAgent(): 
+	WebTunnelAgent():
 		_helpRequested(false),
 		_httpPort(0),
 		_vncPort(0),
@@ -98,7 +98,7 @@ public:
 		_status(STATUS_DISCONNECTED)
 	{
 	}
-	
+
 	~WebTunnelAgent()
 	{
 	}
@@ -114,7 +114,7 @@ protected:
 #endif
 		_pTimer = new Poco::Util::Timer;
 	}
-		
+
 	void uninitialize()
 	{
 		Poco::Net::HTTPSessionInstantiator::unregisterInstantiator();
@@ -127,7 +127,7 @@ protected:
 	void defineOptions(OptionSet& options)
 	{
 		Poco::Util::ServerApplication::defineOptions(options);
-		
+
 		options.addOption(
 			Option("help", "h", "Display help information on command line arguments.")
 				.required(false)
@@ -171,7 +171,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
 			"my-devices.net WebTunnel Agent.\n"
-			"Copyright (c) 2013-2016 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2017 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the my-devices.net reflector server.\n\n"
@@ -197,7 +197,7 @@ protected:
 		else name = def;
 		config().setString(name, value);
 	}
-	
+
 	void statusChanged(Status status, const std::string& msg = std::string())
 	{
 		if (status != _status)
@@ -238,7 +238,7 @@ protected:
 		Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
 		Poco::Net::HTTPResponse response;
 		request.set(SEC_WEBSOCKET_PROTOCOL, WEBTUNNEL_PROTOCOL);
-		
+
 		if (_httpPort != 0)
 		{
 			request.add("X-PTTH-Set-Property", Poco::format("device;httpPort=%hu", _httpPort));
@@ -256,7 +256,7 @@ protected:
 			request.add("X-PTTH-Set-Property", Poco::format("device;version=\"%s\"", _deviceVersion));
 		}
 		request.set("User-Agent", _userAgent);
-		
+
 		try
 		{
 			Poco::Net::DNS::reload();
@@ -285,8 +285,8 @@ protected:
 				_pForwarder->setConnectTimeout(_connectTimeout);
 				_pForwarder->setLocalTimeout(_localTimeout);
 				logger().information("WebTunnel connection established.");
-				
-				statusChanged(STATUS_CONNECTED);					
+
+				statusChanged(STATUS_CONNECTED);
 				return;
 			}
 			else
@@ -325,7 +325,7 @@ protected:
 		}
 		scheduleReconnect();
 	}
-	
+
 	void disconnect()
 	{
 		if (_pForwarder)
@@ -348,10 +348,10 @@ protected:
 			{
 			}
 		}
-		
+
 		statusChanged(STATUS_DISCONNECTED);
 	}
-	
+
 	void onClose(const int& reason)
 	{
 		std::string message;
@@ -371,11 +371,11 @@ protected:
 			break;
 		}
 		logger().information(message);
-		
+
 		statusChanged(STATUS_DISCONNECTED);
 		scheduleReconnect();
 	}
-	
+
 	void reconnect(Poco::Util::TimerTask&)
 	{
 		try
@@ -400,7 +400,7 @@ protected:
 		}
 		catch (Poco::Exception& exc)
 		{
-			logger().fatal(exc.displayText());	
+			logger().fatal(exc.displayText());
 			_retryDelay = 30000;
 			scheduleReconnect();
 		}
@@ -409,7 +409,7 @@ protected:
 			logger().fatal("Unknown exception during connect()");
 		}
 	}
-	
+
 	void scheduleReconnect()
 	{
 		if (!_stopped.tryWait(1))
@@ -422,21 +422,21 @@ protected:
 			_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnect), nextClock);
 		}
 	}
-	
+
 	void notifyConnected(const std::string&)
 	{
 		Poco::Process::Args args;
 		args.push_back("connected");
 		notify(args);
 	}
-	
+
 	void notifyDisconnected(const std::string&)
 	{
 		Poco::Process::Args args;
 		args.push_back("disconnected");
 		notify(args);
 	}
-	
+
 	void notifyError(const std::string& msg)
 	{
 		Poco::Process::Args args;
@@ -444,7 +444,7 @@ protected:
 		args.push_back(msg);
 		notify(args);
 	}
-	
+
 	void notify(const Poco::Process::Args& args)
 	{
 		try
@@ -457,7 +457,7 @@ protected:
 			logger().log(exc);
 		}
 	}
-			
+
 	int main(const std::vector<std::string>& args)
 	{
 		if (_helpRequested)
@@ -531,12 +531,12 @@ protected:
 					_userAgent += "; ";
 					_userAgent += Poco::Environment::osArchitecture();
 					_userAgent += ") POCO/";
-					_userAgent += Poco::format("%d.%d.%d", 
-						static_cast<int>(Poco::Environment::libraryVersion() >> 24), 
-						static_cast<int>((Poco::Environment::libraryVersion() >> 16) & 0xFF), 
+					_userAgent += Poco::format("%d.%d.%d",
+						static_cast<int>(Poco::Environment::libraryVersion() >> 24),
+						static_cast<int>((Poco::Environment::libraryVersion() >> 16) & 0xFF),
 						static_cast<int>((Poco::Environment::libraryVersion() >> 8) & 0xFF));
 				}
-			
+
 				_notifyExec = config().getString("webtunnel.status.notify", "");
 				if (!_notifyExec.empty())
 				{
@@ -564,9 +564,9 @@ protected:
 	#endif
 
 				_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnect), Poco::Clock());
-			
+
 				waitForTerminationRequest();
-		
+
 				_stopped.set();
 				disconnect();
 				_pTimer->cancel(true);
@@ -579,11 +579,11 @@ protected:
 		}
 		return Poco::Util::Application::EXIT_OK;
 	}
-	
+
 	static const std::string SEC_WEBSOCKET_PROTOCOL;
 	static const std::string WEBTUNNEL_PROTOCOL;
 	static const std::string WEBTUNNEL_AGENT;
-	
+
 private:
 	bool _helpRequested;
 	std::string _deviceName;
