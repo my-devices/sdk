@@ -6,7 +6,7 @@
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
 Virtual Network Computing (VNC). With my-devices.net, any network-connected device
 running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
-can be securely accessed remotely over theinternet from browsers, mobile apps, desktop,
+can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
 
 This even works if the device is behind a NAT router, firewall or proxy server.
