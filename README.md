@@ -2,23 +2,23 @@
 
 ## About my-devices.net
 
-[my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices 
-via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or 
-Virtual Network Computing (VNC). With my-devices.net, any network-connected device 
+[my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices
+via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
+Virtual Network Computing (VNC). With my-devices.net, any network-connected device
 running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
-can be securely accessed remotely over theinternet from browsers, mobile apps, desktop, 
-server or cloud applications. 
+can be securely accessed remotely over theinternet from browsers, mobile apps, desktop,
+server or cloud applications.
 
-This even works if the device is behind a NAT router, firewall or proxy server. 
-The device becomes just another host on the internet, addressable via its own URL and 
-protected by the my-devices.net server against unauthorized or malicious access. 
-my-devices.net is a great solution for secure remote support and maintenance, 
-as well as for providing secure remote access to devices for end-users via web or 
+This even works if the device is behind a NAT router, firewall or proxy server.
+The device becomes just another host on the internet, addressable via its own URL and
+protected by the my-devices.net server against unauthorized or malicious access.
+my-devices.net is a great solution for secure remote support and maintenance,
+as well as for providing secure remote access to devices for end-users via web or
 mobile apps.
 
 Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
 Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
-[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for 
+[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
 
 There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
@@ -26,8 +26,8 @@ There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-s
 
 ## About This SDK
 
-The my-devices.net Device SDK is based on the 
-[POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO 
+The my-devices.net Device SDK is based on the
+[POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
 first as it contains important information regarding the directory structure
 and the build system of the SDK.
 
@@ -45,19 +45,19 @@ The my-devices.net SDK is licensed under the [Boost Software License](https://sp
 ## External Dependecies
 
 The my-devices.net Device SDK requires OpenSSL 0.9.8 or newer.
-We recommend using at least OpenSSL 1.0.
+We recommend using at least OpenSSL 1.0.2.
 
-Most Unix/Linux systems already have OpenSSL preinstalled. If your system 
-does not have OpenSSL, please get it from <http://www.openssl.org> or 
-another source. You do not have to build OpenSSL yourself - a binary 
+Most Unix/Linux systems already have OpenSSL preinstalled. If your system
+does not have OpenSSL, please get it from <http://www.openssl.org> or
+another source. You do not have to build OpenSSL yourself - a binary
 distribution is fine (e.g., apt-get install openssl libssl-dev).
 
-The easiest way to install OpenSSL on Windows is to use a binary 
-(prebuild) release, for example the one from Shining Light 
+The easiest way to install OpenSSL on Windows is to use a binary
+(prebuild) release, for example the one from Shining Light
 Productions that comes with a Windows installer
-<http://www.slproweb.com/products/Win32OpenSSL.html>. 
-Depending on where you have installed the OpenSSL libraries, 
-you might have to edit the build script (buildwin.cmd), or add the 
+<http://www.slproweb.com/products/Win32OpenSSL.html>.
+Depending on where you have installed the OpenSSL libraries,
+you might have to edit the build script (buildwin.cmd), or add the
 necessary paths to the INCLUDE and LIB environment variables.
 
 On Unix/Linux/OS X, GNU make 3.80 or newer is required.
@@ -93,11 +93,11 @@ for Angstrom:
     ./buildsdk.sh Angstrom
 
 See the build/config directory for available build configurations. If
-there's no build configuration that fits your target, you'll have to 
+there's no build configuration that fits your target, you'll have to
 create one yourself. This is best done by copying an existing one,
 making the necessary changes (typically, changing the name of the
 compiler and linker executables to match your particular toolchain,
-and modifying compiler/linker settings if necessary). 
+and modifying compiler/linker settings if necessary).
 Specify the name of your new build configuration in the call to buildsdk.sh.
 
 For more information regarding the build system, see the POCO C++
@@ -120,21 +120,21 @@ manually, as described in README_POCO.
 
 A few notes on the arguments:
 
-  * --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION instructs the build system to omit support
+  * `--cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION` instructs the build system to omit support
     for XML configuration files. The result is that the PocoXML library does not
     need to be linked into the application, saving a few 100Ks of executable size.
-  * --no-tests and --no-samples instruct the build system not to build the
+  * `--no-tests and --no-samples` instruct the build system not to build the
     POCO sample applications and the testsuites.
-  * --static instructs the build system to build static libraries.
-  * DEFAULT_TARGET=static_release instructs the build system to only build
+  * `--static instructs` the build system to build static libraries.
+  * `DEFAULT_TARGET=static_release` instructs the build system to only build
     the release configuration.
-  * DEFAULT_TARGET=shared_release (in the second call to GNU make for building the
+  * `DEFAULT_TARGET=shared_release` (in the second call to GNU make for building the
     WebTunnelAgent and WebTunnelClient executables) instructs the build system to
     link against the shared runtime libraries (C and C++ standard libraries, OpenSSL),
     but use the static POCO libraries (since only these are available).
-  * WEBTUNNEL_ENABLE_TLS=1 enables SSL/TLS support for WebTunnelAgent and
+  * `WEBTUNNEL_ENABLE_TLS=1` enables SSL/TLS support for WebTunnelAgent and
     WebTunnelClient.
-  
+
 If your system does not have OpenSSL, run configure and GNU make as follows:
 
     ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
@@ -144,32 +144,33 @@ If your system does not have OpenSSL, run configure and GNU make as follows:
     make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
 
 For a cross-build for an embedded target, you must specify the build configuration in the
-call to ./configure and the final call to GNU make. 
+call to `./configure` and the final call to GNU make.
 
     ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
     make -s -j8 DEFAULT_TARGET=static_release
     export POCO_BASE=`pwd`
     cd WebTunnel/Agent
-    make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release 
+    make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
 
 
 ## Building on Windows
 
 For Windows, you'll need Visual C++. Any version from 2008 to 2017 is fine.
 
-The easiest way to build on Windows is to open the proper *SDK_vsNNN.sln* solution for you preferred version of Visual Studio.
-*SDK_vs90.sln* is for Visual Studio 2008, *SDK_vs120.sln* is for Visual Studio 2013, etc.
-Then, build the *release_static_mt*, which will produce self-contained statically linked executables for *WebTunnelAgent* and
-the other programs.
+The easiest way to build on Windows is to open the proper `SDK_vsNNN.sln` solution for you preferred version of Visual Studio.
+`SDK_vs90.sln` is for Visual Studio 2008, `SDK_vs120.sln` is for Visual Studio 2013, etc.
+Then, build the `release_static_mt` configuration, which will produce self-contained statically linked executables for
+*WebTunnelAgent* and the other programs.
 
-Alternatively, you can run one of the *build_vsNNN.cmd* scripts. For Visual Studio 2008, run *build_vs90.cmd*, for 
-Visual Studio 2013 run *build_vs120.cmd*:
+Alternatively, you can run one of the `build_vsNNN.cmd` scripts. For Visual Studio 2008, run `build_vs90.cmd`, for
+Visual Studio 2013 run `build_vs120.cmd`, etc.:
 
     git clone https://github.com/my-devices/sdk.git
     cd sdk
     build_vs120
 
-The statically linked executables will be located in *WebTunnel\WebTunnelAgent\bin\static_mt*, *WebTunnel\WebTunnelClient\bin\static_mt*, etc.
+The statically linked executables will be located in `WebTunnel\WebTunnelAgent\bin\static_mt`,
+`WebTunnel\WebTunnelClient\bin\static_mt`, etc.
 
 You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
-Also, see README_POCO for more information.
+Also, see [README_POCO](README_POCO) for more information.
