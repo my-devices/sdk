@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy RemoteSigned -File buildsdk.ps1 -tool msbuild -vs_version 150 -action rebuild -config release -linkmode shared -platform x64
