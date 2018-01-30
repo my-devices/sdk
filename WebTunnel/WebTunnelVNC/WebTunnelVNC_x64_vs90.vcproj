@@ -31,7 +31,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;WINVER=0x0500;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				MinimalRebuild="true"
@@ -56,10 +56,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib iphlpapi.lib libeay32mdd.lib ssleay32mdd.lib Crypt32.lib"
+				AdditionalDependencies="ws2_32.lib iphlpapi.lib Crypt32.lib"
 				OutputFile="bin64\WebTunnelVNCd.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="bin64\WebTunnelVNCd.pdb"
@@ -104,7 +104,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WINVER=0x0500;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -127,10 +127,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib iphlpapi.lib libeay32md.lib ssleay32md.lib Crypt32.lib"
+				AdditionalDependencies="ws2_32.lib iphlpapi.lib Crypt32.lib"
 				OutputFile="bin64\WebTunnelVNC.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -171,7 +171,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="4"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;WINVER=0x0500;POCO_STATIC;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				MinimalRebuild="true"
@@ -196,10 +196,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib libeay32mtd.lib ssleay32mtd.lib Crypt32.lib"
+				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.libCrypt32.lib"
 				OutputFile="bin64\static_mt\WebTunnelVNCd.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="bin64\static_mt\WebTunnelVNCd.pdb"
@@ -244,7 +244,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WINVER=0x0500;POCO_STATIC;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -267,10 +267,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib libeay32mt.lib ssleay32mt.lib Crypt32.lib"
+				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib Crypt32.lib"
 				OutputFile="bin64\static_mt\WebTunnelVNC.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -311,7 +311,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="4"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;WINVER=0x0500;POCO_STATIC;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				MinimalRebuild="true"
@@ -336,10 +336,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib libeay32mdd.lib ssleay32mdd.lib Crypt32.lib"
+				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib Crypt32.lib"
 				OutputFile="bin64\static_md\WebTunnelVNCd.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="bin64\static_md\WebTunnelVNCd.pdb"
@@ -384,7 +384,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories=".\include;..\..\Foundation\include;..\..\XML\include;;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
+				AdditionalIncludeDirectories=".\include;..\..\poco\Foundation\include;..\..\poco\XML\include;;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WINVER=0x0500;POCO_STATIC;WEBTUNNEL_ENABLE_TLS=1"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -407,10 +407,10 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib libeay32md.lib ssleay32md.lib Crypt32.lib"
+				AdditionalDependencies="iphlpapi.lib winmm.lib ws2_32.lib iphlpapi.lib Crypt32.lib"
 				OutputFile="bin64\static_md\WebTunnelVNC.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\lib64"
+				AdditionalLibraryDirectories="..\..\lib64;..\..\lib64;..\..\poco\lib64"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"

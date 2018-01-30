@@ -129,7 +129,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug_shared|SDK_AM335X_SK_WEC2013_V300'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -144,7 +144,7 @@
     <Link>
       <AdditionalDependencies>ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\shared\WebTunnelSSHd.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>bin\$(Platform)\shared\WebTunnelSSHd.pdb</ProgramDatabaseFile>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -156,7 +156,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>.\include;..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include;..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;$(ProjectName)_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -169,7 +169,7 @@
     <Link>
       <AdditionalDependencies>ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\shared\WebTunnelSSH.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile/>
       <OptimizeReferences>true</OptimizeReferences>
@@ -181,7 +181,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug_static_mt|SDK_AM335X_SK_WEC2013_V300'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;POCO_STATIC;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -196,7 +196,7 @@
     <Link>
       <AdditionalDependencies>iphlpapi.lib;ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\static_mt\WebTunnelSSHd.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>bin\$(Platform)\static_mt\WebTunnelSSHd.pdb</ProgramDatabaseFile>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -209,7 +209,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;POCO_STATIC;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -224,7 +224,7 @@
     <Link>
       <AdditionalDependencies>iphlpapi.lib;ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\static_mt\WebTunnelSSH.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile/>
       <OptimizeReferences>true</OptimizeReferences>
@@ -236,7 +236,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug_static_md|SDK_AM335X_SK_WEC2013_V300'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -251,7 +251,7 @@
     <Link>
       <AdditionalDependencies>iphlpapi.lib;ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\static_md\WebTunnelSSHd.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>bin\$(Platform)\static_md\WebTunnelSSHd.pdb</ProgramDatabaseFile>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -264,7 +264,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>..\..\Foundation\include;..\..\XML\include;..\..\JSON\include;..\..\Util\include;..\..\Net\include;..\..\Crypto\include;..\..\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\poco\Foundation\include;..\..\poco\XML\include;..\..\poco\JSON\include;..\..\poco\Util\include;..\..\poco\Net\include;..\..\poco\openssl\build\include\;..\..\poco\Crypto\include;..\..\poco\NetSSL_OpenSSL\include;..\..\WebTunnel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;POCO_STATIC;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -279,7 +279,7 @@
     <Link>
       <AdditionalDependencies>iphlpapi.lib;ws2.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>bin\$(Platform)\static_md\WebTunnelSSH.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\lib;..\..\poco\lib</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile/>
       <OptimizeReferences>true</OptimizeReferences>
