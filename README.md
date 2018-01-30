@@ -1,24 +1,24 @@
-# The my-devices.net SDK
+# The macchina.cloud SDK
 
-## About my-devices.net
+## About macchina.cloud
 
-[my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices
+[macchina.cloud](http://www.macchina.cloud) provides secure remote access to connected devices
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
-Virtual Network Computing (VNC). With my-devices.net, any network-connected device
-running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
+Virtual Network Computing (VNC). With macchina.cloud, any network-connected device
+running the macchina.cloud Agent software (*WebTunnelAgent*, contained in this SDK)
 can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
 
 This even works if the device is behind a NAT router, firewall or proxy server.
 The device becomes just another host on the internet, addressable via its own URL and
-protected by the my-devices.net server against unauthorized or malicious access.
-my-devices.net is a great solution for secure remote support and maintenance,
+protected by the macchina.cloud server against unauthorized or malicious access.
+macchina.cloud is a great solution for secure remote support and maintenance,
 as well as for providing secure remote access to devices for end-users via web or
 mobile apps.
 
-Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
-Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
-[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for
+Visit [macchina.cloud](http://www.macchina.cloud) to learn more and to register for a free account.
+Specifically, see the [Getting Started](http://www.macchina.cloud/getstarted.html) page and the
+[Frequently Asked Questions](http://www.macchina.cloud/learnmore.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
 
 There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
@@ -26,25 +26,25 @@ There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-s
 
 ## About This SDK
 
-The my-devices.net Device SDK is based on the
+The macchina.cloud Device SDK is based on the
 [POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
 first as it contains important information regarding the directory structure
 and the build system of the SDK.
 
-The SDK contains the WebTunnel library, which implements the tunnel protocol used by my-devices.net.
+The SDK contains the WebTunnel library, which implements the tunnel protocol used by macchina.cloud.
 Furthermore, the following executables are included:
 
-  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the my-devices.net server. This is the most important component of the my-devices.net SDK.
-  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the my-devices.net server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the my-devices.net server.
+  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the macchina.cloud server. This is the most important component of the macchina.cloud SDK.
+  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the macchina.cloud server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the macchina.cloud server.
   - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to the device, then launches a SSH client using that tunnel connection.
   - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to the device, then launches a VNC viewer using that tunnel connection.
 
-The my-devices.net SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
+The macchina.cloud SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
-## External Dependecies
+## External Dependencies
 
-The my-devices.net Device SDK requires OpenSSL 0.9.8 or newer.
+The macchina.cloud Device SDK requires OpenSSL 0.9.8 or newer.
 We recommend using at least OpenSSL 1.0.2.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
@@ -70,7 +70,7 @@ On Unix/Linux/OS X, GNU make 3.80 or newer is required.
 The easy way to build the SDK on Linux or OS X is to run the
 *buildsdk.sh* script:
 
-    git clone https://github.com/my-devices/sdk.git
+    git clone https://github.com/macchina.cloud/sdk.git
     cd sdk
     ./buildsdk.sh
 
@@ -165,7 +165,7 @@ Then, build the `release_static_mt` configuration, which will produce self-conta
 Alternatively, you can run one of the `build_vsNNN.cmd` scripts. For Visual Studio 2008, run `build_vs90.cmd`, for
 Visual Studio 2013 run `build_vs120.cmd`, etc.:
 
-    git clone https://github.com/my-devices/sdk.git
+    git clone https://github.com/macchina.cloud/sdk.git
     cd sdk
     build_vs120
 
