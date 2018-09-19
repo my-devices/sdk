@@ -1,50 +1,50 @@
-# The my-devices.net SDK
+# The macchina.io Remote Manager SDK
 
-## About my-devices.net
+## About macchina.io Remote Manager
 
-[my-devices.net](http://www.my-devices.net) provides secure remote access to connected devices
+[macchina.io Remote Manager](https://macchina.io) provides secure remote access to connected devices
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
-Virtual Network Computing (VNC). With my-devices.net, any network-connected device
-running the my-devices.net Agent software (*WebTunnelAgent*, contained in this SDK)
+Virtual Network Computing (VNC). With macchina.io Remote Manager, any network-connected device
+running the Remote Manager Agent software (*WebTunnelAgent*, contained in this SDK)
 can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
 
 This even works if the device is behind a NAT router, firewall or proxy server.
 The device becomes just another host on the internet, addressable via its own URL and
-protected by the my-devices.net server against unauthorized or malicious access.
-my-devices.net is a great solution for secure remote support and maintenance,
+protected by the Remote Manager server against unauthorized or malicious access.
+macchina.io Remote Manager is a great solution for secure remote support and maintenance,
 as well as for providing secure remote access to devices for end-users via web or
 mobile apps.
 
-Visit [my-devices.net](http://www.my-devices.net) to learn more and to register for a free account.
-Specifically, see the [Getting Started](http://www.my-devices.net/getstarted.html) page and the
-[Frequently Asked Questions](http://www.my-devices.net/learnmore.html) for
+Visit [macchina.io](https://macchina.io) to learn more and to register for a free account.
+Specifically, see the [Getting Started](https://macchina.io/remote.html#signup) page and the
+[Frequently Asked Questions](https://macchina.io/remote_faq.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
 
-There is also a [blog post](http://www.appinf.com/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
+There is also a [blog post](https://macchina.io/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
 
 
 ## About This SDK
 
-The my-devices.net Device SDK is based on the
+The macchina.io Remote Manager Device SDK is based on the
 [POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
 first as it contains important information regarding the directory structure
 and the build system of the SDK.
 
-The SDK contains the WebTunnel library, which implements the tunnel protocol used by my-devices.net.
+The SDK contains the WebTunnel library, which implements the tunnel protocol used by Remote Manager.
 Furthermore, the following executables are included:
 
-  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the my-devices.net server. This is the most important component of the my-devices.net SDK.
-  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the my-devices.net server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the my-devices.net server.
+  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the Remote Manager server. This is the most important component of the Remote Manager SDK.
+  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the Remote Manager server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the Remote Manager server.
   - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to the device, then launches a SSH client using that tunnel connection.
   - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to the device, then launches a VNC viewer using that tunnel connection.
 
-The my-devices.net SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
+The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
 ## External Dependecies
 
-The my-devices.net Device SDK requires OpenSSL 0.9.8 or newer.
+The macchina.io Remote Manager Device SDK requires OpenSSL 1.0 or newer.
 We recommend using at least OpenSSL 1.0.2.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
