@@ -59,29 +59,29 @@ public:
 		virtual void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 	};
-	
+
 	SocketDispatcher(int threadCount, Poco::Timespan timeout = Poco::Timespan(5000), int maxReadsPerWorker = 10);
 		/// Creates the SocketDispatcher, using the given number of worker threads.
 		///
-		/// The given timeout is used for the main select loop, as well as 
+		/// The given timeout is used for the main select loop, as well as
 		/// by workers to poll if more reads are possible, up to the given
 		/// maximum number of reads per worker.
-		
+
 	~SocketDispatcher();
 		/// Destroys the SocketDispatcher.
 
 	void addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout = 0);
 		/// Adds a socket and its handler to the SocketDispatcher.
-		
+
 	void removeSocket(const Poco::Net::StreamSocket& socket);
 		/// Removes a socket and its associated handler from the SocketDispatcher.
-		
+
 	void closeSocket(const Poco::Net::StreamSocket& socket);
 		/// Closes and removes a socket and its associated handler from the SocketDispatcher.
-		
+
 	void stop();
 		/// Stops the SocketDispatcher and removes all sockets.
-		
+
 	void reset();
 		/// Removes all sockets but does not stop the SocketDispatcher.
 
@@ -89,7 +89,7 @@ protected:
 	struct SocketInfo: public Poco::RefCountedObject
 	{
 		typedef Poco::AutoPtr<SocketInfo> Ptr;
-		
+
 		SocketInfo(SocketHandler::Ptr pHnd, Poco::Timespan tmo):
 			pHandler(pHnd),
 			timeout(tmo),
@@ -97,14 +97,14 @@ protected:
 			polling(true)
 		{
 		}
-		
+
 		SocketHandler::Ptr pHandler;
 		Poco::Timespan timeout;
 		Poco::Clock activity;
 		bool wantRead;
 		bool polling;
 	};
-		
+
 	typedef std::map<Poco::Net::Socket, SocketInfo::Ptr> SocketMap;
 	typedef Poco::SharedPtr<Poco::Thread> ThreadPtr;
 	typedef std::vector<ThreadPtr> ThreadVec;
@@ -121,8 +121,9 @@ protected:
 	void removeSocketImpl(const Poco::Net::StreamSocket& socket);
 	void closeSocketImpl(Poco::Net::StreamSocket& socket);
 	void resetImpl();
+	bool stopped();
 
-private:	
+private:
 	Poco::Timespan _timeout;
 	int _maxReadsPerWorker;
 	SocketMap _socketMap;
@@ -134,6 +135,7 @@ private:
 	Poco::NotificationQueue _mainQueue;
 	Poco::NotificationQueue _workerQueue;
 	bool _stopped;
+	Poco::FastMutex _stoppedMtx;
 	Poco::Logger& _logger;
 
 	friend class ReadableNotification;
@@ -144,6 +146,17 @@ private:
 	friend class CloseSocketNotification;
 	friend class ResetNotification;
 };
+
+
+//
+// inlines
+//
+inline bool SocketDispatcher::stopped()
+{
+	Poco::FastMutex::ScopedLock lock(_stoppedMtx);
+
+	return _stopped;
+}
 
 
 } } // namespace Poco::WebTunnel
