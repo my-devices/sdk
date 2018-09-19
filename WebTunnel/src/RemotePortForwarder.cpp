@@ -38,7 +38,7 @@ RemotePortForwarder::RemotePortForwarder(SocketDispatcher& dispatcher, Poco::Sha
 	_dispatcher.addSocket(*pWebSocket, new TunnelDemultiplexer(*this), remoteTimeout);
 }
 
-	
+
 RemotePortForwarder::~RemotePortForwarder()
 {
 	try
@@ -112,7 +112,7 @@ bool RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 		}
 	}
 	catch (Poco::Exception& exc)
-	{	
+	{
 		_logger.error(Poco::format("Error reading from locally forwarded socket for channel %hu: %s", channel, exc.displayText()));
 		removeChannel(channel);
 		n = 0;
@@ -201,19 +201,19 @@ bool RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 		{
 		case Protocol::WT_OP_DATA:
 			return forwardData(buffer.begin() + hn, static_cast<int>(n - hn), channel);
-			
+
 		case Protocol::WT_OP_OPEN_REQUEST:
 			return openChannel(channel, portOrErrorCode);
-			
+
 		case Protocol::WT_OP_CLOSE:
 			removeChannel(channel);
 			return false;
-			
+
 		case Protocol::WT_OP_ERROR:
 			_logger.error(Poco::format("Status %hu reported by peer. Closing channel %hu", portOrErrorCode, channel));
 			removeChannel(channel);
-			return false;			
-			
+			return false;
+
 		default:
 			_logger.error(Poco::format("Invalid WebSocket frame received (bad opcode: %hu)", static_cast<Poco::UInt16>(opcode)));
 			sendResponse(channel, Protocol::WT_OP_ERROR, Protocol::WT_ERR_PROTOCOL);
@@ -303,7 +303,7 @@ bool RemotePortForwarder::openChannel(Poco::UInt16 channel, Poco::UInt16 port)
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_NOT_FORWARDED);
 		return false;
 	}
-	
+
 	Poco::ScopedLockWithUnlock<Poco::FastMutex> lock(_mutex);
 	ChannelMap::iterator it = _channelMap.find(channel);
 	if (it == _channelMap.end())
@@ -385,39 +385,44 @@ void RemotePortForwarder::sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode,
 
 void RemotePortForwarder::closeWebSocket(CloseReason reason, bool active)
 {
-	if (!_pWebSocket || !_pWebSocket->impl()->initialized()) return;
+	{
+		Poco::FastMutex::ScopedLock lock(_webSocketMutex);
 
-	if (_logger.debug())
-	{
-		_logger.debug(Poco::format("Closing WebSocket, reason: %d, active: %b", static_cast<int>(reason), active));
-	}
-	try
-	{
-		_dispatcher.removeSocket(*_pWebSocket);
-		if (reason == RPF_CLOSE_GRACEFUL)
+		if (!_pWebSocket || !_pWebSocket->impl()->initialized()) return;
+
+		if (_logger.debug())
 		{
-			try
+			_logger.debug(Poco::format("Closing WebSocket, reason: %d, active: %b", static_cast<int>(reason), active));
+		}
+		try
+		{
+			_dispatcher.removeSocket(*_pWebSocket);
+			if (reason == RPF_CLOSE_GRACEFUL)
 			{
-				if (active)
+				try
 				{
-					_pWebSocket->shutdown(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
+					if (active)
+					{
+						_pWebSocket->shutdown(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
+					}
+				}
+				catch (Poco::Exception&)
+				{
 				}
 			}
-			catch (Poco::Exception&)
+			for (ChannelMap::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
 			{
+				_dispatcher.removeSocket(it->second);
 			}
+			_pWebSocket->close();
+			_channelMap.clear();
 		}
-		for (ChannelMap::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
+		catch (Poco::Exception& exc)
 		{
-			_dispatcher.removeSocket(it->second);
+			_logger.log(exc);
 		}
-		_pWebSocket->close();
-		_channelMap.clear();
 	}
-	catch (Poco::Exception& exc)
-	{
-		_logger.log(exc);
-	}
+
 	int eventArg = reason;
 	webSocketClosed(this, eventArg);
 }

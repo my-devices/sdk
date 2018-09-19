@@ -170,15 +170,15 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
-			"my-devices.net WebTunnel Agent.\n"
-			"Copyright (c) 2013-2017 by Applied Informatics Software Engineering GmbH.\n"
+			"macchina.io Remote Manager Agent.\n"
+			"Copyright (c) 2013-2018 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
-			"clients via the my-devices.net reflector server.\n\n"
+			"clients via the macchina.io Remote Manager.\n\n"
 			"The following command-line options are supported:");
 		helpFormatter.setFooter(
-			"For more information, please visit the my-devices.net "
-			"website at <http://www.my-devices.net>."
+			"For more information, please visit the macchina.io "
+			"website at <https://macchina.io>."
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -315,7 +315,7 @@ protected:
 		}
 		catch (Poco::Exception& exc)
 		{
-			std::string msg = response.get("X-WebTunnel-Error", exc.displayText());
+			std::string msg = response.get("X-PTTH-Error", exc.displayText());
 			logger().error(Poco::format("Cannot connect to reflector at %s: %s", _reflectorURI.toString(), msg));
 			statusChanged(STATUS_ERROR, msg);
 			if (_retryDelay < 30000)
@@ -333,15 +333,20 @@ protected:
 			logger().information("Disconnecting from reflector server");
 
 			_pForwarder->webSocketClosed -= Poco::delegate(this, &WebTunnelAgent::onClose);
+			logger().debug("Stopping RemotePortForwarder...");
 			_pForwarder->stop();
+			logger().debug("Resetting SocketDispatcher...");
 			_pDispatcher->reset();
+			logger().debug("Deleting RemotePortForwarder...");
 			_pForwarder = 0;
+			logger().debug("Deleting SocketDispatcher...");
 			_pDispatcher = 0;
 		}
 		if (_pHTTPClientSession)
 		{
 			try
 			{
+				logger().debug("Aborting HTTPClientSession...");
 				_pHTTPClientSession->abort();
 			}
 			catch (Poco::Exception&)
@@ -349,7 +354,9 @@ protected:
 			}
 		}
 
+		logger().debug("Notifying disconnected status...");
 		statusChanged(STATUS_DISCONNECTED);
+		logger().debug("Disconnected.");
 	}
 
 	void onClose(const int& reason)
