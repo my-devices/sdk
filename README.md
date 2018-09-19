@@ -26,7 +26,7 @@ There is also a [blog post](https://macchina.io/blog/?p=257) showing step-by-ste
 
 ## About This SDK
 
-The macchina.io Remote Manager Device SDK is based on the
+The macchina.io Remote Manager SDK is based on the
 [POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
 first as it contains important information regarding the directory structure
 and the build system of the SDK.
@@ -44,7 +44,7 @@ The macchina.io Remote Manager SDK is licensed under the [Boost Software License
 
 ## External Dependecies
 
-The macchina.io Remote Manager Device SDK requires OpenSSL 1.0 or newer.
+The macchina.io Remote Manager SDK requires OpenSSL 1.0 or newer.
 We recommend using at least OpenSSL 1.0.2.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
