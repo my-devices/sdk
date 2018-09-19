@@ -1,8 +1,6 @@
 //
 // WebTunnelAgent.cpp
 //
-// $Id: //poco/1.7/WebTunnel/samples/WebTunnelAgent/src/WebTunnelAgent.cpp#7 $
-//
 // Copyright (c) 2013-2016, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
@@ -626,7 +624,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.6.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.7.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

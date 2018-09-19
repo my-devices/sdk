@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/WebTunnel/samples/WebTunnelVNC/Makefile#3 $
-#
 # Makefile for WebTunnelVNC
 #
 

@@ -1,8 +1,6 @@
 //
 // RemotePortForwarder.cpp
 //
-// $Id: //poco/1.7/WebTunnel/src/RemotePortForwarder.cpp#4 $
-//
 // Library: WebTunnel
 // Package: WebTunnel
 // Module:  RemotePortForwarder

@@ -352,7 +352,7 @@ void SocketDispatcher::runMain()
 					if (!it->second->polling)
 					{
 						it->second->polling = true;
-						_pollSet.update(it->first, PollSet::POLL_READ | PollSet::POLL_ERROR);
+						_pollSet.update(it->first, Poco::Net::PollSet::POLL_READ | Poco::Net::PollSet::POLL_ERROR);
 					}
 				}
 				else
@@ -367,22 +367,22 @@ void SocketDispatcher::runMain()
 				}
 			}
 
-			PollSet::SocketModeMap socketModeMap = _pollSet.poll(currentTimeout);
+			Poco::Net::PollSet::SocketModeMap socketModeMap = _pollSet.poll(currentTimeout);
 			if (!socketModeMap.empty())
 			{
 				currentTimeout = _timeout;
-				for (PollSet::SocketModeMap::const_iterator it = socketModeMap.begin(); it != socketModeMap.end(); ++it)
+				for (Poco::Net::PollSet::SocketModeMap::const_iterator it = socketModeMap.begin(); it != socketModeMap.end(); ++it)
 				{
 					SocketMap::iterator its = _socketMap.find(it->first);
 					if (its != _socketMap.end() && its->second->wantRead)
 					{
 						its->second->wantRead = false;
 						its->second->activity.update();
-						if (it->second & PollSet::POLL_READ)
+						if (it->second & Poco::Net::PollSet::POLL_READ)
 						{
 							readable(its->first, its->second);
 						}
-						if (it->second & PollSet::POLL_ERROR)
+						if (it->second & Poco::Net::PollSet::POLL_ERROR)
 						{
 							exception(its->first, its->second);
 						}
@@ -516,7 +516,7 @@ void SocketDispatcher::timeoutImpl(Poco::Net::StreamSocket& socket, SocketDispat
 void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout)
 {
 	_socketMap[socket] = new SocketInfo(pHandler, timeout);
-	_pollSet.add(socket, PollSet::POLL_READ | PollSet::POLL_ERROR);
+	_pollSet.add(socket, Poco::Net::PollSet::POLL_READ | Poco::Net::PollSet::POLL_ERROR);
 }
 
 

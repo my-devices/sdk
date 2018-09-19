@@ -1,8 +1,6 @@
 //
 // SocketDispatcher.h
 //
-// $Id: //poco/1.7/WebTunnel/include/Poco/WebTunnel/SocketDispatcher.h#2 $
-//
 // Library: WebTunnel
 // Package: WebTunnel
 // Module:  SocketDispatcher
@@ -22,6 +20,7 @@
 
 #include "Poco/WebTunnel/WebTunnel.h"
 #include "Poco/Net/StreamSocket.h"
+#include "Poco/Net/PollSet.h"
 #include "Poco/NotificationQueue.h"
 #include "Poco/Thread.h"
 #include "Poco/RunnableAdapter.h"
@@ -30,7 +29,6 @@
 #include "Poco/SharedPtr.h"
 #include "Poco/Clock.h"
 #include "Poco/Logger.h"
-#include "PollSet.h"
 #include <map>
 
 
@@ -133,7 +131,7 @@ private:
 	Poco::Timespan _timeout;
 	int _maxReadsPerWorker;
 	SocketMap _socketMap;
-	PollSet _pollSet;
+	Poco::Net::PollSet _pollSet;
 	Poco::Thread _mainThread;
 	ThreadVec _workerThreads;
 	Poco::RunnableAdapter<SocketDispatcher> _mainRunnable;
