@@ -398,8 +398,6 @@
 			<Filter
 				Name="Header Files">
 				<File
-					RelativePath=".\include\Poco\WebTunnel\PollSet.h"/>
-				<File
 					RelativePath=".\include\Poco\WebTunnel\Protocol.h"/>
 				<File
 					RelativePath=".\include\Poco\WebTunnel\SocketDispatcher.h"/>
@@ -408,8 +406,6 @@
 			</Filter>
 			<Filter
 				Name="Source Files">
-				<File
-					RelativePath=".\src\PollSet.cpp"/>
 				<File
 					RelativePath=".\src\Protocol.cpp"/>
 				<File

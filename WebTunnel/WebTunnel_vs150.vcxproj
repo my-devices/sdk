@@ -85,7 +85,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros"/>
   <PropertyGroup>
-    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
+    <_ProjectFileVersion>15.0.27924.0</_ProjectFileVersion>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='debug_shared|Win32'">PocoWebTunneld</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='debug_static_md|Win32'">PocoWebTunnelmdd</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='debug_static_mt|Win32'">PocoWebTunnelmtd</TargetName>
@@ -280,7 +280,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Poco\WebTunnel\LocalPortForwarder.h"/>
-    <ClInclude Include="include\Poco\WebTunnel\PollSet.h"/>
     <ClInclude Include="include\Poco\WebTunnel\PortReflector.h"/>
     <ClInclude Include="include\Poco\WebTunnel\Protocol.h"/>
     <ClInclude Include="include\Poco\WebTunnel\RemotePortForwarder.h"/>
@@ -291,7 +290,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\LocalPortForwarder.cpp"/>
-    <ClCompile Include="src\PollSet.cpp"/>
     <ClCompile Include="src\PortReflector.cpp"/>
     <ClCompile Include="src\Protocol.cpp"/>
     <ClCompile Include="src\RemotePortForwarder.cpp"/>
