@@ -109,6 +109,12 @@ protected:
 	typedef Poco::SharedPtr<Poco::Thread> ThreadPtr;
 	typedef std::vector<ThreadPtr> ThreadVec;
 
+	enum
+	{
+		MAIN_QUEUE_TIMEOUT = 1000,
+		WORKER_QUEUE_TIMEOUT = 2500
+	};
+
 	void runMain();
 	void runWorker();
 	void readable(const Poco::Net::StreamSocket& socket, const SocketInfo::Ptr& pInfo);
