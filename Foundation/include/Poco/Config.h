@@ -1,8 +1,6 @@
 //
 // Config.h
 //
-// $Id: //poco/1.4/Foundation/include/Poco/Config.h#3 $
-//
 // Library: Foundation
 // Package: Core
 // Module:  Foundation
@@ -170,6 +168,31 @@
 // even if the _DEBUG variable is not set.
 // This allows the use of these macros in a release version.
 // #define POCO_LOG_DEBUG
+
+
+// OpenSSL on Windows
+//
+// Poco has its own OpenSSL build system.
+// See <https://github.com/pocoproject/openssl/blob/master/README.md>
+// for details.
+//
+// These options are Windows only.
+//
+// To disable the use of Poco-provided OpenSSL binaries,
+// define POCO_EXTERNAL_OPENSSL.
+//
+// Possible values:
+//   POCO_EXTERNAL_OPENSSL_SLPRO:
+//     Automatically link OpenSSL libraries from OpenSSL Windows installer provided
+//     by Shining Light Productions <http://slproweb.com/products/Win32OpenSSL.html>
+//     The (global) library search path must be set accordingly.
+//   POCO_EXTERNAL_OPENSSL_DEFAULT:
+//     Automatically link OpenSSL libraries from standard OpenSSL Windows build.
+//     The (global) library search path must be set accordingly.
+//   empty or other value:
+//     Do not link any OpenSSL libraries automatically. You will have to edit the
+//     Visual C++ project files for Crypto and NetSSL_OpenSSL.
+#define POCO_EXTERNAL_OPENSSL POCO_EXTERNAL_OPENSSL_SLPRO
 
 
 // Define to prevent changing the suffix for shared libraries

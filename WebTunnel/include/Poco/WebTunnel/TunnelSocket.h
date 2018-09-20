@@ -1,8 +1,6 @@
 //
 // TunnelSocket.h
 //
-// $Id: //poco/1.7/WebTunnel/include/Poco/WebTunnel/TunnelSocket.h#1 $
-//
 // Library: WebTunnel
 // Package: WebTunnel
 // Module:  TunnelSocket
@@ -42,7 +40,7 @@ public:
 
 	TunnelSocket(TunnelSocketImpl* pSocketImpl);
 		/// Creates a TunnelSocket with the given TunnelSocketImpl.
-	
+
 	virtual ~TunnelSocket();
 		/// Destroys the StreamSocket.
 

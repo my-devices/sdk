@@ -277,7 +277,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Poco\WebTunnel\PollSet.h"/>
     <ClInclude Include="include\Poco\WebTunnel\Protocol.h"/>
     <ClInclude Include="include\Poco\WebTunnel\SocketDispatcher.h"/>
     <ClInclude Include="include\Poco\WebTunnel\WebTunnel.h"/>
@@ -288,7 +287,6 @@
     <ClInclude Include="include\Poco\WebTunnel\TunnelSocketImpl.h"/>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\PollSet.cpp"/>
     <ClCompile Include="src\Protocol.cpp"/>
     <ClCompile Include="src\SocketDispatcher.cpp"/>
     <ClCompile Include="src\LocalPortForwarder.cpp"/>

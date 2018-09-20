@@ -19,14 +19,14 @@ endif
 .PHONY: poco all libexecs cppunit tests samples clean distclean install
 
 # TESTS and SAMPLES are set in config.make
-poco: libexecs $(if $(TESTS),tests) $(if $(SAMPLES),samples) 
+poco: libexecs $(if $(TESTS),tests) $(if $(SAMPLES),samples)
 all: libexecs tests samples
 
 INSTALLDIR = $(DESTDIR)$(POCO_PREFIX)
 COMPONENTS = Foundation XML JSON Util Net Crypto NetSSL_OpenSSL WebTunnel
 
 cppunit:
-	$(MAKE) -C $(POCO_BASE)/CppUnit 
+	$(MAKE) -C $(POCO_BASE)/CppUnit
 
 install: libexecs
 	mkdir -p $(INSTALLDIR)/include/Poco
@@ -45,7 +45,7 @@ install: libexecs
 
 libexecs =  Foundation-libexec XML-libexec JSON-libexec Util-libexec Net-libexec Crypto-libexec NetSSL_OpenSSL-libexec WebTunnel-libexec
 tests    =  Foundation-tests XML-tests JSON-tests Util-tests Net-tests Crypto-tests NetSSL_OpenSSL-tests
-samples  =  Foundation-samples XML-samples JSON-samples Util-samples Net-samples Crypto-samples NetSSL_OpenSSL-samples WebTunnel-samples
+samples  =  Foundation-samples XML-samples JSON-samples Util-samples Net-samples Crypto-samples NetSSL_OpenSSL-samples
 
 .PHONY: $(libexecs)
 .PHONY: $(tests)
@@ -55,13 +55,13 @@ libexecs: $(filter-out $(foreach f,$(OMIT),$f%),$(libexecs))
 tests: $(filter-out $(foreach f,$(OMIT),$f%),$(tests))
 samples: $(filter-out $(foreach f,$(OMIT),$f%),$(samples))
 
-Foundation-libexec: 
+Foundation-libexec:
 	$(MAKE) -C $(POCO_BASE)/Foundation
 
 Foundation-tests: Foundation-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/Foundation/testsuite
-	
-Foundation-samples: Foundation-libexec 
+
+Foundation-samples: Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/Foundation/samples
 
 XML-libexec:  Foundation-libexec
@@ -69,8 +69,8 @@ XML-libexec:  Foundation-libexec
 
 XML-tests: XML-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/XML/testsuite
-	
-XML-samples: XML-libexec 
+
+XML-samples: XML-libexec
 	$(MAKE) -C $(POCO_BASE)/XML/samples
 
 JSON-libexec:  Foundation-libexec
@@ -78,8 +78,8 @@ JSON-libexec:  Foundation-libexec
 
 JSON-tests: JSON-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/JSON/testsuite
-	
-JSON-samples: JSON-libexec 
+
+JSON-samples: JSON-libexec
 	$(MAKE) -C $(POCO_BASE)/JSON/samples
 
 Util-libexec:  Foundation-libexec XML-libexec JSON-libexec
@@ -87,8 +87,8 @@ Util-libexec:  Foundation-libexec XML-libexec JSON-libexec
 
 Util-tests: Util-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/Util/testsuite
-	
-Util-samples: Util-libexec 
+
+Util-samples: Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Util/samples
 
 Net-libexec:  Foundation-libexec
@@ -96,7 +96,7 @@ Net-libexec:  Foundation-libexec
 
 Net-tests: Net-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/Net/testsuite
-	
+
 Net-samples: Net-libexec  Foundation-libexec XML-libexec JSON-libexec Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Net/samples
 
@@ -105,7 +105,7 @@ Crypto-libexec:  Foundation-libexec
 
 Crypto-tests: Crypto-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/Crypto/testsuite
-	
+
 Crypto-samples: Crypto-libexec  Foundation-libexec Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Crypto/samples
 
@@ -114,15 +114,12 @@ NetSSL_OpenSSL-libexec:  Foundation-libexec Net-libexec Util-libexec Crypto-libe
 
 NetSSL_OpenSSL-tests: NetSSL_OpenSSL-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/testsuite
-	
-NetSSL_OpenSSL-samples: NetSSL_OpenSSL-libexec 
+
+NetSSL_OpenSSL-samples: NetSSL_OpenSSL-libexec
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/samples
 
 WebTunnel-libexec:  Foundation-libexec Net-libexec Util-libexec
 	$(MAKE) -C $(POCO_BASE)/WebTunnel
-	
-WebTunnel-samples: WebTunnel-libexec  Foundation-libexec Net-libexec Util-libexec
-	$(MAKE) -C $(POCO_BASE)/WebTunnel/samples
 
 clean:
 	$(MAKE) -C $(POCO_BASE)/Foundation clean
@@ -147,7 +144,6 @@ clean:
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/testsuite clean
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/samples clean
 	$(MAKE) -C $(POCO_BASE)/WebTunnel clean
-	$(MAKE) -C $(POCO_BASE)/WebTunnel/samples clean
 	$(MAKE) -C $(POCO_BASE)/CppUnit clean
 
 distclean:

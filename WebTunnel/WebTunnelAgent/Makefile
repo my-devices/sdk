@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/WebTunnel/samples/WebTunnelAgent/Makefile#3 $
-#
 # Makefile for WebTunnelAgent
 #
 

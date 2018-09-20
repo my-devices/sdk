@@ -2,46 +2,43 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Core">
-      <UniqueIdentifier>{1e246bcc-650f-473a-803c-0273d0335d8d}</UniqueIdentifier>
+      <UniqueIdentifier>{822b5824-4dc1-4c69-aad9-0aa3e0c6e4ee}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Header Files">
-      <UniqueIdentifier>{07f41c5c-c4b9-4c1d-8ad9-4373b1dea21d}</UniqueIdentifier>
+      <UniqueIdentifier>{1b57bf4e-535d-440f-b7bc-f0932e491cb5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Source Files">
-      <UniqueIdentifier>{ba7ecf4d-eb62-4617-99c7-b62eedb5f9bc}</UniqueIdentifier>
+      <UniqueIdentifier>{3f4d356e-c4d2-45a1-b8f1-d1ec79c45452}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client">
-      <UniqueIdentifier>{8a55349c-aa2a-4cd3-b4e1-b9a0297af458}</UniqueIdentifier>
+      <UniqueIdentifier>{208395af-3ea1-4717-9834-831017dfd837}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Header Files">
-      <UniqueIdentifier>{2d96327b-e4e7-4d10-98c2-eb3115c905b1}</UniqueIdentifier>
+      <UniqueIdentifier>{3327afe9-f34f-40d6-a31f-f2c5126ec187}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Source Files">
-      <UniqueIdentifier>{a46982ce-5700-4fd2-872c-dc5dc55af0fd}</UniqueIdentifier>
+      <UniqueIdentifier>{334cd2f9-946a-44a1-90d2-3bc202fbf4ce}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server">
-      <UniqueIdentifier>{9c6643a2-b172-4c3a-9321-697dc580f43b}</UniqueIdentifier>
+      <UniqueIdentifier>{5ee773a0-a299-4a7e-8b70-dec18b29cbd2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Header Files">
-      <UniqueIdentifier>{c7016ffe-a401-44de-8807-02c1774b06e1}</UniqueIdentifier>
+      <UniqueIdentifier>{b68b6678-9efd-4569-8781-50a9f1fc288d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Server\Source Files">
-      <UniqueIdentifier>{572da025-5079-43e8-9c6e-ed796afdb85b}</UniqueIdentifier>
+      <UniqueIdentifier>{aaa1edc7-d919-4f89-aa27-bc5a9fdcbe53}</UniqueIdentifier>
     </Filter>
     <Filter Include="Reflector">
-      <UniqueIdentifier>{df2cee37-3cad-4b44-9d5e-e84fa4399843}</UniqueIdentifier>
+      <UniqueIdentifier>{8468e92a-033a-462a-ab83-5dc14996329d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Reflector\Header Files">
-      <UniqueIdentifier>{87470fd0-78a6-438f-9606-d1456025ac40}</UniqueIdentifier>
+      <UniqueIdentifier>{c6103ed0-cc9d-4b9f-acb5-26703028e756}</UniqueIdentifier>
     </Filter>
     <Filter Include="Reflector\Source Files">
-      <UniqueIdentifier>{1cae731d-6f4c-428d-8155-95942c9d5e1f}</UniqueIdentifier>
+      <UniqueIdentifier>{f5d49256-4b78-40e0-b020-428a9f885bcc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Poco\WebTunnel\PollSet.h">
-      <Filter>Core\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Poco\WebTunnel\Protocol.h">
       <Filter>Core\Header Files</Filter>
     </ClInclude>
@@ -68,9 +65,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\PollSet.cpp">
-      <Filter>Core\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Protocol.cpp">
       <Filter>Core\Source Files</Filter>
     </ClCompile>

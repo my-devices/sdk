@@ -1,8 +1,6 @@
 //
 // Protocol.cpp
 //
-// $Id: //poco/1.7/WebTunnel/src/Protocol.cpp#1 $
-//
 // Library: WebTunnel
 // Package: WebTunnel
 // Module:  Protocol

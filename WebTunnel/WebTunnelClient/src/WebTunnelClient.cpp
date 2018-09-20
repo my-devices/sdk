@@ -1,8 +1,6 @@
 //
 // WebTunnelClient.cpp
 //
-// $Id: //poco/1.7/WebTunnel/samples/WebTunnelClient/src/WebTunnelClient.cpp#3 $
-//
 // Copyright (c) 2013, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
@@ -129,14 +127,14 @@ protected:
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleRemotePort)));
 
 		options.addOption(
-			Option("username", "u", "Specify username for reflector server (required).")
+			Option("username", "u", "Specify username for Remote Manager server (required).")
 				.required(false)
 				.repeatable(true)
 				.argument("username")
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleUsername)));
 
 		options.addOption(
-			Option("password", "p", "Specify password for reflector server (required).")
+			Option("password", "p", "Specify password for Remote Manager server (required).")
 				.required(false)
 				.repeatable(true)
 				.argument("password")
@@ -191,13 +189,13 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS <Remote-URI>");
 		helpFormatter.setHeader("\n"
-			"my-devices.net WebTunnel Client.\n"
-			"Copyright (c) 2013-2017 by Applied Informatics Software Engineering GmbH.\n"
+			"macchina.io Remote Manager Client.\n"
+			"Copyright (c) 2013-2018 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward a remote TCP port to the local\n"
-			"host via the my-devices.net reflector server.\n\n"
+			"host via the macchina.io Remote Manager server.\n\n"
 			"<Remote-URI> specifies the URI of the remote device via the\n"
-			"reflector server, e.g.:\n"
+			"Remote Manager server, e.g.:\n"
 #if defined(WEBTUNNEL_ENABLE_TLS)
 			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #else
@@ -207,8 +205,8 @@ protected:
 			"The following command-line options are supported:"
 		);
 		helpFormatter.setFooter(
-			"For more information, please visit the my-devices.net "
-			"website at <http://www.my-devices.net>."
+			"For more information, please visit the macchina.io "
+			"website at <https://macchina.io>."
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -232,12 +230,12 @@ protected:
 	{
 		if (_username.empty())
 		{
-			std::cout << "my-devices.net Username: " << std::flush;
+			std::cout << "Remote Manager Username: " << std::flush;
 			std::getline(std::cin, _username);
 		}
 		if (_password.empty())
 		{
-			std::cout << "my-devices.net Password: " << std::flush;
+			std::cout << "Remote Manager Password: " << std::flush;
 			echo(false);
 			std::getline(std::cin, _password);
 			echo(true);

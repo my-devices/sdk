@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: //poco/1.7/WebTunnel/Makefile#2 $
-#
 # Makefile for Poco WebTunnel library
 #
 
@@ -10,7 +8,7 @@ include $(POCO_BASE)/build/rules/global
 
 objects = LocalPortForwarder RemotePortForwarder PortReflector \
 	TunnelSocket TunnelSocketImpl \
-	SocketDispatcher Protocol PollSet
+	SocketDispatcher Protocol
 
 target         = PocoWebTunnel
 target_version = 1
