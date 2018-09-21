@@ -11,28 +11,86 @@ ifndef POCO_BASE
 $(warning WARNING: POCO_BASE is not defined. Assuming current directory.)
 export POCO_BASE=$(shell pwd)
 endif
+ifdef POCO_VERBOSE
+$(info POCO_BASE           = $(POCO_BASE))
+endif
 
 ifndef POCO_BUILD
 export POCO_BUILD=$(POCO_BASE)
 endif
+ifdef POCO_VERBOSE
+$(info POCO_BUILD          = $(POCO_BUILD))
+endif
 
-.PHONY: poco all libexecs cppunit tests samples clean distclean install
+#
+# Determine OS
+#
+POCO_HOST_OSNAME = $(shell uname)
+ifeq ($(findstring CYGWIN,$(POCO_HOST_OSNAME)),CYGWIN)
+POCO_HOST_OSNAME = CYGWIN
+endif
+
+ifeq ($(findstring MINGW,$(POCO_HOST_OSNAME)),MINGW)
+POCO_HOST_OSNAME = MinGW
+endif
+POCO_HOST_OSARCH ?= $(subst /,-,$(shell uname -m | tr ' ' _))
+
+#
+# If POCO_CONFIG is not set, use the OS name as configuration name
+#
+ifndef POCO_CONFIG
+POCO_CONFIG = $(POCO_HOST_OSNAME)
+endif
+ifdef POCO_VERBOSE
+$(info POCO_CONFIG         = $(POCO_CONFIG))
+endif
+
+#
+# Include System Specific Settings
+#
+include $(POCO_BASE)/build/config/$(POCO_CONFIG)
+
+#
+# Determine operating system
+#
+ifndef POCO_TARGET_OSNAME
+OSNAME   := $(POCO_HOST_OSNAME)
+else
+OSNAME   := $(POCO_TARGET_OSNAME)
+endif
+ifdef POCO_VERBOSE
+$(info OSNAME              = $(OSNAME))
+endif
+
+ifndef POCO_TARGET_OSARCH
+OSARCH   := $(POCO_HOST_OSARCH)
+else
+OSARCH   := $(POCO_TARGET_OSARCH)
+endif
+ifdef POCO_VERBOSE
+$(info OSARCH              = $(OSARCH))
+endif
+
+.PHONY: poco all libexecs cppunit tests samples cleans clean distclean install uninstall
 
 # TESTS and SAMPLES are set in config.make
 poco: libexecs $(if $(TESTS),tests) $(if $(SAMPLES),samples)
 all: libexecs tests samples
 
 INSTALLDIR = $(DESTDIR)$(POCO_PREFIX)
-COMPONENTS = Foundation XML JSON Util Net Crypto NetSSL_OpenSSL WebTunnel
+COMPONENTS = Foundation XML JSON Util Net Crypto NetSSL_OpenSSL WebTunnel PageCompiler PageCompiler/File2Page
 
 cppunit:
 	$(MAKE) -C $(POCO_BASE)/CppUnit
+
+CppUnit-clean:
+	$(MAKE) -C $(POCO_BASE)/CppUnit clean
 
 install: libexecs
 	mkdir -p $(INSTALLDIR)/include/Poco
 	mkdir -p $(INSTALLDIR)/lib
 	mkdir -p $(INSTALLDIR)/bin
-	for comp in $(COMPONENTS) ; do \
+	for comp in $(filter-out $(foreach f,$(OMIT),$f%),$(COMPONENTS)) ; do \
 		if [ -d "$(POCO_BASE)/$$comp/include" ] ; then \
 			cp -Rf $(POCO_BASE)/$$comp/include/* $(INSTALLDIR)/include/ ; \
 		fi ; \
@@ -40,20 +98,37 @@ install: libexecs
 			find $(POCO_BUILD)/$$comp/bin -perm -700 -type f -exec cp -f {} $(INSTALLDIR)/bin \; ; \
 		fi ; \
 	done
-	find $(POCO_BUILD)/lib -name "libPoco*" -type f -exec cp -f {} $(INSTALLDIR)/lib \;
-	find $(POCO_BUILD)/lib -name "libPoco*" -type l -exec cp -Rf {} $(INSTALLDIR)/lib \;
+ifeq ($(OSNAME), CYGWIN)
+	find $(POCO_BUILD)/lib/$(OSNAME)/$(OSARCH) -name "cygPoco*" -type f -exec cp -f  {} $(INSTALLDIR)/bin \;
+	find $(POCO_BUILD)/lib/$(OSNAME)/$(OSARCH) -name "cygPoco*" -type l -exec cp -Rf {} $(INSTALLDIR)/bin \;
+endif
+	find $(POCO_BUILD)/lib/$(OSNAME)/$(OSARCH) -name "libPoco*" -type f -exec cp -f  {} $(INSTALLDIR)/lib \;
+	find $(POCO_BUILD)/lib/$(OSNAME)/$(OSARCH) -name "libPoco*" -type l -exec cp -Rf {} $(INSTALLDIR)/lib \;
 
-libexecs =  Foundation-libexec XML-libexec JSON-libexec Util-libexec Net-libexec Crypto-libexec NetSSL_OpenSSL-libexec WebTunnel-libexec
-tests    =  Foundation-tests XML-tests JSON-tests Util-tests Net-tests Crypto-tests NetSSL_OpenSSL-tests
-samples  =  Foundation-samples XML-samples JSON-samples Util-samples Net-samples Crypto-samples NetSSL_OpenSSL-samples
+uninstall:
+	[ -d $(INSTALLDIR)/include/Poco ] && rm -rf $(INSTALLDIR)/include/Poco || echo "No installed Poco headers found";
+	[ -d $(INSTALLDIR)/include/CppUnit ] && rm -rf $(INSTALLDIR)/include/CppUnit || echo "No installed CppUnit headers found";
+ifeq ($(OSNAME), Cygwin)
+	find $(INSTALLDIR)/bin -name "cygPoco*" -type f -exec rm -f  {} \;
+	find $(INSTALLDIR)/bin -name "cygPoco*" -type l -exec rm -f {} \;
+endif
+	find $(INSTALLDIR)/lib -name "libPoco*" -type f -exec rm -f  {} \;
+	find $(INSTALLDIR)/lib -name "libPoco*" -type l -exec rm -f {} \;
+
+libexecs =  Foundation-libexec Encodings-libexec XML-libexec JSON-libexec Util-libexec Net-libexec Crypto-libexec NetSSL_OpenSSL-libexec Data-libexec Data/SQLite-libexec Data/ODBC-libexec Data/MySQL-libexec Zip-libexec PageCompiler-libexec PageCompiler/File2Page-libexec CppParser-libexec PDF-libexec MongoDB-libexec Redis-libexec
+tests    =  Foundation-tests Encodings-tests XML-tests JSON-tests Util-tests Net-tests Crypto-tests NetSSL_OpenSSL-tests Data-tests Data/SQLite-tests Data/ODBC-tests Data/MySQL-tests Zip-tests CppParser-tests PDF-tests MongoDB-tests Redis-tests
+samples  =  Foundation-samples Encodings-samples XML-samples JSON-samples Util-samples Net-samples Crypto-samples NetSSL_OpenSSL-samples Data-samples MongoDB-samples Zip-samples PageCompiler-samples PDF-samples
+cleans   =  Foundation-clean Encodings-clean XML-clean JSON-clean Util-clean Net-clean Crypto-clean NetSSL_OpenSSL-clean Data-clean Data/SQLite-clean Data/ODBC-clean Data/MySQL-clean Zip-clean PageCompiler-clean PageCompiler/File2Page-clean CppParser-clean PDF-clean MongoDB-clean Redis-clean
 
 .PHONY: $(libexecs)
 .PHONY: $(tests)
 .PHONY: $(samples)
+.PHONY: $(cleans)
 
 libexecs: $(filter-out $(foreach f,$(OMIT),$f%),$(libexecs))
 tests: $(filter-out $(foreach f,$(OMIT),$f%),$(tests))
 samples: $(filter-out $(foreach f,$(OMIT),$f%),$(samples))
+cleans: $(filter-out $(foreach f,$(OMIT),$f%),$(cleans))
 
 Foundation-libexec:
 	$(MAKE) -C $(POCO_BASE)/Foundation
@@ -64,6 +139,11 @@ Foundation-tests: Foundation-libexec cppunit
 Foundation-samples: Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/Foundation/samples
 
+Foundation-clean:
+	$(MAKE) -C $(POCO_BASE)/Foundation clean
+	$(MAKE) -C $(POCO_BASE)/Foundation/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/Foundation/samples clean
+
 XML-libexec:  Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/XML
 
@@ -72,6 +152,11 @@ XML-tests: XML-libexec cppunit
 
 XML-samples: XML-libexec
 	$(MAKE) -C $(POCO_BASE)/XML/samples
+
+XML-clean:
+	$(MAKE) -C $(POCO_BASE)/XML clean
+	$(MAKE) -C $(POCO_BASE)/XML/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/XML/samples clean
 
 JSON-libexec:  Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/JSON
@@ -82,6 +167,11 @@ JSON-tests: JSON-libexec cppunit
 JSON-samples: JSON-libexec
 	$(MAKE) -C $(POCO_BASE)/JSON/samples
 
+JSON-clean:
+	$(MAKE) -C $(POCO_BASE)/JSON clean
+	$(MAKE) -C $(POCO_BASE)/JSON/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/JSON/samples clean
+
 Util-libexec:  Foundation-libexec XML-libexec JSON-libexec
 	$(MAKE) -C $(POCO_BASE)/Util
 
@@ -91,14 +181,24 @@ Util-tests: Util-libexec cppunit
 Util-samples: Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Util/samples
 
+Util-clean:
+	$(MAKE)  -C $(POCO_BASE)/Util clean
+	$(MAKE) -C $(POCO_BASE)/Util/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/Util/samples clean
+
 Net-libexec:  Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/Net
 
 Net-tests: Net-libexec cppunit
 	$(MAKE) -C $(POCO_BASE)/Net/testsuite
 
-Net-samples: Net-libexec  Foundation-libexec XML-libexec JSON-libexec Util-libexec
+Net-samples: Net-libexec  Foundation-libexec XML-libexec Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Net/samples
+
+Net-clean:
+	$(MAKE) -C $(POCO_BASE)/Net clean
+	$(MAKE) -C $(POCO_BASE)/Net/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/Net/samples clean
 
 Crypto-libexec:  Foundation-libexec
 	$(MAKE) -C $(POCO_BASE)/Crypto
@@ -109,6 +209,11 @@ Crypto-tests: Crypto-libexec cppunit
 Crypto-samples: Crypto-libexec  Foundation-libexec Util-libexec
 	$(MAKE) -C $(POCO_BASE)/Crypto/samples
 
+Crypto-clean:
+	$(MAKE) -C $(POCO_BASE)/Crypto clean
+	$(MAKE) -C $(POCO_BASE)/Crypto/testsuite clean
+	$(MAKE) -C $(POCO_BASE)/Crypto/samples clean
+
 NetSSL_OpenSSL-libexec:  Foundation-libexec Net-libexec Util-libexec Crypto-libexec
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL
 
@@ -118,33 +223,34 @@ NetSSL_OpenSSL-tests: NetSSL_OpenSSL-libexec cppunit
 NetSSL_OpenSSL-samples: NetSSL_OpenSSL-libexec
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/samples
 
-WebTunnel-libexec:  Foundation-libexec Net-libexec Util-libexec
-	$(MAKE) -C $(POCO_BASE)/WebTunnel
-
-clean:
-	$(MAKE) -C $(POCO_BASE)/Foundation clean
-	$(MAKE) -C $(POCO_BASE)/Foundation/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/Foundation/samples clean
-	$(MAKE) -C $(POCO_BASE)/XML clean
-	$(MAKE) -C $(POCO_BASE)/XML/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/XML/samples clean
-	$(MAKE) -C $(POCO_BASE)/JSON clean
-	$(MAKE) -C $(POCO_BASE)/JSON/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/JSON/samples clean
-	$(MAKE) -C $(POCO_BASE)/Util clean
-	$(MAKE) -C $(POCO_BASE)/Util/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/Util/samples clean
-	$(MAKE) -C $(POCO_BASE)/Net clean
-	$(MAKE) -C $(POCO_BASE)/Net/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/Net/samples clean
-	$(MAKE) -C $(POCO_BASE)/Crypto clean
-	$(MAKE) -C $(POCO_BASE)/Crypto/testsuite clean
-	$(MAKE) -C $(POCO_BASE)/Crypto/samples clean
+NetSSL_OpenSSL-clean:
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL clean
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/testsuite clean
 	$(MAKE) -C $(POCO_BASE)/NetSSL_OpenSSL/samples clean
+
+WebTunnel-libexec:  Foundation-libexec Net-libexec Util-libexec
+	$(MAKE) -C $(POCO_BASE)/WebTunnel
+
+WebTunnel-clean:
 	$(MAKE) -C $(POCO_BASE)/WebTunnel clean
-	$(MAKE) -C $(POCO_BASE)/CppUnit clean
+
+PageCompiler-libexec:  Net-libexec Util-libexec XML-libexec Foundation-libexec
+	$(MAKE) -C $(POCO_BASE)/PageCompiler
+
+PageCompiler-samples: PageCompiler-libexec
+	$(MAKE) -C $(POCO_BASE)/PageCompiler/samples
+
+PageCompiler-clean:
+	$(MAKE) -C $(POCO_BASE)/PageCompiler clean
+	$(MAKE) -C $(POCO_BASE)/PageCompiler/samples clean
+
+PageCompiler/File2Page-libexec:  Net-libexec Util-libexec XML-libexec Foundation-libexec
+	$(MAKE) -C $(POCO_BASE)/PageCompiler/File2Page
+
+PageCompiler/File2Page-clean:
+	$(MAKE) -C $(POCO_BASE)/PageCompiler/File2Page clean
+
+clean: cleans CppUnit-clean
 
 distclean:
 	rm -rf $(POCO_BUILD)/lib
