@@ -17,7 +17,7 @@ echo "Starting macchina.io Remote Manager SDK build..."
 export POCO_BASE=`pwd`
 export POCO_CONFIG=$1
 
-./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --cflags=-DPOCO_UTIL_NO_JSONCONFIGURATION --no-tests --no-samples --static $config
+./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --cflags=-DPOCO_UTIL_NO_JSONCONFIGURATION --no-tests --no-samples --omit=PageCompiler,PageCompiler/File2Page --static $config
 if [ $? -ne 0 ] ; then
 	echo "Configure script failed. Exiting."
 	exit 1
