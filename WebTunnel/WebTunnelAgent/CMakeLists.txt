@@ -14,4 +14,4 @@ if(ENABLE_NETSSL)
 endif()
 endif()
 
-target_link_libraries(${APP_NAME} PocoWebTunnel PocoUtil PocoNet PocoXML PocoJSON PocoFoundation)
+target_link_libraries(${APP_NAME} PocoWebTunnel PocoUtil PocoNet PocoFoundation)
