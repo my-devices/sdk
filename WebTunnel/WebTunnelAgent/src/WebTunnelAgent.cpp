@@ -169,7 +169,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager Agent.\n"
-			"Copyright (c) 2013-2018 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io Remote Manager.\n\n"
@@ -550,7 +550,7 @@ protected:
 					error += Poco::delegate(this, &WebTunnelAgent::notifyError);
 				}
 
-	#if defined(WEBTUNNEL_ENABLE_TLS)
+#if defined(WEBTUNNEL_ENABLE_TLS)
 				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
 				std::string cipherList = config().getString("tls.ciphers", "HIGH:!DSS:!aNULL@STRENGTH");
 				bool extendedVerification = config().getBool("tls.extendedCertificateVerification", false);
@@ -563,10 +563,16 @@ protected:
 					pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
 				else
 					pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
+#if defined(POCO_NETSSL_WIN)
+				int options = Poco::Net::Context::OPT_DEFAULTS | Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
+				if (caLocation.empty()) caLocation = Poco::Net::Context::CERT_STORE_CA;
+				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options, caLocation);
+#else
 				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+#endif // POCO_NETSSL_WIN
 				pContext->enableExtendedCertificateVerification(extendedVerification);
 				Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
-	#endif
+#endif // WEBTUNNEL_ENABLE_TLS
 
 				_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnect), Poco::Clock());
 
@@ -624,7 +630,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.7.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.8.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

@@ -190,7 +190,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI>");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager Client.\n"
-			"Copyright (c) 2013-2018 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward a remote TCP port to the local\n"
 			"host via the macchina.io Remote Manager server.\n\n"
@@ -282,7 +282,13 @@ protected:
 				pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
 			else
 				pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
+
+#if defined(POCO_NETSSL_WIN)
+			if (caLocation.empty()) caLocation = Poco::Net::Context::CERT_STORE_CA;
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", Poco::Net::Context::VERIFY_RELAXED, Poco::Net::Context::OPT_DEFAULTS, caLocation);
+#else
 			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", "", caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+#endif
 			pContext->enableExtendedCertificateVerification(extendedVerification);
 			Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
 #endif
