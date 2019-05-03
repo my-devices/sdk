@@ -467,7 +467,7 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Server">
+			Name="Agent">
 			<Filter
 				Name="Header Files">
 				<File
@@ -477,27 +477,6 @@
 				Name="Source Files">
 				<File
 					RelativePath=".\src\RemotePortForwarder.cpp"/>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="Reflector">
-			<Filter
-				Name="Header Files">
-				<File
-					RelativePath=".\include\Poco\WebTunnel\PortReflector.h"/>
-				<File
-					RelativePath=".\include\Poco\WebTunnel\TunnelSocket.h"/>
-				<File
-					RelativePath=".\include\Poco\WebTunnel\TunnelSocketImpl.h"/>
-			</Filter>
-			<Filter
-				Name="Source Files">
-				<File
-					RelativePath=".\src\PortReflector.cpp"/>
-				<File
-					RelativePath=".\src\TunnelSocket.cpp"/>
-				<File
-					RelativePath=".\src\TunnelSocketImpl.cpp"/>
 			</Filter>
 		</Filter>
 	</Files>

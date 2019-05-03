@@ -278,22 +278,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Poco\WebTunnel\LocalPortForwarder.h"/>
-    <ClInclude Include="include\Poco\WebTunnel\PortReflector.h"/>
     <ClInclude Include="include\Poco\WebTunnel\Protocol.h"/>
     <ClInclude Include="include\Poco\WebTunnel\RemotePortForwarder.h"/>
     <ClInclude Include="include\Poco\WebTunnel\SocketDispatcher.h"/>
-    <ClInclude Include="include\Poco\WebTunnel\TunnelSocket.h"/>
-    <ClInclude Include="include\Poco\WebTunnel\TunnelSocketImpl.h"/>
     <ClInclude Include="include\Poco\WebTunnel\WebTunnel.h"/>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\LocalPortForwarder.cpp"/>
-    <ClCompile Include="src\PortReflector.cpp"/>
     <ClCompile Include="src\Protocol.cpp"/>
     <ClCompile Include="src\RemotePortForwarder.cpp"/>
     <ClCompile Include="src\SocketDispatcher.cpp"/>
-    <ClCompile Include="src\TunnelSocket.cpp"/>
-    <ClCompile Include="src\TunnelSocketImpl.cpp"/>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
   <ImportGroup Label="ExtensionTargets"/>

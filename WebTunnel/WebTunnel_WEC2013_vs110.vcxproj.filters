@@ -2,31 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Core">
-      <UniqueIdentifier>{a617687f-2a23-4e45-a1ee-27706adad191}</UniqueIdentifier>
+      <UniqueIdentifier>{766f123a-acd7-41ee-8959-e84911718202}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Header Files">
-      <UniqueIdentifier>{a91ec631-50a2-4518-a125-8c90f6d54e01}</UniqueIdentifier>
+      <UniqueIdentifier>{72591e0a-e5b6-45de-a5db-f3b6ddef6bae}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Source Files">
-      <UniqueIdentifier>{b0868b78-de5f-4f86-a6bb-de39f28e0d1a}</UniqueIdentifier>
+      <UniqueIdentifier>{dad6f4cd-8b3c-4fc6-bbd7-1c9d6d2a050a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client">
-      <UniqueIdentifier>{44ecb675-dec4-4368-b72b-4c8b0558ea78}</UniqueIdentifier>
+      <UniqueIdentifier>{9a3fdf2f-d950-4cda-ab09-6c1f2b6ae37b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Header Files">
-      <UniqueIdentifier>{7ebab96c-d2eb-45dc-98f8-d26bc0eaaee2}</UniqueIdentifier>
+      <UniqueIdentifier>{d0d7c7d5-07ac-4ec4-82b1-0bafc941f77e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Source Files">
-      <UniqueIdentifier>{dbc811d8-50b0-4838-8eae-cfee96aced7f}</UniqueIdentifier>
+      <UniqueIdentifier>{55ea0d46-9a9a-4efd-b07e-6bdf17bca148}</UniqueIdentifier>
     </Filter>
     <Filter Include="Agent">
-      <UniqueIdentifier>{671e8993-b128-4a15-8d26-0f437205e356}</UniqueIdentifier>
+      <UniqueIdentifier>{ae45d60e-8a49-4d2f-be52-13ef1293b1c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Agent\Header Files">
-      <UniqueIdentifier>{5a9782e2-889f-479e-b89f-b53df9a261cd}</UniqueIdentifier>
+      <UniqueIdentifier>{e6a2dcd2-de8b-464d-8ab0-1257ba33dd3c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Agent\Source Files">
-      <UniqueIdentifier>{916a55a1-b6dc-4c7c-8683-41c5fb52fd15}</UniqueIdentifier>
+      <UniqueIdentifier>{2407d1b2-57c2-4ca3-917c-4d65716d807f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

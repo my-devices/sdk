@@ -2,40 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Core">
-      <UniqueIdentifier>{e5f4f0e4-083f-4bf2-8e57-ae44db7c5d9d}</UniqueIdentifier>
+      <UniqueIdentifier>{5dffd03b-43cd-41b1-90b5-53da5656199e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Header Files">
-      <UniqueIdentifier>{9a46cbc7-1651-4c82-8527-8d96b20998ea}</UniqueIdentifier>
+      <UniqueIdentifier>{01a45db7-6f77-430b-8501-16383b8112a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Source Files">
-      <UniqueIdentifier>{0983fa49-3c23-4056-800d-e8c236f50f86}</UniqueIdentifier>
+      <UniqueIdentifier>{133167b0-1721-4d8a-a2c3-8ed0dbbeb5f9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client">
-      <UniqueIdentifier>{b0c5f72e-8daa-4d4c-b0fa-f6fbdb375b2c}</UniqueIdentifier>
+      <UniqueIdentifier>{c0927392-71aa-4987-ab91-82a5634d5d52}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Header Files">
-      <UniqueIdentifier>{ae446333-c33d-4604-8a5a-32d7f362f35a}</UniqueIdentifier>
+      <UniqueIdentifier>{ec054a76-a915-49f7-8da8-56631775113b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Client\Source Files">
-      <UniqueIdentifier>{c6238e5e-d68a-4d94-9705-0a35c70eaca6}</UniqueIdentifier>
+      <UniqueIdentifier>{cbfa1b9a-607f-46e3-b454-411c42316ed8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Server">
-      <UniqueIdentifier>{e7ab2058-c76f-41f6-984e-d3b8eda10624}</UniqueIdentifier>
+    <Filter Include="Agent">
+      <UniqueIdentifier>{8e4a43c9-f12e-4402-8e10-3b4ced9174d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Server\Header Files">
-      <UniqueIdentifier>{08a4924e-20c5-493b-a977-d15458e464b1}</UniqueIdentifier>
+    <Filter Include="Agent\Header Files">
+      <UniqueIdentifier>{a082d10c-26e6-4ceb-bfac-9213c98a560e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Server\Source Files">
-      <UniqueIdentifier>{277b4709-3570-4753-9ea9-b66bbd15ad0d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Reflector">
-      <UniqueIdentifier>{2afc4faf-4ae5-45c6-8bfb-b0dfdd077560}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Reflector\Header Files">
-      <UniqueIdentifier>{7698d6b3-ada4-4d2c-bcfb-0f02afcc473c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Reflector\Source Files">
-      <UniqueIdentifier>{1d54759d-e3f9-439d-9d08-b40a8486b869}</UniqueIdentifier>
+    <Filter Include="Agent\Source Files">
+      <UniqueIdentifier>{47808aaf-072d-4af7-bb7e-b7ce9496247a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,16 +43,7 @@
       <Filter>Client\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Poco\WebTunnel\RemotePortForwarder.h">
-      <Filter>Server\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Poco\WebTunnel\PortReflector.h">
-      <Filter>Reflector\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Poco\WebTunnel\TunnelSocket.h">
-      <Filter>Reflector\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Poco\WebTunnel\TunnelSocketImpl.h">
-      <Filter>Reflector\Header Files</Filter>
+      <Filter>Agent\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -75,16 +57,7 @@
       <Filter>Client\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\RemotePortForwarder.cpp">
-      <Filter>Server\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PortReflector.cpp">
-      <Filter>Reflector\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TunnelSocket.cpp">
-      <Filter>Reflector\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TunnelSocketImpl.cpp">
-      <Filter>Reflector\Source Files</Filter>
+      <Filter>Agent\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

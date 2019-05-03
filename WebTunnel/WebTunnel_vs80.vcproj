@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	Name="WebTunnel"
-	Version="9.00"
+	Version="8.00"
 	ProjectType="Visual C++"
 	ProjectGUID="{b9f549c3-ad48-4ca5-b83a-15c7c4ab2400}"
 	RootNamespace="WebTunnel"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
-			Name="x64"/>
+			Name="Win32"/>
 	</Platforms>
 	<ToolFiles/>
 	<Configurations>
 		<Configuration
-			Name="debug_shared|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="debug_shared|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -57,15 +57,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib iphlpapi.lib"
-				OutputFile="..\bin64\PocoWebTunnel64d.dll"
+				OutputFile="..\bin\PocoWebTunneld.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin64\PocoWebTunnel64d.pdb"
-				AdditionalLibraryDirectories="..\lib64"
+				ProgramDatabaseFile="..\bin\PocoWebTunneld.pdb"
+				AdditionalLibraryDirectories="..\lib"
 				SubSystem="1"
-				ImportLibrary="..\lib64\PocoWebTunneld.lib"
-				TargetMachine="17"
+				ImportLibrary="..\lib\PocoWebTunneld.lib"
+				TargetMachine="1"
 				AdditionalOptions=""/>
 			<Tool
 				Name="VCALinkTool"/>
@@ -83,9 +83,9 @@
 				Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration
-			Name="release_shared|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="release_shared|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -129,17 +129,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib iphlpapi.lib"
-				OutputFile="..\bin64\PocoWebTunnel64.dll"
+				OutputFile="..\bin\PocoWebTunnel.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="false"
-				AdditionalLibraryDirectories="..\lib64"
+				AdditionalLibraryDirectories="..\lib"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="0"
-				ImportLibrary="..\lib64\PocoWebTunnel.lib"
-				TargetMachine="17"
+				ImportLibrary="..\lib\PocoWebTunnel.lib"
+				TargetMachine="1"
 				AdditionalOptions=""/>
 			<Tool
 				Name="VCALinkTool"/>
@@ -157,9 +157,9 @@
 				Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration
-			Name="debug_static_mt|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="debug_static_mt|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -186,7 +186,7 @@
 				ForceConformanceInForLoopScope="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				ProgramDataBaseFileName="..\lib64\PocoWebTunnelmtd.pdb"
+				ProgramDataBaseFileName="..\lib\PocoWebTunnelmtd.pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
@@ -201,8 +201,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib64\PocoWebTunnelmtd.lib"
-				TargetMachine="17"/>
+				OutputFile="..\lib\PocoWebTunnelmtd.lib"/>
 			<Tool
 				Name="VCALinkTool"/>
 			<Tool
@@ -215,9 +214,9 @@
 				Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration
-			Name="release_static_mt|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="release_static_mt|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -260,8 +259,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib64\PocoWebTunnelmt.lib"
-				TargetMachine="17"/>
+				OutputFile="..\lib\PocoWebTunnelmt.lib"/>
 			<Tool
 				Name="VCALinkTool"/>
 			<Tool
@@ -274,9 +272,9 @@
 				Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration
-			Name="debug_static_md|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="debug_static_md|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -303,7 +301,7 @@
 				ForceConformanceInForLoopScope="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				ProgramDataBaseFileName="..\lib64\PocoWebTunnelmdd.pdb"
+				ProgramDataBaseFileName="..\lib\PocoWebTunnelmdd.pdb"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
@@ -318,8 +316,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib64\PocoWebTunnelmdd.lib"
-				TargetMachine="17"/>
+				OutputFile="..\lib\PocoWebTunnelmdd.lib"/>
 			<Tool
 				Name="VCALinkTool"/>
 			<Tool
@@ -332,9 +329,9 @@
 				Name="VCPostBuildEventTool"/>
 		</Configuration>
 		<Configuration
-			Name="release_static_md|x64"
-			OutputDirectory="obj64\$(ConfigurationName)"
-			IntermediateDirectory="obj64\$(ConfigurationName)"
+			Name="release_static_md|Win32"
+			OutputDirectory="obj\$(ConfigurationName)"
+			IntermediateDirectory="obj\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -377,8 +374,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib64\PocoWebTunnelmd.lib"
-				TargetMachine="17"/>
+				OutputFile="..\lib\PocoWebTunnelmd.lib"/>
 			<Tool
 				Name="VCALinkTool"/>
 			<Tool
