@@ -564,9 +564,9 @@ protected:
 				else
 					pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
 #if defined(POCO_NETSSL_WIN)
-				int options = Poco::Net::Context::OPT_DEFAULTS | Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
-				if (caLocation.empty()) caLocation = Poco::Net::Context::CERT_STORE_CA;
-				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options, caLocation);
+				int options = Poco::Net::Context::OPT_DEFAULTS;
+				if (!certificate.empty()) options |= Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
+				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options);
 #else
 				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
 #endif // POCO_NETSSL_WIN
