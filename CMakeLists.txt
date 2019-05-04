@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.2.0)
 
-project(Poco)
+project(RemoteManagerSDK)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -16,7 +16,6 @@ file(STRINGS "${PROJECT_SOURCE_DIR}/libversion" SHARED_LIBRARY_VERSION)
 
 # Read the version information from the VERSION file
 file(STRINGS "${PROJECT_SOURCE_DIR}/VERSION" PACKAGE_VERSION)
-message(STATUS "Poco package version: ${PACKAGE_VERSION}")
 string(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" CPACK_PACKAGE_VERSION_MAJOR ${PACKAGE_VERSION})
 string(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" CPACK_PACKAGE_VERSION_MINOR ${PACKAGE_VERSION})
 string(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" CPACK_PACKAGE_VERSION_PATCH ${PACKAGE_VERSION})
@@ -75,7 +74,7 @@ if(NOT MSVC_IDE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: None Debug Release" FORCE)
   endif()
-  message(STATUS "Setting Poco build type - ${CMAKE_BUILD_TYPE}")
+  message(STATUS "Setting SDK build type - ${CMAKE_BUILD_TYPE}")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -256,7 +255,7 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-configure_file(cmake/${PROJECT_NAME}Config.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake" @ONLY)
+configure_file(cmake/PocoConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake" @ONLY)
 install(
     FILES
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake

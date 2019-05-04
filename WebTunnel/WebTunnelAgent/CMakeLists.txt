@@ -20,3 +20,8 @@ endif()
 endif()
 
 target_link_libraries(${APP_NAME} PocoWebTunnel PocoUtil PocoNet PocoFoundation)
+
+install(
+  TARGETS "${APP_NAME}" EXPORT "${APP_NAME}Targets"
+  RUNTIME DESTINATION bin
+)
