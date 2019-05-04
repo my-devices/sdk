@@ -16,7 +16,7 @@ macchina.io Remote Manager is a great solution for secure remote support and mai
 as well as for providing secure remote access to devices for end-users via web or
 mobile apps.
 
-Visit [macchina.io](https://macchina.io) to learn more and to register for a free account.
+Visit [macchina.io](https://macchina.io/remote.html) to learn more and to register for a free account.
 Specifically, see the [Getting Started](https://macchina.io/remote_signup.html) page and the
 [Frequently Asked Questions](https://macchina.io/remote_faq.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
@@ -53,7 +53,7 @@ The macchina.io Remote Manager SDK is licensed under the [Boost Software License
 
 The macchina.io Remote Manager SDK requires OpenSSL 1.0 or newer
 on Linux and macOS systems.
-We recommend using at least OpenSSL 1.0.2.
+We recommend using at least OpenSSL 1.0.2r or 1.1.1b.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
 does not have OpenSSL, please get it from <http://www.openssl.org> or
@@ -74,38 +74,71 @@ On Windows, OpenSSL is optional. The default (with CMake) is to build using
 Windows native SSL/TLS support. However, it's also possible to use OpenSSL instead.
 The easiest way to install OpenSSL on Windows is to use a binary
 (prebuild) release, for example the one from Shining Light
-Productions that comes with a Windows installer
-<http://www.slproweb.com/products/Win32OpenSSL.html>.
-
-[CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
+Productions that comes with a
+[Windows installer](https://www.slproweb.com/products/Win32OpenSSL.html).
 
 ### Toolchain
 
 A C++ compiler is required to build the SDK and applications. The system's default
-compiler (gcc on Linux, clang on macOS) is fine. On Windows, Visual C++ is
-recommended (any version from 2008 to 2019 will do).
+compiler (gcc on Linux, clang on macOS) should be fine on reasonably recent systems.
+On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
+
+[CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
 
 
 ## Building with CMake (Linux, macOS, Windows)
 
 [CMake](https://cmake.org) (version 3.2 or newer) is the recommended build system for
-building the Remote Manager SDK.
+building the macchina.io Remote Manager SDK.
 
 ```
-    git clone https://github.com/my-devices/sdk.git
-    cd sdk
-    mkdir cmake-build
-    cd cmake-build
-    cmake ..
-    cmake --build .
+git clone https://github.com/my-devices/sdk.git
+cd sdk
+mkdir cmake-build
+cd cmake-build
+cmake ..
+cmake --build . --config Release
 ```
 
 On macOS, it's necessary to tell CMake where to find the OpenSSL headers
-and libraries. For example, if OpenSSL has been installed with Homebrew,
-the CMake invocation becomes:
+and libraries by setting the `OPENSSL_ROOT_DIR` CMake variable.
+For example, if OpenSSL has been installed with Homebrew,
+the `cmake` invocation becomes:
 
 ```
-    cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+```
+
+Other common ways of building with CMake (e.g., `cmake-gui`) will also work.
+
+There are also a number of project-specific CMake variables that can be changed,
+e.g., to build with OpenSSL on Windows.
+
+
+### Installing
+
+The SDK can be optionally be installed by building the `install` target. However,
+in most cases this is not necessary. The resulting executables in the `cmake-build/bin`
+directory are statically linked per default and can be moved to any directory desired.
+
+If required, the SDK header files and libraries can be installed with:
+
+```
+sudo cmake --build . --target install
+```
+
+The default install location is `/usr/local/` on Linux and macOS and
+`C:\Program Files (x64)\` on Windows and can be overridden by setting
+the `CMAKE_INSTALL_PREFIX` CMake variable.
+
+
+### Cross-Compiling
+
+With a proper CMake toolchain file (specified via the `CMAKE_TOOLCHAIN_FILE` CMake variable),
+the SDK can be cross-compiled for embedded Linux systems:
+
+```
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
 ```
 
 
@@ -117,11 +150,13 @@ POCO C++ Libraries is also supported.
 ### The Easy Way
 
 The easy way to build the SDK on Linux or macOS is to run the
-*buildsdk.sh* script:
+`buildsdk.sh` script:
 
-    git clone https://github.com/my-devices/sdk.git
-    cd sdk
-    ./buildsdk.sh
+```
+git clone https://github.com/my-devices/sdk.git
+cd sdk
+./buildsdk.sh
+```
 
 It will make the necessary invocations of
 the configure script and GNU make to build WebTunnelAgent and
@@ -136,10 +171,12 @@ do a manual build if your target does not have OpenSSL.
 The resulting executables will be located in the *bin* directory.
 
 For cross-compiling for an embedded platform, pass the name of a
-build configuration to the *buildsdk.sh* script. For example, to build
+build configuration to the `buildsdk.sh` script. For example, to build
 for Angstrom:
 
-    ./buildsdk.sh Angstrom
+```
+./buildsdk.sh Angstrom
+```
 
 See the build/config directory for available build configurations. If
 there's no build configuration that fits your target, you'll have to
@@ -147,12 +184,12 @@ create one yourself. This is best done by copying an existing one,
 making the necessary changes (typically, changing the name of the
 compiler and linker executables to match your particular toolchain,
 and modifying compiler/linker settings if necessary).
-Specify the name of your new build configuration in the call to buildsdk.sh.
+Specify the name of your new build configuration in the call to `buildsdk.sh`.
 
 For more information regarding the build system, see the POCO C++
 Libraries documentation at <http://pocoproject.org/docs>.
 
-A final note: buildsdk.sh only builds the release configuration.
+A final note: `buildsdk.sh` only builds the release configuration.
 If you need a debug build, see below.
 
 
@@ -161,11 +198,13 @@ If you need a debug build, see below.
 To customize the SDK build, invoke the configure script and GNU make
 manually, as described in README_POCO.
 
-    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
-    make -s -j8 DEFAULT_TARGET=static_release
-    export POCO_BASE=`pwd`
-    cd WebTunnel/Agent
-    make -s DEFAULT_TARGET=shared_release
+```
+./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
+make -s -j8 DEFAULT_TARGET=static_release
+export POCO_BASE=`pwd`
+cd WebTunnel/Agent
+make -s DEFAULT_TARGET=shared_release
+```
 
 A few notes on the arguments:
 
@@ -186,23 +225,26 @@ A few notes on the arguments:
 
 If your system does not have OpenSSL, run configure and GNU make as follows:
 
-    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
-    make -s -j8 DEFAULT_TARGET=static_release
-    export POCO_BASE=`pwd`
-    cd WebTunnel/Agent
-    make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
+```
+./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
+make -s -j8 DEFAULT_TARGET=static_release
+export POCO_BASE=`pwd`
+cd WebTunnel/Agent
+make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
+```
 
 For a cross-build for an embedded target, you must specify the build configuration in the
 call to `./configure` and the final call to GNU make.
 
-    ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
-    make -s -j8 DEFAULT_TARGET=static_release
-    export POCO_BASE=`pwd`
-    cd WebTunnel/Agent
-    make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
+```
+./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
+make -s -j8 DEFAULT_TARGET=static_release
+export POCO_BASE=`pwd`
+cd WebTunnel/Agent
+make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
+```
 
-
-## Building on Windows with Visual C++
+## Building on Windows with Visual C++ (Deprecated)
 
 Visual Studio project and solution files are included for various Visual Studio versions.
 However, these are deprecated and will be removed in the future. We strongly recommend
@@ -216,9 +258,11 @@ Then, build the `release_static_mt` configuration, which will produce self-conta
 Alternatively, you can run one of the `build_vsNNN.cmd` scripts. For Visual Studio 2008, run `build_vs90.cmd`, for
 Visual Studio 2013 run `build_vs120.cmd`, etc.:
 
-    git clone https://github.com/my-devices/sdk.git
-    cd sdk
-    build_vs120
+```
+git clone https://github.com/my-devices/sdk.git
+cd sdk
+build_vs120
+```
 
 The statically linked executables will be located in `WebTunnel\WebTunnelAgent\bin\static_mt`,
 `WebTunnel\WebTunnelClient\bin\static_mt`, etc.
