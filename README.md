@@ -17,7 +17,7 @@ as well as for providing secure remote access to devices for end-users via web o
 mobile apps.
 
 Visit [macchina.io](https://macchina.io) to learn more and to register for a free account.
-Specifically, see the [Getting Started](https://macchina.io/remote.html#signup) page and the
+Specifically, see the [Getting Started](https://macchina.io/remote_signup.html) page and the
 [Frequently Asked Questions](https://macchina.io/remote_faq.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
 
@@ -28,46 +28,95 @@ There is also a [blog post](https://macchina.io/blog/?p=257) showing step-by-ste
 
 The macchina.io Remote Manager SDK is based on the
 [POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
-first as it contains important information regarding the directory structure
+as well as it contains important information regarding the directory structure
 and the build system of the SDK.
 
 The SDK contains the WebTunnel library, which implements the tunnel protocol used by Remote Manager.
 Furthermore, the following executables are included:
 
-  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device and the Remote Manager server. This is the most important component of the Remote Manager SDK.
-  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the device, via the Remote Manager server. It is required for tunneling protocols like SSH or other TCP-based protocols not directly supported by the Remote Manager server.
-  - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to the device, then launches a SSH client using that tunnel connection.
-  - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to the device, then launches a VNC viewer using that tunnel connection.
+  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device
+    and the Remote Manager server. This is the most important component of the Remote Manager SDK.
+  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the
+    device, via the Remote Manager server. It is required for tunneling protocols like SSH or other TCP-based
+    protocols not directly supported by the Remote Manager server.
+  - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC
+    to the device, then launches a SSH client using that tunnel connection.
+  - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to
+    the device, then launches a VNC viewer using that tunnel connection.
 
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
 ## External Dependecies
 
-The macchina.io Remote Manager SDK requires OpenSSL 1.0 or newer.
+### Libraries
+
+The macchina.io Remote Manager SDK requires OpenSSL 1.0 or newer
+on Linux and macOS systems.
 We recommend using at least OpenSSL 1.0.2.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
 does not have OpenSSL, please get it from <http://www.openssl.org> or
 another source. You do not have to build OpenSSL yourself - a binary
-distribution is fine (e.g., apt-get install openssl libssl-dev).
+distribution is fine. For example, via Debian APT:
 
+```
+  $ apt-get install openssl libssl-dev
+```
+
+On macOS, the easiest way to install OpenSSL is via [Homebrew](https://brew.sh):
+
+```
+  $ brew install openssl
+```
+
+On Windows, OpenSSL is optional. The default (with CMake) is to build using
+Windows native SSL/TLS support. However, it's also possible to use OpenSSL instead.
 The easiest way to install OpenSSL on Windows is to use a binary
 (prebuild) release, for example the one from Shining Light
 Productions that comes with a Windows installer
 <http://www.slproweb.com/products/Win32OpenSSL.html>.
-Depending on where you have installed the OpenSSL libraries,
-you might have to edit the build script (buildwin.cmd), or add the
-necessary paths to the INCLUDE and LIB environment variables.
 
-On Unix/Linux/OS X, GNU make 3.80 or newer is required.
+[CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
+
+### Toolchain
+
+A C++ compiler is required to build the SDK and applications. The system's default
+compiler (gcc on Linux, clang on macOS) is fine. On Windows, Visual C++ is
+recommended (any version from 2008 to 2019 will do).
 
 
-## Building on Linux and OS X
+## Building with CMake (Linux, macOS, Windows)
+
+[CMake](https://cmake.org) (version 3.2 or newer) is the recommended build system for
+building the Remote Manager SDK.
+
+```
+    git clone https://github.com/my-devices/sdk.git
+    cd sdk
+    mkdir cmake-build
+    cd cmake-build
+    cmake ..
+    cmake --build .
+```
+
+On macOS, it's necessary to tell CMake where to find the OpenSSL headers
+and libraries. For example, if OpenSSL has been installed with Homebrew,
+the CMake invocation becomes:
+
+```
+    cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+```
+
+
+## Building on Linux and macOS with GNU Make
+
+In addition to CMake, the GNU Make based build system from the
+POCO C++ Libraries is also supported.
 
 ### The Easy Way
 
-The easy way to build the SDK on Linux or OS X is to run the
+The easy way to build the SDK on Linux or macOS is to run the
 *buildsdk.sh* script:
 
     git clone https://github.com/my-devices/sdk.git
@@ -153,9 +202,11 @@ call to `./configure` and the final call to GNU make.
     make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
 
 
-## Building on Windows
+## Building on Windows with Visual C++
 
-For Windows, you'll need Visual C++. Any version from 2008 to 2017 is fine.
+Visual Studio project and solution files are included for various Visual Studio versions.
+However, these are deprecated and will be removed in the future. We strongly recommend
+using CMake.
 
 The easiest way to build on Windows is to open the proper `SDK_vsNNN.sln` solution for you preferred version of Visual Studio.
 `SDK_vs90.sln` is for Visual Studio 2008, `SDK_vs120.sln` is for Visual Studio 2013, etc.
