@@ -146,7 +146,7 @@ There are a number of system settings that can be used as well:
   * `system.dateTime`: the current UTC date and time, formatted in ISO 8601 format (example: `2005-01-01T11:00:00Z`)
   * `system.pid`: the current process ID
   * `system.env.NAME`: the value of the environment variable with the given NAME
-  * `application.path`: the absolute path to the reflector executable
+  * `application.path`: the absolute path to the `WebTunnelAgent` executable
   * `application.name`: the name of the `WebTunnelAgent` executable
   * `application.dir`: the path to the directory containing the `WebTunnelAgent` executable
 
