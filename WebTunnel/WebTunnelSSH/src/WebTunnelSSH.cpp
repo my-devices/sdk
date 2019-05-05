@@ -71,6 +71,11 @@ public:
 		_localPort(0),
 		_remotePort(22)
 	{
+#if defined(POCO_OS_FAMILY_WINDOWS)
+		_sshClient = "putty";
+#else
+		_sshClient = "ssh";
+#endif
 	}
 
 	~WebTunnelSSH()
@@ -113,6 +118,19 @@ protected:
 				.repeatable(true)
 				.argument("file")
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleConfig)));
+
+		options.addOption(
+			Option("ssh-client", "C", "Specify the name of the SSH client executable (default: ssh or putty.exe).")
+				.required(false)
+				.repeatable(false)
+				.argument("program")
+				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleClient)));
+
+		options.addOption(
+			Option("scp", "", "Use scp as SSH client for copying files between local host and target.")
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleSCP)));
 
 		options.addOption(
 			Option("local-port", "L", "Specify local port number (default: ephemeral).")
@@ -167,6 +185,16 @@ protected:
 	void handleConfig(const std::string& name, const std::string& value)
 	{
 		loadConfiguration(value);
+	}
+
+	void handleClient(const std::string& name, const std::string& value)
+	{
+		_sshClient = value;
+	}
+
+	void handleSCP(const std::string& name, const std::string& value)
+	{
+		_sshClient = "scp";
 	}
 
 	void handleLocalPort(const std::string& name, const std::string& value)
@@ -328,29 +356,28 @@ protected:
 
 			Poco::UInt16 localPort = forwarder.localPort();
 
-			std::string defaultSSHExecutable;
-#if defined(POCO_OS_FAMILY_WINDOWS)
-			defaultSSHExecutable = "putty";
-#else
-			defaultSSHExecutable = "ssh";
-#endif
-			std::string sshExecutable = config().getString("ssh.executable", defaultSSHExecutable);
+			_sshClient = config().getString("ssh.executable", _sshClient);
 			Poco::Process::Args sshArgs;
-			if (Poco::icompare(sshExecutable, 0, 5, "putty") == 0)
+			if (Poco::icompare(_sshClient, 0, 5, "putty") == 0 || Poco::icompare(_sshClient, 0, 3, "scp") == 0)
 				sshArgs.push_back("-P");
 			else
 				sshArgs.push_back("-p");
 			sshArgs.push_back(Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
-			if (!_login.empty())
+
+			std::vector<std::string>::const_iterator itArgs = ++args.begin();
+			if (!_login.empty() && Poco::icompare(_sshClient, 0, 3, "scp") != 0)
 			{
 				sshArgs.push_back("-l");
 				sshArgs.push_back(_login);
 			}
-			sshArgs.insert(sshArgs.end(), ++args.begin(), args.end());
-			sshArgs.push_back("localhost");
+			sshArgs.insert(sshArgs.end(), itArgs, args.end());
+			if (Poco::icompare(_sshClient, 0, 3, "scp") != 0)
+			{
+				sshArgs.push_back("localhost");
+			}
 
-			logger().debug(Poco::format("Launching SSH client: %s", sshExecutable));
-			Poco::ProcessHandle ph = Poco::Process::launch(sshExecutable, sshArgs);
+			logger().debug(Poco::format("Launching SSH client: %s", _sshClient));
+			Poco::ProcessHandle ph = Poco::Process::launch(_sshClient, sshArgs);
 			rc = ph.wait();
 			logger().debug(Poco::format("SSH client terminated with exit code %d", rc));
 		}
@@ -364,6 +391,7 @@ private:
 	std::string _username;
 	std::string _password;
 	std::string _login;
+	std::string _sshClient;
 	SSLInitializer _sslInitializer;
 };
 

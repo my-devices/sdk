@@ -34,14 +34,14 @@ and the build system of the SDK.
 The SDK contains the WebTunnel library, which implements the tunnel protocol used by Remote Manager.
 Furthermore, the following executables are included:
 
-  - *WebTunnelAgent*: This executable runs on the device and creates the secure tunnel between the device
+  - [*WebTunnelAgent*](WebTunnel/WebTunnelAgent/README.md): This executable runs on the device and creates the secure tunnel between the device
     and the Remote Manager server. This is the most important component of the Remote Manager SDK.
-  - *WebTunnelClient*: This executable can run on a client PC to create a secure tunnel from the PC to the
+  - [*WebTunnelClient*](WebTunnel/WebTunnelClient/README.md): This executable can run on a client PC to create a secure tunnel from the PC to the
     device, via the Remote Manager server. It is required for tunneling protocols like SSH or other TCP-based
     protocols not directly supported by the Remote Manager server.
-  - *WebTunnelSSH*: This is a variant of WebTunnelClient that first creates a tunnel connection from your PC
+  - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC
     to the device, then launches a SSH client using that tunnel connection.
-  - *WebTunnelVNC*: This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to
+  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to
     the device, then launches a VNC viewer using that tunnel connection.
 
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
