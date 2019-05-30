@@ -32,7 +32,7 @@ WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -R 2
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net /R 22 /L 2222
+WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net /remote 22 /local 2222
 ```
 
 `WebTunnelClient` will prompt for your Remote Manager username and password.
