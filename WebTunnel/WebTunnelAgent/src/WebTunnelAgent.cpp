@@ -16,6 +16,7 @@
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Net/HTTPBasicCredentials.h"
 #include "Poco/Net/DNS.h"
+#include "Poco/Net/NetException.h"
 #if defined(WEBTUNNEL_ENABLE_TLS)
 #include "Poco/Net/HTTPSSessionInstantiator.h"
 #include "Poco/Net/Context.h"
@@ -218,9 +219,15 @@ protected:
 
 	void connect()
 	{
-		logger().information("Connecting to " + _reflectorURI.toString() + "...");
+		Poco::URI reflectorURI;
+		if (!_redirectURI.empty())
+			reflectorURI = _redirectURI;
+		else
+			reflectorURI = _reflectorURI;
 
-		_pHTTPClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(_reflectorURI);
+		logger().information("Connecting to " + reflectorURI.toString() + "...");
+
+		_pHTTPClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(reflectorURI);
 		_pHTTPClientSession->setTimeout(_httpTimeout);
 		if (_useProxy && !_proxyHost.empty())
 		{
@@ -231,7 +238,7 @@ protected:
 			}
 		}
 
-		std::string path(_reflectorURI.getPathEtc());
+		std::string path(reflectorURI.getPathEtc());
 		if (path.empty()) path = "/";
 		Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
 		Poco::Net::HTTPResponse response;
@@ -289,7 +296,7 @@ protected:
 			}
 			else
 			{
-				std::string msg(Poco::format("The host at %s does not support the WebTunnel protocol.", _reflectorURI.toString()));
+				std::string msg(Poco::format("The host at %s does not support the WebTunnel protocol.", reflectorURI.toString()));
 				logger().error(msg);
 
 				pWebSocket->shutdown(Poco::Net::WebSocket::WS_PROTOCOL_ERROR);
@@ -311,15 +318,35 @@ protected:
 				_retryDelay = 30000;
 			}
 		}
+		catch (Poco::Net::WebSocketException& exc)
+		{
+			if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_FOUND)
+			{
+				_redirectURI = Poco::URI(_reflectorURI, response.get("Location"));
+				_retryDelay = 1000;
+				logger().information("Redirected to %s.", _redirectURI.toString());
+			}
+			else
+			{
+				std::string msg = response.get("X-PTTH-Error", exc.displayText());
+				logger().error("Cannot connect to reflector at %s: %s", reflectorURI.toString(), msg);
+				statusChanged(STATUS_ERROR, msg);
+				if (_retryDelay < 30000)
+				{
+					_retryDelay *= 2;
+				}
+				_redirectURI.clear();
+			}
+		}
 		catch (Poco::Exception& exc)
 		{
-			std::string msg = response.get("X-PTTH-Error", exc.displayText());
-			logger().error(Poco::format("Cannot connect to reflector at %s: %s", _reflectorURI.toString(), msg));
-			statusChanged(STATUS_ERROR, msg);
+			logger().error("Cannot connect to reflector at %s: %s", reflectorURI.toString(), exc.displayText());
+			statusChanged(STATUS_ERROR, exc.displayText());
 			if (_retryDelay < 30000)
 			{
 				_retryDelay *= 2;
 			}
+			_redirectURI.clear();
 		}
 		scheduleReconnect();
 	}
@@ -602,6 +629,7 @@ private:
 	Poco::Net::IPAddress _host;
 	std::set<Poco::UInt16> _ports;
 	Poco::URI _reflectorURI;
+	Poco::URI _redirectURI;
 	std::string _userAgent;
 	Poco::UInt16 _httpPort;
 	Poco::UInt16 _vncPort;

@@ -43,7 +43,7 @@ class Net_API HTTPCredentials
 	/// First, create a HTTPCredentials object containing
 	/// the username and password.
 	///     Poco::Net::HTTPCredentials creds("user", "s3cr3t");
-	/// 
+	///
 	/// Second, send the HTTP request with Poco::Net::HTTPClientSession.
 	///     Poco::Net::HTTPClientSession session("pocoproject.org");
 	///     Poco::Net::HTTPRequest request(HTTPRequest::HTTP_GET, "/index.html", HTTPMessage::HTTP_1_1);
@@ -51,7 +51,7 @@ class Net_API HTTPCredentials
 	///     Poco::Net::HTTPResponse;
 	///     std::istream& istr = session.receiveResponse(response);
 	///
-	/// If the server responds with a 401 status, authenticate the 
+	/// If the server responds with a 401 status, authenticate the
 	/// request and resend it:
 	///     if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
 	///     {
@@ -61,7 +61,7 @@ class Net_API HTTPCredentials
 	///     }
 	///
 	/// To perform multiple authenticated requests, call updateAuthInfo()
-	/// instead of authenticate() on subsequent requests.	
+	/// instead of authenticate() on subsequent requests.
 	///     creds.updateAuthInfo(request);
 	///     session.sendRequest(request);
 	///     ...
@@ -101,6 +101,9 @@ public:
 
 	const std::string& getPassword() const;
 		/// Returns the password.
+
+	bool empty() const;
+		/// Returns true if both username and password are empty strings.
 
 	void authenticate(HTTPRequest& request, const HTTPResponse& response);
 		/// Inspects WWW-Authenticate header of the response, initializes
@@ -172,7 +175,7 @@ inline const std::string& HTTPCredentials::getUsername() const
 	return _digest.getUsername();
 }
 
-	
+
 inline void HTTPCredentials::setPassword(const std::string& password)
 {
 	_digest.setPassword(password);
@@ -182,6 +185,12 @@ inline void HTTPCredentials::setPassword(const std::string& password)
 inline const std::string& HTTPCredentials::getPassword() const
 {
 	return _digest.getPassword();
+}
+
+
+inline bool HTTPCredentials::empty() const
+{
+	return _digest.getUsername().empty() && _digest.getPassword().empty();
 }
 
 
