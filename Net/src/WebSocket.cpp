@@ -126,6 +126,18 @@ WebSocket::Mode WebSocket::mode() const
 }
 
 
+void WebSocket::setMaxPayloadSize(int maxPayloadSize)
+{
+	static_cast<WebSocketImpl*>(impl())->setMaxPayloadSize(maxPayloadSize);
+}
+
+
+int WebSocket::getMaxPayloadSize() const
+{
+	return static_cast<WebSocketImpl*>(impl())->getMaxPayloadSize();
+}
+
+
 WebSocketImpl* WebSocket::accept(HTTPServerRequest& request, HTTPServerResponse& response)
 {
 	if (request.hasToken("Connection", "upgrade") && icompare(request.get("Upgrade", ""), "websocket") == 0)
@@ -141,7 +153,7 @@ WebSocketImpl* WebSocket::accept(HTTPServerRequest& request, HTTPServerResponse&
 		response.set("Upgrade", "websocket");
 		response.set("Connection", "Upgrade");
 		response.set("Sec-WebSocket-Accept", computeAccept(key));
-		response.setContentLength(0);
+		response.setContentLength(HTTPResponse::UNKNOWN_CONTENT_LENGTH);
 		response.send().flush();
 
 		HTTPServerRequestImpl& requestImpl = static_cast<HTTPServerRequestImpl&>(request);
@@ -188,7 +200,7 @@ WebSocketImpl* WebSocket::connect(HTTPClientSession& cs, HTTPRequest& request, H
 			{
 				return completeHandshake(cs, response, key);
 			}
-			if (response.getStatus() == HTTPResponse::HTTP_UNAUTHORIZED)
+			else if (response.getStatus() == HTTPResponse::HTTP_UNAUTHORIZED)
 			{
 				throw WebSocketException("Not authorized", WS_ERR_UNAUTHORIZED);
 			}
