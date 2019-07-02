@@ -131,6 +131,11 @@ The default install location is `/usr/local/` on Linux and macOS and
 `C:\Program Files (x64)\` on Windows and can be overridden by setting
 the `CMAKE_INSTALL_PREFIX` CMake variable.
 
+_WARNING_: Be careful when installing to the default location if you also
+have the POCO C++ Libraries installed there, as both install locations are
+the same. If you need to install (e.g., in order to build the Remote
+Manager Gateway), specify an appropriate `CMAKE_INSTALL_PREFIX`.
+
 
 ### Cross-Compiling
 
@@ -244,28 +249,3 @@ cd WebTunnel/Agent
 make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
 ```
 
-## Building on Windows with Visual C++ (Deprecated)
-
-Visual Studio project and solution files are included for various Visual Studio versions.
-However, these are deprecated and will be removed in the future. We strongly recommend
-using CMake.
-
-The easiest way to build on Windows is to open the proper `SDK_vsNNN.sln` solution for you preferred version of Visual Studio.
-`SDK_vs90.sln` is for Visual Studio 2008, `SDK_vs120.sln` is for Visual Studio 2013, etc.
-Then, build the `release_static_mt` configuration, which will produce self-contained statically linked executables for
-*WebTunnelAgent* and the other programs.
-
-Alternatively, you can run one of the `build_vsNNN.cmd` scripts. For Visual Studio 2008, run `build_vs90.cmd`, for
-Visual Studio 2013 run `build_vs120.cmd`, etc.:
-
-```
-git clone https://github.com/my-devices/sdk.git
-cd sdk
-build_vs120
-```
-
-The statically linked executables will be located in `WebTunnel\WebTunnelAgent\bin\static_mt`,
-`WebTunnel\WebTunnelClient\bin\static_mt`, etc.
-
-You can also use the buildwin.cmd script for greater flexibility. Run it without arguments to see available options.
-Also, see [README_POCO](README_POCO) for more information.
