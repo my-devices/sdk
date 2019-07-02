@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.2.0)
 
-project(RemoteManagerSDK)
+project(Poco)
 
 set(CMAKE_C_STANDARD 11)
 
