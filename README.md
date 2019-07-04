@@ -61,13 +61,13 @@ another source. You do not have to build OpenSSL yourself - a binary
 distribution is fine. For example, via Debian APT:
 
 ```
-  $ apt-get install openssl libssl-dev
+$ apt-get install openssl libssl-dev
 ```
 
 On macOS, the easiest way to install OpenSSL is via [Homebrew](https://brew.sh):
 
 ```
-  $ brew install openssl
+$ brew install openssl
 ```
 
 On Windows, OpenSSL is optional. The default (with CMake) is to build using
@@ -92,12 +92,12 @@ On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
 building the macchina.io Remote Manager SDK.
 
 ```
-git clone https://github.com/my-devices/sdk.git
-cd sdk
-mkdir cmake-build
-cd cmake-build
-cmake ..
-cmake --build . --config Release
+$ git clone https://github.com/my-devices/sdk.git
+$ cd sdk
+$ mkdir cmake-build
+$ cd cmake-build
+$ cmake ..
+$ cmake --build . --config Release
 ```
 
 On macOS, it's necessary to tell CMake where to find the OpenSSL headers
@@ -106,7 +106,7 @@ For example, if OpenSSL has been installed with Homebrew,
 the `cmake` invocation becomes:
 
 ```
-cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 ```
 
 Other common ways of building with CMake (e.g., `cmake-gui`) will also work.
@@ -121,7 +121,7 @@ With a proper CMake toolchain file (specified via the `CMAKE_TOOLCHAIN_FILE` CMa
 the SDK can be cross-compiled for embedded Linux systems:
 
 ```
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
+$ cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
 ```
 
 
@@ -134,7 +134,7 @@ directory are statically linked per default and can be moved to any directory de
 If required, the SDK header files and libraries can be installed with:
 
 ```
-sudo cmake --build . --target install
+$ sudo cmake --build . --target install
 ```
 
 The default install location is `/usr/local/` on Linux and macOS and
@@ -158,9 +158,9 @@ The easy way to build the SDK on Linux or macOS is to run the
 `buildsdk.sh` script:
 
 ```
-git clone https://github.com/my-devices/sdk.git
-cd sdk
-./buildsdk.sh
+$ git clone https://github.com/my-devices/sdk.git
+$ cd sdk
+$ ./buildsdk.sh
 ```
 
 It will make the necessary invocations of
@@ -180,7 +180,7 @@ build configuration to the `buildsdk.sh` script. For example, to build
 for Angstrom:
 
 ```
-./buildsdk.sh Angstrom
+$ ./buildsdk.sh Angstrom
 ```
 
 See the build/config directory for available build configurations. If
@@ -204,11 +204,11 @@ To customize the SDK build, invoke the configure script and GNU make
 manually, as described in README_POCO.
 
 ```
-./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
-make -s -j8 DEFAULT_TARGET=static_release
-export POCO_BASE=`pwd`
-cd WebTunnel/Agent
-make -s DEFAULT_TARGET=shared_release
+$ ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
+$ make -s -j8 DEFAULT_TARGET=static_release
+$ export POCO_BASE=`pwd`
+$ cd WebTunnel/Agent
+$ make -s DEFAULT_TARGET=shared_release
 ```
 
 A few notes on the arguments:
@@ -231,21 +231,21 @@ A few notes on the arguments:
 If your system does not have OpenSSL, run configure and GNU make as follows:
 
 ```
-./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
-make -s -j8 DEFAULT_TARGET=static_release
-export POCO_BASE=`pwd`
-cd WebTunnel/Agent
-make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
+$ ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --omit=Crypto,NetSSL_OpenSSL --no-tests --no-samples --static
+$ make -s -j8 DEFAULT_TARGET=static_release
+$ export POCO_BASE=`pwd`
+$ cd WebTunnel/Agent
+$ make -s WEBTUNNEL_DISABLE_TLS=1 DEFAULT_TARGET=shared_release
 ```
 
 For a cross-build for an embedded target, you must specify the build configuration in the
 call to `./configure` and the final call to GNU make.
 
 ```
-./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
-make -s -j8 DEFAULT_TARGET=static_release
-export POCO_BASE=`pwd`
-cd WebTunnel/Agent
-make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
+$ ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
+$ make -s -j8 DEFAULT_TARGET=static_release
+$ export POCO_BASE=`pwd`
+$ cd WebTunnel/Agent
+$ make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
 ```
 
