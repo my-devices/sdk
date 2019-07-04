@@ -115,6 +115,16 @@ There are also a number of project-specific CMake variables that can be changed,
 e.g., to build with OpenSSL on Windows.
 
 
+### Cross-Compiling
+
+With a proper CMake toolchain file (specified via the `CMAKE_TOOLCHAIN_FILE` CMake variable),
+the SDK can be cross-compiled for embedded Linux systems:
+
+```
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
+```
+
+
 ### Installing
 
 The SDK can be optionally be installed by building the `install` target. However,
@@ -135,16 +145,6 @@ _WARNING_: Be careful when installing to the default location if you also
 have the POCO C++ Libraries installed there, as both install locations are
 the same. If you need to install (e.g., in order to build the Remote
 Manager Gateway), specify an appropriate `CMAKE_INSTALL_PREFIX`.
-
-
-### Cross-Compiling
-
-With a proper CMake toolchain file (specified via the `CMAKE_TOOLCHAIN_FILE` CMake variable),
-the SDK can be cross-compiled for embedded Linux systems:
-
-```
-cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
-```
 
 
 ## Building on Linux and macOS with GNU Make
