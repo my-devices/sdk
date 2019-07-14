@@ -41,8 +41,10 @@ Furthermore, the following executables are included:
     protocols not directly supported by the Remote Manager server.
   - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC
     to the device, then launches a SSH client using that tunnel connection.
-  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelVNC that first creates a tunnel connection from your PC to
+  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to
     the device, then launches a VNC viewer using that tunnel connection.
+  - [*WebTunnelRDP*](WebTunnel/WebTunnelRDP/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to
+    the device, then launches the Microsoft Remote Desktop client using that tunnel connection.
 
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
