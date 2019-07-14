@@ -30,7 +30,7 @@ fi
 
 mkdir -p bin
 
-for app in WebTunnelAgent WebTunnelClient WebTunnelSSH WebTunnelVNC; do
+for app in WebTunnelAgent WebTunnelClient WebTunnelSSH WebTunnelVNC WebTunnelRDP; do
 	echo "Building: $app"
 	make -s DEFAULT_TARGET=shared_release -C WebTunnel/$app
 	if [ $? -ne 0 ] ; then
