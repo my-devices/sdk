@@ -28,8 +28,10 @@
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Process.h"
+#include "Poco/Environment.h"
 #include "Poco/Format.h"
 #include "Poco/String.h"
+#include "Poco/Path.h"
 #include <iostream>
 #if defined(POCO_OS_FAMILY_WINDOWS)
 #include <windows.h>
@@ -72,7 +74,11 @@ public:
 		_remotePort(22)
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
-		_sshClient = "putty";
+		_sshClient = findExecutable("ssh.exe");
+		if (_sshClient.empty())
+		{
+			_sshClient = findExecutable("putty.exe");
+		}
 #else
 		_sshClient = "ssh";
 #endif
@@ -303,6 +309,16 @@ protected:
 #endif
 	}
 
+	std::string findExecutable(const std::string& name)
+	{
+		std::string pathList = Poco::Environment::get("PATH");
+		Poco::Path p;
+		if (Poco::Path::find(pathList, name, p))
+			return p.toString();
+		else
+			return std::string();
+	}
+
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
@@ -347,6 +363,13 @@ protected:
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
+			_sshClient = config().getString("ssh.executable", _sshClient);
+			if (_sshClient.empty())
+			{
+				logger().error("No SSH client program available. Please configure the SSH client program using the ssh.executable configuration property or ssh-client option.");
+				return Poco::Util::Application::EXIT_CONFIG;
+			}
+
 			promptLogin();
 
 			Poco::URI uri(args[0]);
@@ -356,7 +379,6 @@ protected:
 
 			Poco::UInt16 localPort = forwarder.localPort();
 
-			_sshClient = config().getString("ssh.executable", _sshClient);
 			Poco::Process::Args sshArgs;
 			if (Poco::icompare(_sshClient, 0, 5, "putty") == 0 || Poco::icompare(_sshClient, 0, 3, "scp") == 0)
 				sshArgs.push_back("-P");
