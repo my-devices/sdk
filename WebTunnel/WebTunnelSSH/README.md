@@ -30,7 +30,13 @@ If running on Windows, the parameters must be passed Windows-style:
 WebTunnelSSH /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-Furthermore, on Windows, the default SSH client program is `putty.exe` instead of `ssh`.
+Furthermore, on Windows, `WebTunnelSSH` first looks for `ssh.exe`, which is
+available in newer releases of Windows 10. If `ssh.exe` cannot be found in the
+executables search path (`PATH` environment variable), `WebTunnelSSH` looks
+for `putty.exe`. If no SSH client executable could be found, and also no
+executable has been configured (using the `ssh.executable` configuration property
+or `/ssh-property` command-line argument), an error message is printed and
+`WebTunnelSSH` exits.
 
 `WebTunnelSSH` will prompt for your Remote Manager username and password and
 then launch the SSH client with correct parameters for host, port number and
@@ -45,6 +51,12 @@ To copy a file `file.txt` to the remote system using `scp`.
 
 ```
 WebTunnelSSH --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
+```
+
+or, on Windows 10 (with SSH):
+
+```
+WebTunnelSSH /scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
 ```
 
 Note that the remote host name must be specified as `localhost` in this case, as
