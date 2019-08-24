@@ -34,6 +34,7 @@
 #include "Poco/Util/TimerTaskAdapter.h"
 #include "Poco/URI.h"
 #include "Poco/NumberParser.h"
+#include "Poco/NumberFormatter.h"
 #include "Poco/StringTokenizer.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/BasicEvent.h"
@@ -46,6 +47,7 @@
 #include "Poco/Process.h"
 #include "Poco/Pipe.h"
 #include "Poco/PipeStream.h"
+#include "Poco/String.h"
 #include <iostream>
 
 
@@ -227,6 +229,7 @@ protected:
 
 	void addProperties(Poco::Net::HTTPRequest& request, const std::map<std::string, std::string>& props)
 	{
+		request.add("X-PTTH-Set-Property", Poco::format("device;ports=%s", formatPorts()));
 		if (_httpPort != 0)
 		{
 			request.add("X-PTTH-Set-Property", Poco::format("device;httpPort=%hu", _httpPort));
@@ -257,6 +260,17 @@ protected:
 			request.add("X-PTTH-Set-Property", hdr);
 		}
 		request.set("User-Agent", _userAgent);
+	}
+
+	std::string formatPorts()
+	{
+		std::string result;
+		for (std::set<Poco::UInt16>::const_iterator it = _ports.begin(); it != _ports.end(); ++it)
+		{
+			if (!result.empty()) result += ", ";
+			Poco::NumberFormatter::append(result, *it);
+		}
+		return result;
 	}
 
 	void connect()
@@ -528,9 +542,16 @@ protected:
 		std::string quoted("\"");
 		for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
 		{
-			if (*it == '\"')
-				quoted += '\\';
-			quoted += *it;
+			if (*it < ' ')
+			{
+				quoted += ' ';
+			}
+			else
+			{
+				if (*it == '\"')
+					quoted += '\\';
+				quoted += *it;
+			}
 		}
 		quoted += '"';
 		return quoted;
@@ -613,6 +634,7 @@ protected:
 		Poco::PipeInputStream istr(outPipe);
 		Poco::StreamCopier::copyToString(istr, output);
 		ph.wait();
+		Poco::trimInPlace(output);
 		return output;
 	}
 
