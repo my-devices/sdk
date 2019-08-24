@@ -167,7 +167,7 @@ void Context::loadCertificate()
 	if (!_hCertStore)
 	{
 		if (_options & OPT_USE_MACHINE_STORE)
-			_hCertStore = CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, _certStoreName.c_str());
+			_hCertStore = CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, wcertStoreName.c_str());
 		else
 			_hCertStore = CertOpenSystemStoreW(0, wcertStore.c_str());
 	}
@@ -193,7 +193,6 @@ void Context::importCertificate()
 	Poco::File certFile(_certNameOrPath);
 	if (!certFile.exists()) throw Poco::FileNotFoundException(_certNameOrPath);
 	Poco::File::FileSize size = certFile.getSize();
-	if (size > 4096) throw Poco::DataFormatException("PKCS #12 certificate file too large", _certNameOrPath);
 	Poco::Buffer<char> buffer(static_cast<std::size_t>(size));
 	Poco::FileInputStream istr(_certNameOrPath);
 	istr.read(buffer.begin(), buffer.size());
@@ -208,7 +207,7 @@ void Context::importCertificate(const char* pBuffer, std::size_t size)
 	SSLManager::instance().PrivateKeyPassphraseRequired.notify(&SSLManager::instance(), password);
 	std::wstring wpassword;
 	Poco::UnicodeConverter::toUTF16(password, wpassword);
-	
+
 	// clear UTF-8 password
 	std::fill(const_cast<char*>(password.data()), const_cast<char*>(password.data() + password.size()), 'X');
 
@@ -217,7 +216,7 @@ void Context::importCertificate(const char* pBuffer, std::size_t size)
 	blob.pbData = reinterpret_cast<BYTE*>(const_cast<char*>(pBuffer));
 
 	HCERTSTORE hTempStore =  PFXImportCertStore(&blob, wpassword.data(), PKCS12_ALLOW_OVERWRITE_KEY | PKCS12_INCLUDE_EXTENDED_PROPERTIES);
-	
+
 	// clear UTF-16 password
 	std::fill(const_cast<wchar_t*>(wpassword.data()), const_cast<wchar_t*>(wpassword.data() + password.size()), L'X');
 
@@ -302,13 +301,13 @@ void Context::acquireSchannelCredentials(CredHandle& credHandle) const
 		if (!_extendedCertificateVerification)
 			schannelCred.dwFlags |= SCH_CRED_NO_SERVERNAME_CHECK;
 	}
-	
+
 #if defined(SCH_USE_STRONG_CRYPTO)
 	if (_options & Context::OPT_USE_STRONG_CRYPTO)
 		schannelCred.dwFlags |= SCH_USE_STRONG_CRYPTO;
 #endif
 
-	schannelCred.hRootStore = _hCollectionCertStore;
+	schannelCred.hRootStore = schannelCred.hRootStore = isForServerUse() ? _hCollectionCertStore : NULL;
 
 	TimeStamp tsExpiry;
 	tsExpiry.LowPart = tsExpiry.HighPart = 0;
