@@ -99,13 +99,16 @@ public:
 	WebTunnelAgent():
 		_helpRequested(false),
 		_httpPort(0),
+		_sshPort(0),
 		_vncPort(0),
+		_rdpPort(0),
 		_useProxy(false),
 		_proxyPort(0),
 		_threads(8),
 		_retryDelay(MIN_RETRY_DELAY),
 		_status(STATUS_DISCONNECTED)
 	{
+		_random.seed();
 	}
 
 	~WebTunnelAgent()
@@ -229,14 +232,27 @@ protected:
 
 	void addProperties(Poco::Net::HTTPRequest& request, const std::map<std::string, std::string>& props)
 	{
-		request.add("X-PTTH-Set-Property", Poco::format("device;ports=%s", formatPorts()));
+		request.add("X-PTTH-Set-Property", Poco::format("device;targetHost=%s", _host.toString()));
+		request.add("X-PTTH-Set-Property", Poco::format("device;targetPorts=%s", formatPorts()));
+		if (!_httpPath.empty())
+		{
+			request.add("X-PTTH-Set-Property", Poco::format("device;httpPath=%s", quoteString(_httpPath)));
+		}
 		if (_httpPort != 0)
 		{
 			request.add("X-PTTH-Set-Property", Poco::format("device;httpPort=%hu", _httpPort));
 		}
+		if (_sshPort != 0)
+		{
+			request.add("X-PTTH-Set-Property", Poco::format("device;sshPort=%hu", _sshPort));
+		}
 		if (_vncPort != 0)
 		{
 			request.add("X-PTTH-Set-Property", Poco::format("device;vncPort=%hu", _vncPort));
+		}
+		if (_rdpPort != 0)
+		{
+			request.add("X-PTTH-Set-Property", Poco::format("device;rdpPort=%hu", _rdpPort));
 		}
 		if (!_deviceName.empty())
 		{
@@ -682,8 +698,11 @@ protected:
 				_connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout", 10), 0);
 				_remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout", 300), 0);
 				_threads = config().getInt("webtunnel.threads", 8);
+				_httpPath = config().getString("webtunnel.httpPath", "");
 				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort", 0));
+				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort", 0));
 				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort", 0));
+				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort", 0));
 				_userAgent = config().getString("webtunnel.userAgent", "");
 				_httpTimeout = Poco::Timespan(config().getInt("http.timeout", 30), 0);
 				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval", 0), 0);
@@ -698,9 +717,17 @@ protected:
 				{
 					logger().warning(Poco::format("HTTP port (%hu) not in list of forwarded ports.", _httpPort));
 				}
+				if (_sshPort != 0 && _ports.find(_sshPort) == _ports.end())
+				{
+					logger().warning(Poco::format("SSH port (%hu) not in list of forwarded ports.", _sshPort));
+				}
 				if (_vncPort != 0 && _ports.find(_vncPort) == _ports.end())
 				{
 					logger().warning(Poco::format("VNC/RFB port (%hu) not in list of forwarded ports.", _vncPort));
+				}
+				if (_rdpPort != 0 && _ports.find(_rdpPort) == _ports.end())
+				{
+					logger().warning(Poco::format("RDP port (%hu) not in list of forwarded ports.", _rdpPort));
 				}
 
 				if (_userAgent.empty())
@@ -781,8 +808,11 @@ private:
 	Poco::URI _reflectorURI;
 	Poco::URI _redirectURI;
 	std::string _userAgent;
+	std::string _httpPath;
 	Poco::UInt16 _httpPort;
+	Poco::UInt16 _sshPort;
 	Poco::UInt16 _vncPort;
+	Poco::UInt16 _rdpPort;
 	bool _useProxy;
 	std::string _proxyHost;
 	Poco::UInt16 _proxyPort;
