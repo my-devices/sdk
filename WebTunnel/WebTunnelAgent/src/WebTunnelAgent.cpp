@@ -265,15 +265,10 @@ protected:
 
 		if (!props.empty())
 		{
-			std::string hdr("device;");
 			for (std::map<std::string, std::string>::const_iterator it = props.begin(); it != props.end(); ++it)
 			{
-				if (it != props.begin()) hdr += ',';
-				hdr += it->first;
-				hdr += '=';
-				hdr += quoteString(it->second);
+				request.add("X-PTTH-Set-Property", Poco::format("device;%s=%s", it->first, quoteString(it->second)));
 			}
-			request.add("X-PTTH-Set-Property", hdr);
 		}
 		request.set("User-Agent", _userAgent);
 	}
@@ -422,33 +417,29 @@ protected:
 			logger().information("Disconnecting from reflector server");
 
 			_pForwarder->webSocketClosed -= Poco::delegate(this, &WebTunnelAgent::onClose);
-			logger().debug("Stopping RemotePortForwarder...");
 			_pForwarder->stop();
-			logger().debug("Resetting SocketDispatcher...");
 			_pDispatcher->reset();
-			logger().debug("Deleting RemotePortForwarder...");
 			_pForwarder = 0;
-			logger().debug("Deleting SocketDispatcher...");
 			_pDispatcher = 0;
 		}
 		if (_pHTTPClientSession)
 		{
 			try
 			{
-				logger().debug("Aborting HTTPClientSession...");
 				_pHTTPClientSession->abort();
 			}
 			catch (Poco::Exception&)
 			{
 			}
 		}
-		logger().debug("Notifying disconnected status...");
 		statusChanged(STATUS_DISCONNECTED);
 		logger().debug("Disconnected.");
 	}
 
 	void onClose(const int& reason)
 	{
+		stopPropertiesUpdateTask();
+
 		std::string message;
 		switch (reason)
 		{
@@ -471,7 +462,7 @@ protected:
 		scheduleReconnect();
 	}
 
-	void reconnect(Poco::Util::TimerTask&)
+	void reconnectTask(Poco::Util::TimerTask&)
 	{
 		try
 		{
@@ -505,6 +496,19 @@ protected:
 		}
 	}
 
+	void disconnectTask(Poco::Util::TimerTask&)
+	{
+		try
+		{
+			disconnect();
+		}
+		catch (Poco::Exception& exc)
+		{
+			logger().warning("Exception during disconnect: " + exc.displayText());
+		}
+		_disconnected.set();
+	}
+
 	void scheduleReconnect()
 	{
 		if (!_stopped.tryWait(1))
@@ -514,8 +518,13 @@ protected:
 			Poco::Clock nextClock;
 			nextClock += retryDelay;
 			logger().information(Poco::format("Will reconnect in %.2f seconds.", retryDelay/1000000.0));
-			_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnect), nextClock);
+			_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnectTask), nextClock);
 		}
+	}
+
+	void scheduleDisconnect()
+	{
+		_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::disconnectTask), Poco::Clock());
 	}
 
 	void notifyConnected(const std::string&)
@@ -778,13 +787,14 @@ protected:
 				Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
 #endif // WEBTUNNEL_ENABLE_TLS
 
-				_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnect), Poco::Clock());
+				_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnectTask), Poco::Clock());
 
 				waitForTerminationRequest();
 
 				_stopped.set();
+				scheduleDisconnect();
+				_disconnected.wait();
 				_pTimer->cancel(true);
-				disconnect();
 			}
 			catch (Poco::Exception& exc)
 			{
@@ -829,6 +839,7 @@ private:
 	Poco::SharedPtr<Poco::WebTunnel::RemotePortForwarder> _pForwarder;
 	Poco::SharedPtr<Poco::Net::HTTPClientSession> _pHTTPClientSession;
 	Poco::Event _stopped;
+	Poco::Event _disconnected;
 	int _retryDelay;
 	Poco::SharedPtr<Poco::Util::Timer> _pTimer;
 	Poco::Util::TimerTask::Ptr _pPropertiesUpdateTask;
