@@ -416,6 +416,7 @@ protected:
 
 	void disconnect()
 	{
+		stopPropertiesUpdateTask();
 		if (_pForwarder)
 		{
 			logger().information("Disconnecting from reflector server");
@@ -441,7 +442,6 @@ protected:
 			{
 			}
 		}
-		stopPropertiesUpdateTask();
 		logger().debug("Notifying disconnected status...");
 		statusChanged(STATUS_DISCONNECTED);
 		logger().debug("Disconnected.");
@@ -783,8 +783,8 @@ protected:
 				waitForTerminationRequest();
 
 				_stopped.set();
-				disconnect();
 				_pTimer->cancel(true);
+				disconnect();
 			}
 			catch (Poco::Exception& exc)
 			{
