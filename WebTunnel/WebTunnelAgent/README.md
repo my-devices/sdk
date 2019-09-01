@@ -187,16 +187,16 @@ multiple network adapters.
 This optional property can be used to set the device `name` property shown in the
 Remote Manager dashboard and device page.
 
-Note that if enabled, this will cause the device name property to be
-set every time `WebTunnelAgent` connects to the Remote Manager, therefore
-overwriting any changes made in the Remote Manager's web interface, shell
-or API.
+Note that if enabled, this will set the `name` property of the device only once,
+when the device is created on the server when the initial connection is made.
+Further changes to the device name have to be made directly on the Remote Manager
+web interface, or through its API.
 
 You can specify a name, or use a configuration variable like
 `${system.nodeName} `or refer to an environment variable like
 `${system.env.HOSTNAME}`.
 
-#### webtunnel.version
+#### webtunnel.deviceVersion
 
 This optional property can be used to set the device `version` property shown
 in the Remote Manager device page (and optionally dashboard, if configured).
@@ -230,12 +230,32 @@ SSH (22), VNC (5900) or other TCP ports.
 This setting specifies the port number of the device's web server. Must only be
 set if different from default HTTP port 80. Must also be included in the `webtunnel.ports` list.
 
+#### webtunnel.httpPath
+
+This optional setting specifies the default URI path of the device's web server.
+It will be used by the Remote Manager web user interface to construct the
+URL of the device.
+
+#### webtunnel.sshPort
+
+The optional setting specifies the port number of the device's SSH server.
+Used to enable SSH support in the Remote Manager web interface.
+The port number must also be included in the webtunnel.ports list.
+If not set SSH access will not be enabled via the Remote Manager web interface.
+
 #### webtunnel.vncPort
 
 The optional setting specifies the port number of the device's VNC server.
-Used to enable VNC support in the web interface.
-Must also be included in the webtunnel.ports list.
-If not set VNC access will not be enabled via the Remote Manager.
+Used to enable VNC support in the Remote Manager web interface.
+The port number must also be included in the webtunnel.ports list.
+If not set VNC access will not be enabled via the Remote Manager web interface.
+
+#### webtunnel.rdpPort
+
+The optional setting specifies the port number of the device's RDP server.
+Used to enable RDP support in the Remote Manager web interface.
+The port number must also be included in the webtunnel.ports list.
+If not set RDP access will not be enabled via the Remote Manager web interface.
 
 #### webtunnel.reflectorURI
 
@@ -291,6 +311,44 @@ will be passed as command-line argument to the executable and will be one of:
 The number of I/O threads the `WebTunnelAgent` should use. Should be left at the default
 (4).
 
+#### webtunnel.properties
+
+This setting specifies additional device properties that are sent to the
+Remote Manager. Format is:
+
+```
+webtunnel.properties.<property> = <value>
+```
+
+Multiple properties can be specified.
+
+If `<value>` is enclosed in backticks (`` `<value>` ``), then `<value>` is considered
+to be a shell command that is executed to obtain the actual value.
+
+Example:
+
+```
+webtunnel.properties.uptime = `uptime`
+```
+
+Will set the value of the `uptime` property to the result of running the `uptime`
+command. The command will be executed by the system's shell, so it's also possible
+to combine commands with a pipe, e.g.:
+
+```
+webtunnel.properties.cpuLoad = `uptime | awk '{print $10}'`
+```
+
+To send updates to properties to the Remote Manager server periodically, and not
+just when connecting the tunnel, see `webtunnel.propertiesUpdateInterval`.
+
+#### webtunnel.propertiesUpdateInterval
+
+This optional setting specifies the interval in seconds in which property
+updates are sent to the Remote Manager server. If set to 0 (default), any
+defined properties (see `webtunnel.properties`) will only be sent when
+the agent connects (or reconnects) to the Remote Manager server.
+If set to a non-zero value, property updates will be sent periodically.
 
 ### HTTP Configuration
 
