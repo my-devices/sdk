@@ -230,6 +230,15 @@ SSH (22), VNC (5900) or other TCP ports.
 This setting specifies the port number of the device's web server. Must only be
 set if different from default HTTP port 80. Must also be included in the `webtunnel.ports` list.
 
+If the device has only a HTTPS server, specify the port of the server here and set
+the `webtunnel.httpsRequired` property to true.
+
+#### webtunnel.httpsRequired
+
+Set this property to `true` if the device only has a HTTPS server. In this case,
+`WebTunnelAgent` will connect to the designated device HTTP server port
+(`webtunnel.httpPort`) over TLS.
+
 #### webtunnel.httpPath
 
 This optional setting specifies the default URI path of the device's web server.
@@ -291,7 +300,7 @@ i.e., the connection to the device's web server.
 #### webtunnel.remoteTimeout
 
 The timeout (given in seconds) for the WebTunnel connection to the Remote Manager
-server. If half of the timeout expires, the `WebTunnelAGent` will send a PING message to the
+server. If half of the timeout expires, the `WebTunnelAgent` will send a PING message to the
 Remote Manager server. If the PING is not answered by the server, the `WebTunnelAgent`
 will terminate the connection and attempt to re-connect.
 
@@ -419,6 +428,17 @@ specified using tls.privateKey property).
 This optional setting specifies the path to an X509 private key file in PEM format
 used for authenticating the device against the server (together with a certificate,
 specified using tls.certificate property).
+
+#### tls.verification
+
+This optional setting specifies the certificate validation mode. Use one of the
+following values.
+
+  * `none`: The server certificate is not validated.
+  * `relaxed`: The server certificate is validated if one is presented by the server.
+    This is the default.
+  * `strict`: The server certificate is validated and it is an error if the server
+    does not present a certificate.
 
 ### Logging
 

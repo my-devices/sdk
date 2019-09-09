@@ -709,6 +709,7 @@ protected:
 	}
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
+
 	Poco::Net::Context::Ptr createContext(const std::string& prefix)
 	{
 		std::string cipherList = config().getString(prefix + ".ciphers", "HIGH:!DSS:!aNULL@STRENGTH");
@@ -717,16 +718,27 @@ protected:
 		std::string privateKey = config().getString(prefix + ".privateKey", "");
 		std::string certificate = config().getString(prefix + ".certificate", "");
 
+		Poco::Net::Context::VerificationMode vMode = Poco::Net::Context::VERIFY_RELAXED;
+		std::string vModeStr = config().getString(prefix + ".verification", "");
+		if (vModeStr == "none")
+			vMode = Poco::Net::Context::VERIFY_NONE;
+		else if (vModeStr == "relaxed")
+			vMode = Poco::Net::Context::VERIFY_RELAXED;
+		else if (vModeStr == "strict")
+			vMode = Poco::Net::Context::VERIFY_STRICT;
+
 #if defined(POCO_NETSSL_WIN)
 		int options = Poco::Net::Context::OPT_DEFAULTS;
 		if (!certificate.empty()) options |= Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, vMode, options);
 #else
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, vMode, 5, true, cipherList);
 #endif // POCO_NETSSL_WIN
+
 		pContext->enableExtendedCertificateVerification(extendedVerification);
 		return pContext;
 	}
+
 #endif // WEBTUNNEL_ENABLE_TLS
 
 	int main(const std::vector<std::string>& args)
@@ -832,8 +844,8 @@ protected:
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
 				Poco::Net::Context::Ptr pContext = createContext("tls");
-				Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
+				Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 				if (acceptUnknownCert)
 					pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
 				else
