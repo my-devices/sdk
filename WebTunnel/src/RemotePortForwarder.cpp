@@ -25,8 +25,38 @@ namespace Poco {
 namespace WebTunnel {
 
 
-RemotePortForwarder::RemotePortForwarder(SocketDispatcher& dispatcher, Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket, const Poco::Net::IPAddress& host, const std::set<Poco::UInt16>& ports, Poco::Timespan remoteTimeout):
+//
+// SocketFactory
+//
+
+
+SocketFactory::SocketFactory()
+{
+}
+
+
+SocketFactory::~SocketFactory()
+{
+}
+
+
+Poco::Net::StreamSocket SocketFactory::createSocket(const Poco::Net::SocketAddress& addr, Poco::Timespan timeout)
+{
+	Poco::Net::StreamSocket streamSocket;
+	streamSocket.connect(addr, timeout);
+	streamSocket.setNoDelay(true);
+	return streamSocket;
+}
+
+
+//
+// RemotePortForwarder
+//
+
+
+RemotePortForwarder::RemotePortForwarder(SocketDispatcher& dispatcher, Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket, const Poco::Net::IPAddress& host, const std::set<Poco::UInt16>& ports, Poco::Timespan remoteTimeout, SocketFactory::Ptr pSocketFactory):
 	_dispatcher(dispatcher),
+	_pSocketFactory(pSocketFactory),
 	_pWebSocket(pWebSocket),
 	_host(host),
 	_ports(ports),
@@ -316,9 +346,7 @@ bool RemotePortForwarder::openChannel(Poco::UInt16 channel, Poco::UInt16 port)
 		try
 		{
 			Poco::Net::SocketAddress addr(_host, port);
-			Poco::Net::StreamSocket streamSocket;
-			streamSocket.connect(addr, _connectTimeout);
-			streamSocket.setNoDelay(true);
+			Poco::Net::StreamSocket streamSocket(_pSocketFactory->createSocket(addr, _connectTimeout));
 			_dispatcher.addSocket(streamSocket, new TunnelMultiplexer(*this, channel), _localTimeout);
 			_channelMap[channel] = streamSocket;
 		}

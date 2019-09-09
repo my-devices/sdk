@@ -19,6 +19,7 @@
 #include "Poco/Net/NetException.h"
 #if defined(WEBTUNNEL_ENABLE_TLS)
 #include "Poco/Net/HTTPSSessionInstantiator.h"
+#include "Poco/Net/SecureStreamSocket.h"
 #include "Poco/Net/Context.h"
 #include "Poco/Net/PrivateKeyPassphraseHandler.h"
 #include "Poco/Net/AcceptCertificateHandler.h"
@@ -76,6 +77,49 @@ public:
 };
 
 
+#if defined(WEBTUNNEL_ENABLE_TLS)
+
+
+class TLSSocketFactory: public Poco::WebTunnel::SocketFactory
+{
+public:
+	TLSSocketFactory(Poco::UInt16 tlsPort, Poco::Net::Context::Ptr pContext):
+		_tlsPort(tlsPort),
+		_pContext(pContext)
+	{
+	}
+
+	~TLSSocketFactory()
+	{
+	}
+
+	Poco::Net::StreamSocket createSocket(const Poco::Net::SocketAddress& addr, Poco::Timespan timeout)
+	{
+		if (addr.port() == _tlsPort)
+		{
+			Poco::Net::SecureStreamSocket streamSocket(_pContext);
+			streamSocket.connect(addr, timeout);
+			streamSocket.setNoDelay(true);
+			return streamSocket;
+		}
+		else
+		{
+			Poco::Net::StreamSocket streamSocket;
+			streamSocket.connect(addr, timeout);
+			streamSocket.setNoDelay(true);
+			return streamSocket;
+		}
+	}
+
+private:
+	Poco::UInt16 _tlsPort;
+	Poco::Net::Context::Ptr _pContext;
+};
+
+
+#endif // defined(WEBTUNNEL_ENABLE_TLS)
+
+
 class WebTunnelAgent: public Poco::Util::ServerApplication
 {
 public:
@@ -99,6 +143,7 @@ public:
 	WebTunnelAgent():
 		_helpRequested(false),
 		_httpPort(0),
+		_httpsRequired(false),
 		_sshPort(0),
 		_vncPort(0),
 		_rdpPort(0),
@@ -338,7 +383,7 @@ protected:
 				pWebSocket->setNoDelay(true);
 				_retryDelay = MIN_RETRY_DELAY;
 				_pDispatcher = new Poco::WebTunnel::SocketDispatcher(_threads);
-				_pForwarder = new Poco::WebTunnel::RemotePortForwarder(*_pDispatcher, pWebSocket, _host, _ports, _remoteTimeout);
+				_pForwarder = new Poco::WebTunnel::RemotePortForwarder(*_pDispatcher, pWebSocket, _host, _ports, _remoteTimeout, _pSocketFactory);
 				_pForwarder->webSocketClosed += Poco::delegate(this, &WebTunnelAgent::onClose);
 				_pForwarder->setConnectTimeout(_connectTimeout);
 				_pForwarder->setLocalTimeout(_localTimeout);
@@ -663,6 +708,27 @@ protected:
 		return output;
 	}
 
+#if defined(WEBTUNNEL_ENABLE_TLS)
+	Poco::Net::Context::Ptr createContext(const std::string& prefix)
+	{
+		std::string cipherList = config().getString(prefix + ".ciphers", "HIGH:!DSS:!aNULL@STRENGTH");
+		bool extendedVerification = config().getBool(prefix + ".extendedCertificateVerification", false);
+		std::string caLocation = config().getString(prefix + ".caLocation", "");
+		std::string privateKey = config().getString(prefix + ".privateKey", "");
+		std::string certificate = config().getString(prefix + ".certificate", "");
+
+#if defined(POCO_NETSSL_WIN)
+		int options = Poco::Net::Context::OPT_DEFAULTS;
+		if (!certificate.empty()) options |= Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options);
+#else
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+#endif // POCO_NETSSL_WIN
+		pContext->enableExtendedCertificateVerification(extendedVerification);
+		return pContext;
+	}
+#endif // WEBTUNNEL_ENABLE_TLS
+
 	int main(const std::vector<std::string>& args)
 	{
 		if (_helpRequested)
@@ -709,6 +775,7 @@ protected:
 				_threads = config().getInt("webtunnel.threads", 8);
 				_httpPath = config().getString("webtunnel.httpPath", "");
 				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort", 0));
+				_httpsRequired = config().getBool("webtunnel.httpsRequired", false);
 				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort", 0));
 				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort", 0));
 				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort", 0));
@@ -764,28 +831,25 @@ protected:
 				}
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
-				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
-				std::string cipherList = config().getString("tls.ciphers", "HIGH:!DSS:!aNULL@STRENGTH");
-				bool extendedVerification = config().getBool("tls.extendedCertificateVerification", false);
-				std::string caLocation = config().getString("tls.caLocation", "");
-				std::string privateKey = config().getString("tls.privateKey", "");
-				std::string certificate = config().getString("tls.certificate", "");
-
+				Poco::Net::Context::Ptr pContext = createContext("tls");
 				Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
+				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
 				if (acceptUnknownCert)
 					pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
 				else
 					pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
-#if defined(POCO_NETSSL_WIN)
-				int options = Poco::Net::Context::OPT_DEFAULTS;
-				if (!certificate.empty()) options |= Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
-				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, Poco::Net::Context::VERIFY_RELAXED, options);
-#else
-				Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
-#endif // POCO_NETSSL_WIN
-				pContext->enableExtendedCertificateVerification(extendedVerification);
 				Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
+
+				if (_httpsRequired)
+				{
+					_pSocketFactory = new TLSSocketFactory(_httpPort, createContext("https"));
+				}
 #endif // WEBTUNNEL_ENABLE_TLS
+
+				if (!_pSocketFactory)
+				{
+					_pSocketFactory = new Poco::WebTunnel::SocketFactory;
+				}
 
 				_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnectTask), Poco::Clock());
 
@@ -820,6 +884,7 @@ private:
 	std::string _userAgent;
 	std::string _httpPath;
 	Poco::UInt16 _httpPort;
+	bool _httpsRequired;
 	Poco::UInt16 _sshPort;
 	Poco::UInt16 _vncPort;
 	Poco::UInt16 _rdpPort;
@@ -846,12 +911,13 @@ private:
 	SSLInitializer _sslInitializer;
 	Status _status;
 	Poco::Random _random;
+	Poco::WebTunnel::SocketFactory::Ptr _pSocketFactory;
 };
 
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.9.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)
