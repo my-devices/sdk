@@ -231,9 +231,9 @@ This setting specifies the port number of the device's web server. Must only be
 set if different from default HTTP port 80. Must also be included in the `webtunnel.ports` list.
 
 If the device has only a HTTPS server, specify the port of the server here and set
-the `webtunnel.httpsRequired` property to true.
+the `webtunnel.https.enable` property to `true`.
 
-#### webtunnel.httpsRequired
+#### webtunnel.https.enable
 
 Set this property to `true` if the device only has a HTTPS server. In this case,
 `WebTunnelAgent` will connect to the designated device HTTP server port
@@ -359,6 +359,7 @@ defined properties (see `webtunnel.properties`) will only be sent when
 the agent connects (or reconnects) to the Remote Manager server.
 If set to a non-zero value, property updates will be sent periodically.
 
+
 ### HTTP Configuration
 
 #### http.timeout
@@ -396,13 +397,24 @@ if no proxy authentication is required.
 #### tls.acceptUnknownCertificate
 
 Enable (`true`) or disable (`false`) accepting an unknown certificate from the
-Remote Manager server. Should only be used for testing purposes, e.g., while using
-a self-signed certificate. Should not be used in production setups.
+Remote Manager server or the device web server. Should only be used for testing purposes,
+e.g., while using a self-signed certificate. Should not be used in production setups.
 
 #### tls.ciphers
 
 This setting is used to specify a list of acceptable OpenSSL ciphers. Only used
 if `WebTunnelAgent` has been built with OpenSSL.
+
+#### tls.verification
+
+This optional setting specifies the certificate validation mode for the connection
+to the Remote Manager server. Use one of the following values.
+
+  * `none`: The server certificate is not validated.
+  * `relaxed`: The server certificate is validated if one is presented by the server.
+    This is the default.
+  * `strict`: The server certificate is validated and it is an error if the server
+    does not present a certificate.
 
 #### tls.extendedCertificateVerification
 
@@ -429,16 +441,49 @@ This optional setting specifies the path to an X509 private key file in PEM form
 used for authenticating the device against the server (together with a certificate,
 specified using tls.certificate property).
 
-#### tls.verification
+#### webtunnel.https.ciphers
 
-This optional setting specifies the certificate validation mode. Use one of the
-following values.
+This setting is used to specify a list of acceptable OpenSSL ciphers for the HTTPS
+connection to the device web server. Only used if `WebTunnelAgent` has been built
+with OpenSSL.
+
+#### webtunnel.https.verification
+
+This optional setting specifies the certificate validation mode for the HTTPS connection
+to the device web server. Use one of the following values.
 
   * `none`: The server certificate is not validated.
   * `relaxed`: The server certificate is validated if one is presented by the server.
     This is the default.
   * `strict`: The server certificate is validated and it is an error if the server
     does not present a certificate.
+
+#### webtunnel.https.extendedCertificateVerification
+
+Enable (`true`) or disable (`false`) extended (domain name) certificate validation.
+If set to `true`, `WebTunnelAgent` will verify that the common name (or one of the
+Subject Alternative names) of the server certificate matches the device IP
+address. Should be set to `false`, as most devices don't have TLS certificates
+matching the device domain name or IP address.
+
+#### webtunnel.https.caLocation
+
+This setting specifies a directory or file containing trusted root certificates
+for OpenSSL. Can be left empty to use the built-in default OpenSSL root certificates.
+Please note that OpenSSL on Windows may not include a list of trusted root certificates.
+
+#### webtunnel.https.certificate
+
+This optional setting specifies the path to an X509 certificate file in PEM format
+used for authenticating the agent against the device web server
+(together with a private key, specified using tls.privateKey property) if HTTPS
+is used.
+
+#### webtunnel.https.privateKey
+
+This optional setting specifies the path to an X509 private key file in PEM format
+used for authenticating the agent against the device web (together with a certificate,
+specified using tls.certificate property) if HTTPS is used.
 
 ### Logging
 

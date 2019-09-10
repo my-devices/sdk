@@ -787,7 +787,7 @@ protected:
 				_threads = config().getInt("webtunnel.threads", 8);
 				_httpPath = config().getString("webtunnel.httpPath", "");
 				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort", 0));
-				_httpsRequired = config().getBool("webtunnel.httpsRequired", false);
+				_httpsRequired = config().getBool("webtunnel.https.enable", false);
 				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort", 0));
 				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort", 0));
 				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort", 0));
@@ -854,7 +854,7 @@ protected:
 
 				if (_httpsRequired)
 				{
-					_pSocketFactory = new TLSSocketFactory(_httpPort, createContext("https"));
+					_pSocketFactory = new TLSSocketFactory(_httpPort, createContext("webtunnel.https"));
 				}
 #endif // WEBTUNNEL_ENABLE_TLS
 
