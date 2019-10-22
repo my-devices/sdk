@@ -48,6 +48,7 @@
 #include "Poco/Process.h"
 #include "Poco/Pipe.h"
 #include "Poco/PipeStream.h"
+#include "Poco/StreamCopier.h"
 #include "Poco/String.h"
 #include <iostream>
 
@@ -630,7 +631,7 @@ protected:
 	void startPropertiesUpdateTask()
 	{
 		_pPropertiesUpdateTask = new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::updateProperties);
-		_pTimer->scheduleAtFixedRate(_pPropertiesUpdateTask, _propertiesUpdateInterval.totalMilliseconds(), _propertiesUpdateInterval.totalMilliseconds());
+		_pTimer->scheduleAtFixedRate(_pPropertiesUpdateTask, static_cast<long>(_propertiesUpdateInterval.totalMilliseconds()), static_cast<long>(_propertiesUpdateInterval.totalMilliseconds()));
 	}
 
 	void stopPropertiesUpdateTask()

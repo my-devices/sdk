@@ -162,14 +162,14 @@ Poco::Net::X509Certificate Context::certificate()
 
 void Context::loadCertificate()
 {
-	std::wstring wcertStore;
-	Poco::UnicodeConverter::convert(_certStoreName, wcertStore);
+	std::wstring wcertStoreName;
+	Poco::UnicodeConverter::convert(_certStoreName, wcertStoreName);
 	if (!_hCertStore)
 	{
 		if (_options & OPT_USE_MACHINE_STORE)
 			_hCertStore = CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, 0, CERT_SYSTEM_STORE_LOCAL_MACHINE, wcertStoreName.c_str());
 		else
-			_hCertStore = CertOpenSystemStoreW(0, wcertStore.c_str());
+			_hCertStore = CertOpenSystemStoreW(0, wcertStoreName.c_str());
 	}
 	if (!_hCertStore) throw CertificateException("Failed to open certificate store", _certStoreName, GetLastError());
 
