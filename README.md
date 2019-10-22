@@ -111,6 +111,13 @@ the `cmake` invocation becomes:
 $ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
 ```
 
+If you want to link statically with OpenSSL libraries (recommended on
+macOS), add the `-DOPENSSL_USE_STATIC_LIBS=TRUE` option, e.g.:
+
+```
+$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_USE_STATIC_LIBS=TRUE
+```
+
 Other common ways of building with CMake (e.g., `cmake-gui`) will also work.
 
 There are also a number of project-specific CMake variables that can be changed,
