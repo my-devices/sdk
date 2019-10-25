@@ -46,7 +46,7 @@ WebTunnelAgent --help
 for more information.
 
 
-## Automatically Starting WebTunnelAgent
+#### Automatically Starting WebTunnelAgent
 
 A Debian-style Linux init script for `/etc/init.d/` is [included](etc/init.d/WebTunnelAgent)
 with the source code. It expects the `WebTunnelAgent` executable to be located in
