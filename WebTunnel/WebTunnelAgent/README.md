@@ -48,10 +48,26 @@ for more information.
 
 ## Automatically Starting WebTunnelAgent
 
-A Debian Linux startup script for `/etc/init.d` is [included](etc/init.d/WebTunnelAgent)
+A Debian-style Linux init script for `/etc/init.d/` is [included](etc/init.d/WebTunnelAgent)
 with the source code. It expects the `WebTunnelAgent` executable to be located in
 `/usr/local/sbin/WebTunnelAgent` and the configuration file in `/etc/WebTunnelAgent.properties`.
 
+Copy the init script to `/etc/init.d/` and make it executable. Copy the
+`WebTunnelAgent` executable to `/usr/local/sbin/` and make sure it's executable as well.
+Copy the configuration file `WebTunnelAgent.properties` to `/etc/`.
+
+Then enable the startup script with:
+
+```
+sudo /usr/sbin/update-rc.d WebTunnelAgent defaults
+sudo /usr/sbin/update-rc.d WebTunnelAgent enable
+```
+
+and start with:
+
+```
+sudo /etc/init.d/WebTunnelAgent start
+```
 
 ### Running WebTunnelAgent as Windows Service
 
