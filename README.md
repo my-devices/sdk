@@ -133,6 +133,11 @@ the SDK can be cross-compiled for embedded Linux systems:
 $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
 ```
 
+Note: The resulting executables may contain debug information, which significantly
+increases their size.
+You should run `xxx-yyy-linux-strip` on the resulting executables to reduce their
+size before deploying them to the device.
+
 
 ### Installing
 
