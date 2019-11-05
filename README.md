@@ -112,7 +112,7 @@ On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
 
 All dependencies can be installed with the following commands:
 
-#### Debian Linux
+#### Debian Linux (including Ubuntu and Raspbian)
 
 ```
 $ sudo apt-get -y update && sudo apt-get -y install git g++ make cmake libssl-dev
