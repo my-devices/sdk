@@ -70,6 +70,12 @@ If you do not want to or cannot run the installer script, please see the followi
 instructions.
 
 
+## Pre-Built Executables
+
+Pre-built executables for Windows, macOS and some Linux distributions
+(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
+
+
 ## External Dependecies
 
 ### Libraries
