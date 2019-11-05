@@ -49,7 +49,13 @@ Furthermore, the following executables are included:
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
-## Easy Install (Linux and macOS)
+## Pre-Built Executables
+
+Pre-built executables for Windows, macOS and some Linux distributions
+(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
+
+
+## Easy Install from Source (Linux and macOS)
 
 The easiest way to install the above mentioned executables on a Linux or macOS system
 from source is to download and run the
@@ -68,12 +74,6 @@ GitHub and run the steps necessary (see below) to build and install the binaries
 
 If you do not want to or cannot run the installer script, please see the following
 instructions.
-
-
-## Pre-Built Executables
-
-Pre-built executables for Windows, macOS and some Linux distributions
-(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
 
 
 ## External Dependecies
