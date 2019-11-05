@@ -127,7 +127,7 @@ $ sudo yum install -y git gcc-c++ make cmake3 openssl-devel
 #### macOS (with Homebrew)
 
 ```
-brew install cmake openssl
+$ brew install cmake openssl
 ```
 
 ## Building with CMake (Linux, macOS, Windows)
