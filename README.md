@@ -49,6 +49,27 @@ Furthermore, the following executables are included:
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
+## Easy Install (Linux and macOS)
+
+The easiest way to install the above mentioned executables on a Linux or macOS system
+from source is to download and run the
+[installer script](https://github.com/my-devices/agent-installer/blob/master/install.sh)
+with the following command:
+
+```
+$ curl https://raw.githubusercontent.com/my-devices/agent-installer/master/install.sh | bash
+```
+
+The script should work on most Debian and RedHat-based Linux distributions including
+Ubuntu and Raspbian. On macOS, [Homebrew](https://brew.sh) must be installed.
+
+The script will install all required dependencies, then get the sources from
+GitHub and run the steps necessary (see below) to build and install the binaries in `/usr/local/bin/`.
+
+If you do not want to or cannot run the installer script, please see the following
+instructions.
+
+
 ## External Dependecies
 
 ### Libraries
