@@ -108,6 +108,27 @@ On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
 
 [CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
 
+### Installing All Dependencies (Linux and macOS)
+
+All dependencies can be installed with the following commands:
+
+#### Debian Linux
+
+```
+$ sudo apt-get -y update && sudo apt-get -y install git g++ make cmake libssl-dev
+```
+
+#### RedHat Linux
+
+```
+$ sudo yum install -y git gcc-c++ make cmake3 openssl-devel
+```
+
+#### macOS (with Homebrew)
+
+```
+brew install cmake openssl
+```
 
 ## Building with CMake (Linux, macOS, Windows)
 
