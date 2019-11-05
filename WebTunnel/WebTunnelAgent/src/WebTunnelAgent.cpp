@@ -228,7 +228,7 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
-			"macchina.io Remote Manager Agent.\n"
+			"macchina.io Remote Manager Device Agent.\n"
 			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
@@ -744,7 +744,7 @@ protected:
 
 	int main(const std::vector<std::string>& args)
 	{
-		if (_helpRequested)
+		if (_helpRequested || !config().has("webtunnel.reflectorURI"))
 		{
 			displayHelp();
 		}
@@ -752,9 +752,9 @@ protected:
 		{
 			try
 			{
+				_reflectorURI = config().getString("webtunnel.reflectorURI");
 				_deviceName = config().getString("webtunnel.deviceName", "");
 				_deviceVersion = config().getString("webtunnel.deviceVersion", "");
-				_reflectorURI = config().getString("webtunnel.reflectorURI");
 				std::string host = config().getString("webtunnel.host", "localhost");
 				if (!Poco::Net::IPAddress::tryParse(host, _host))
 				{
