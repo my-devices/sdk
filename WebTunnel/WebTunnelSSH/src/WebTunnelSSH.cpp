@@ -176,6 +176,13 @@ protected:
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleLogin)));
 
 		options.addOption(
+			Option("command", "m", "Specify remote (SSH) command. This is passed as second argument to the SSH client.")
+				.required(false)
+				.repeatable(false)
+				.argument("command")
+				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleCommand)));
+
+		options.addOption(
 			Option("define", "D", "Define or override a configuration property.")
 				.required(false)
 				.repeatable(true)
@@ -218,14 +225,19 @@ protected:
 		_username = value;
 	}
 
+	void handlePassword(const std::string& name, const std::string& value)
+	{
+		_password = value;
+	}
+
 	void handleLogin(const std::string& name, const std::string& value)
 	{
 		_login = value;
 	}
 
-	void handlePassword(const std::string& name, const std::string& value)
+	void handleCommand(const std::string& name, const std::string& value)
 	{
-		_password = value;
+		_command = value;
 	}
 
 	void handleDefine(const std::string& name, const std::string& value)
@@ -398,6 +410,11 @@ protected:
 				sshArgs.push_back("localhost");
 			}
 
+			if (!_command.empty())
+			{
+				sshArgs.push_back(_command);
+			}
+
 			logger().debug(Poco::format("Launching SSH client: %s", _sshClient));
 			Poco::ProcessHandle ph = Poco::Process::launch(_sshClient, sshArgs);
 			rc = ph.wait();
@@ -414,6 +431,7 @@ private:
 	std::string _password;
 	std::string _login;
 	std::string _sshClient;
+	std::string _command;
 	SSLInitializer _sslInitializer;
 };
 
