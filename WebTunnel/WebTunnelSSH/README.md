@@ -73,14 +73,19 @@ a private key for authentication:
 WebTunnelSSH -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
 ```
 
-### Passing a Command the the SSH Client
+### Passing a Command or Script to the SSH Client
 
-`WebTunnelSSH` can pass a command to `ssh`. To do so, specify the command using the
-`--command` (short: `-m`; Windows: `/command`) option. The given command will be passed
-to `ssh` after the extra options and the hostname. This can also be used to run a
-script (via pipe of redirection of stdin). However, in this case, the Remote Manager
-username and password must be passed as command-line arguments, and `bash` or a different
-shell must be specified as command to execute via `ssh`:
+`WebTunnelSSH` can pass a command for the remote system to `ssh`.
+To do so, specify the command using the `--command` (short: `-m`; Windows: `/command`) option.
+The given command will be passed to `ssh` after the extra options and the hostname:
+
+```
+WebTunnelSSH -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+```
+
+This can also be used to run a script (via pipe of redirection of stdin).
+However, in this case, the Remote Manager username and password must be passed as
+command-line arguments, and `bash` or another shell must be specified as command to execute via `ssh`:
 
 ```
 WebTunnelSSH -l pi -u rmuser -p rmpasswd -m bash https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net <script.sh
