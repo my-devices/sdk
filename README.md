@@ -49,6 +49,33 @@ Furthermore, the following executables are included:
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
+## Pre-Built Executables
+
+Pre-built executables for Windows, macOS and some Linux distributions
+(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
+
+
+## Easy Install from Source (Linux and macOS)
+
+The easiest way to install the above mentioned executables on a Linux or macOS system
+from source is to download and run the
+[installer script](https://github.com/my-devices/agent-installer/blob/master/install.sh)
+with the following command:
+
+```
+$ curl https://raw.githubusercontent.com/my-devices/agent-installer/master/install.sh | bash
+```
+
+The script should work on most Debian and RedHat-based Linux distributions including
+Ubuntu and Raspbian. On macOS, [Homebrew](https://brew.sh) must be installed.
+
+The script will install all required dependencies, then get the sources from
+GitHub and run the steps necessary (see below) to build and install the binaries in `/usr/local/bin/`.
+
+If you do not want to or cannot run the installer script, please see the following
+instructions.
+
+
 ## External Dependecies
 
 ### Libraries
@@ -132,6 +159,11 @@ the SDK can be cross-compiled for embedded Linux systems:
 ```
 $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
 ```
+
+Note: The resulting executables may contain debug information, which significantly
+increases their size.
+You should run `xxx-yyy-linux-strip` on the resulting executables to reduce their
+size before deploying them to the device.
 
 
 ### Installing

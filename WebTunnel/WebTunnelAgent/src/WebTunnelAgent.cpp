@@ -744,7 +744,7 @@ protected:
 
 	int main(const std::vector<std::string>& args)
 	{
-		if (_helpRequested)
+		if (_helpRequested || !config().has("webtunnel.reflectorURI"))
 		{
 			displayHelp();
 		}
@@ -752,9 +752,9 @@ protected:
 		{
 			try
 			{
+				_reflectorURI = config().getString("webtunnel.reflectorURI");
 				_deviceName = config().getString("webtunnel.deviceName", "");
 				_deviceVersion = config().getString("webtunnel.deviceVersion", "");
-				_reflectorURI = config().getString("webtunnel.reflectorURI");
 				std::string host = config().getString("webtunnel.host", "localhost");
 				if (!Poco::Net::IPAddress::tryParse(host, _host))
 				{

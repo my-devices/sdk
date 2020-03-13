@@ -36,6 +36,7 @@ WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net /rem
 ```
 
 `WebTunnelClient` will prompt for your Remote Manager username and password.
+When no longer needed, the tunnel can be terminated by typing `CTRL-C`.
 
 You can now start your SSH client and connect it to port 2222 on your local machine
 in order to open an SSH session to your device:
@@ -50,6 +51,18 @@ remote device, not your local machine.
 The [`WebTunnelSSH`](../WebTunnelSSH/README.md) program also included in the
 SDK simplifies these steps for SSH access to a device, by setting up the tunnel
 and then launching the SSH client with correct parameters.
+
+`WebTunnelClient` can also run a command after setting up the tunnel, instead of just
+waiting. To do so, use the `--command` (short `-C`, or `/command` on Windows) option
+to specify the command. Arguments for the command can be specified at the end of the
+command-line, separated by `--`. Example:
+
+```
+WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -R 22 -L 2222 -C ssh -- -p 22 localhost
+```
+
+Given command to execute, `WebTunnelClient` will terminate as soon as the specified program has
+terminated as well.
 
 Like `WebTunnelAgent`, `WebTunnelClient` can be used as a daemon or Windows service.
 Please see the [`WebTunnelAgent` documentation](../WebTunnelAgent/README.md) for more information.

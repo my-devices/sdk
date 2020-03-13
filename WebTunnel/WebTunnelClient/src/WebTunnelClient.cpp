@@ -26,6 +26,7 @@
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/IntValidator.h"
 #include "Poco/NumberParser.h"
+#include "Poco/Process.h"
 #include <iostream>
 #if defined(POCO_OS_FAMILY_WINDOWS)
 #include <windows.h>
@@ -141,6 +142,13 @@ protected:
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handlePassword)));
 
 		options.addOption(
+			Option("command", "C", "Specify a command to run (instead of waiting).")
+				.required(false)
+				.repeatable(false)
+				.argument("command")
+				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleCommand)));
+
+		options.addOption(
 			Option("define", "D", "Define or override a configuration property.")
 				.required(false)
 				.repeatable(true)
@@ -176,6 +184,11 @@ protected:
 	void handlePassword(const std::string& name, const std::string& value)
 	{
 		_password = value;
+	}
+
+	void handleCommand(const std::string& name, const std::string& value)
+	{
+		_command = value;
 	}
 
 	void handleDefine(const std::string& name, const std::string& value)
@@ -261,7 +274,9 @@ protected:
 
 	int main(const std::vector<std::string>& args)
 	{
-		if (_helpRequested || args.size() != 1)
+		int rc = Poco::Util::Application::EXIT_OK;
+
+		if (_helpRequested || args.empty())
 		{
 			displayHelp();
 		}
@@ -310,9 +325,18 @@ protected:
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
 
-			waitForTerminationRequest();
+			if (_command.empty())
+			{
+				waitForTerminationRequest();
+			}
+			else
+			{
+				Poco::Process::Args commandArgs(args.begin() + 1, args.end());
+				Poco::ProcessHandle ph = Poco::Process::launch(_command, commandArgs);
+				rc = ph.wait();
+			}
 		}
-		return Poco::Util::Application::EXIT_OK;
+		return rc;
 	}
 
 private:
@@ -321,6 +345,7 @@ private:
 	Poco::UInt16 _remotePort;
 	std::string _username;
 	std::string _password;
+	std::string _command;
 	SSLInitializer _sslInitializer;
 };
 
