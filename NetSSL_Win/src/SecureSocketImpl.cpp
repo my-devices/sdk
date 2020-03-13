@@ -433,7 +433,7 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 		}
 		else
 		{
-			rc = overflowSize;
+			rc = static_cast<int>(overflowSize);
 			std::memcpy(buffer, _overflowBuffer.begin(), rc);
 			_overflowBuffer.resize(0);
 		}
@@ -552,10 +552,10 @@ SECURITY_STATUS SecureSocketImpl::decodeMessage(BYTE* pBuffer, DWORD bufSize, Au
 	{
 		for (int i = 1; i < 4; ++i)
 		{
-			if (pDataBuffer == 0 && msg[i].BufferType == SECBUFFER_DATA)
+			if (!pDataBuffer && msg[i].BufferType == SECBUFFER_DATA)
 				pDataBuffer = &msg[i];
 
-			if (pExtraBuffer == NULL && msg[i].BufferType == SECBUFFER_EXTRA)
+			if (!pExtraBuffer && msg[i].BufferType == SECBUFFER_EXTRA)
 				pExtraBuffer = &msg[i];
 		}
 	}
@@ -631,15 +631,15 @@ SECURITY_STATUS SecureSocketImpl::decodeBufferFull(BYTE* pBuffer, DWORD bufSize,
 		}
 		else
 		{
-			// everything decoded
-			if (securityStatus != SEC_E_OK && securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
+			if (securityStatus == SEC_E_OK)
 			{
-				throw SSLException("Failed to decode data", Utility::formatError(securityStatus));
-			}
-			else if (securityStatus == SEC_E_OK)
-			{
+				// everything decoded
 				pBuffer = 0;
 				bufSize = 0;
+			}
+			else if (securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
+			{
+				return securityStatus;
 			}
 		}
 
@@ -970,6 +970,8 @@ void SecureSocketImpl::performClientHandshakeLoopCondReceive()
 	performClientHandshakeLoopInit();
 	if (_needData)
 	{
+		if (_recvBuffer.capacity() != IO_BUFFER_SIZE)
+ 			_recvBuffer.setCapacity(IO_BUFFER_SIZE);
 		performClientHandshakeLoopReceive();
 	}
 	else _needData = true;
@@ -1281,7 +1283,7 @@ void SecureSocketImpl::verifyCertificateChainClient(PCCERT_CONTEXT pServerCert)
 			BOOL ok = CertVerifyRevocation(
 					X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
 					CERT_CONTEXT_REVOCATION_TYPE,
-					certs.size(),
+					static_cast<DWORD>(certs.size()),
 					(void**) &certs[0],
 					CERT_VERIFY_REV_CHAIN_FLAG,
 					NULL,
@@ -1388,7 +1390,7 @@ void SecureSocketImpl::serverVerifyCertificate()
 		BOOL ok = CertVerifyRevocation(
 						X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
 						CERT_CONTEXT_REVOCATION_TYPE,
-						certs.size(),
+						static_cast<DWORD>(certs.size()),
 						(void**) &certs[0],
 						CERT_VERIFY_REV_CHAIN_FLAG,
 						NULL,

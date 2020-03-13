@@ -190,7 +190,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI>");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager Client.\n"
-			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward a remote TCP port to the local\n"
 			"host via the macchina.io Remote Manager server.\n\n"

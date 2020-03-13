@@ -194,7 +194,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- RDP-OPTIONS]");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager RDP Client.\n"
-			"Copyright (c) 2019 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2019-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a Remote Desktop connection to a remote\n"
 			"host via the macchina.io Remote Manager server.\n\n"

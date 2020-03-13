@@ -240,7 +240,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager SSH Client.\n"
-			"Copyright (c) 2014-2019 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2014-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SSH connection to a remote\n"
 			"host via the macchina.io Remote Manager server.\n\n"

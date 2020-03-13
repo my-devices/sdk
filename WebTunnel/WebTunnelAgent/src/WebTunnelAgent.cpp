@@ -228,8 +228,8 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
-			"macchina.io Remote Manager Agent.\n"
-			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
+			"macchina.io Remote Manager Device Agent.\n"
+			"Copyright (c) 2013-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io Remote Manager.\n\n"
