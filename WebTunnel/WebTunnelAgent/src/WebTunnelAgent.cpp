@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2016, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2020, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -930,7 +930,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.1");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

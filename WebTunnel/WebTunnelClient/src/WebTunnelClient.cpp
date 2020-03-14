@@ -1,7 +1,7 @@
 //
 // WebTunnelClient.cpp
 //
-// Copyright (c) 2013, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2020, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -10,6 +10,7 @@
 
 #include "Poco/WebTunnel/LocalPortForwarder.h"
 #include "Poco/Net/HTTPClientSession.h"
+#include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -57,6 +58,32 @@ public:
 		Poco::Net::uninitializeSSL();
 #endif
 	}
+};
+
+
+class JWTWebSocketFactory: public Poco::WebTunnel::WebSocketFactory
+{
+public:
+	JWTWebSocketFactory(const std::string& jwt, Poco::Timespan timeout = Poco::Timespan(30, 0)):
+		_jwt(jwt),
+		_timeout(timeout)
+	{
+	}
+
+	Poco::Net::WebSocket* createWebSocket(const Poco::URI& uri, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response)
+	{
+		Poco::SharedPtr<Poco::Net::HTTPClientSession> pSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri);
+		pSession->setTimeout(_timeout);
+		if (!_jwt.empty())
+		{
+			request.set(Poco::Net::HTTPRequest::AUTHORIZATION, Poco::format("bearer %s", _jwt));
+		}
+		return new Poco::Net::WebSocket(*pSession, request, response);
+	}
+
+private:
+	std::string _jwt;
+	Poco::Timespan _timeout;
 };
 
 
@@ -114,7 +141,7 @@ protected:
 		options.addOption(
 			Option("local-port", "L", "Specify local port number (required).")
 				.required(false)
-				.repeatable(true)
+				.repeatable(false)
 				.argument("port")
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleLocalPort)));
@@ -122,24 +149,31 @@ protected:
 		options.addOption(
 			Option("remote-port", "R", "Specify remote port number (required).")
 				.required(false)
-				.repeatable(true)
+				.repeatable(false)
 				.argument("port")
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleRemotePort)));
 
 		options.addOption(
-			Option("username", "u", "Specify username for Remote Manager server (required).")
+			Option("username", "u", "Specify username for Remote Manager server.")
 				.required(false)
-				.repeatable(true)
+				.repeatable(false)
 				.argument("username")
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleUsername)));
 
 		options.addOption(
-			Option("password", "p", "Specify password for Remote Manager server (required).")
+			Option("password", "p", "Specify password for Remote Manager server.")
 				.required(false)
-				.repeatable(true)
+				.repeatable(false)
 				.argument("password")
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handlePassword)));
+
+		options.addOption(
+			Option("token", "t", "Specify token (JWT) for authenticating against Remote Manager server.")
+				.required(false)
+				.repeatable(false)
+				.argument("token")
+				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleToken)));
 
 		options.addOption(
 			Option("command", "C", "Specify a command to run (instead of waiting).")
@@ -184,6 +218,11 @@ protected:
 	void handlePassword(const std::string& name, const std::string& value)
 	{
 		_password = value;
+	}
+
+	void handleToken(const std::string& name, const std::string& value)
+	{
+		_token = value;
 	}
 
 	void handleCommand(const std::string& name, const std::string& value)
@@ -318,10 +357,22 @@ protected:
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
-			promptLogin();
+			if (_token.empty())
+			{
+				promptLogin();
+			}
 
 			Poco::URI uri(args[0]);
-			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout));
+			Poco::WebTunnel::WebSocketFactory::Ptr pWSF;
+			if (!_token.empty())
+			{
+				pWSF = new JWTWebSocketFactory(_token, connectTimeout);
+			}
+			else
+			{
+				pWSF = new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout);
+			}
+			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, pWSF);
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
 
@@ -345,6 +396,7 @@ private:
 	Poco::UInt16 _remotePort;
 	std::string _username;
 	std::string _password;
+	std::string _token;
 	std::string _command;
 	SSLInitializer _sslInitializer;
 };

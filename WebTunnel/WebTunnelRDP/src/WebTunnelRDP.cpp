@@ -1,7 +1,7 @@
 //
 // WebTunnelRDP.cpp
 //
-// Copyright (c) 2015, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2020, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
