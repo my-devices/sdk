@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2016, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2020, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -229,7 +229,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager Device Agent.\n"
-			"Copyright (c) 2013-2019 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io Remote Manager.\n\n"
@@ -930,7 +930,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.1");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

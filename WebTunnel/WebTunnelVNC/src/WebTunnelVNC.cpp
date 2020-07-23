@@ -1,7 +1,7 @@
 //
 // WebTunnelVNC.cpp
 //
-// Copyright (c) 2015, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2020, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -194,7 +194,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- VNC-OPTIONS]");
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager VNC Client.\n"
-			"Copyright (c) 2015-2019 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2015-2020 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a VNC connection to a remote\n"
 			"host via the macchina.io Remote Manager server.\n\n"

@@ -49,7 +49,13 @@ Furthermore, the following executables are included:
 The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
-## Easy Install (Linux and macOS)
+## Pre-Built Executables
+
+Pre-built executables for Windows, macOS and some Linux distributions
+(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
+
+
+## Easy Install from Source (Linux and macOS)
 
 The easiest way to install the above mentioned executables on a Linux or macOS system
 from source is to download and run the
@@ -108,6 +114,27 @@ On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
 
 [CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
 
+### Installing All Dependencies (Linux and macOS)
+
+All dependencies can be installed with the following commands:
+
+#### Debian Linux (including Ubuntu and Raspbian)
+
+```
+$ sudo apt-get -y update && sudo apt-get -y install git g++ make cmake libssl-dev
+```
+
+#### RedHat Linux
+
+```
+$ sudo yum install -y git gcc-c++ make cmake3 openssl-devel
+```
+
+#### macOS (with Homebrew)
+
+```
+$ brew install cmake openssl
+```
 
 ## Building with CMake (Linux, macOS, Windows)
 
