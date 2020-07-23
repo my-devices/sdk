@@ -769,7 +769,7 @@ protected:
 					{
 						_ports.insert(static_cast<Poco::UInt16>(port));
 					}
-					else
+					else if (port != 0)
 					{
 						logger().error(Poco::format("Out-of-range port number specified in configuration: %d", port));
 						return Poco::Util::Application::EXIT_CONFIG;
