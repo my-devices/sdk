@@ -93,7 +93,8 @@ public:
 	WebTunnelClient():
 		_helpRequested(false),
 		_localPort(0),
-		_remotePort(0)
+		_remotePort(0),
+		_bindAddress("localhost")
 	{
 	}
 
@@ -155,6 +156,13 @@ protected:
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleRemotePort)));
 
 		options.addOption(
+			Option("bind-address", "b", "Specify local address to bind server socket to (defaults to \"localhost\").")
+				.required(false)
+				.repeatable(false)
+				.argument("address")
+				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleBindAddress)));
+
+		options.addOption(
 			Option("username", "u", "Specify username for Remote Manager server.")
 				.required(false)
 				.repeatable(false)
@@ -208,6 +216,11 @@ protected:
 	void handleRemotePort(const std::string& name, const std::string& value)
 	{
 		_remotePort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
+	}
+
+	void handleBindAddress(const std::string& name, const std::string& value)
+	{
+		_bindAddress = value;
 	}
 
 	void handleUsername(const std::string& name, const std::string& value)
@@ -372,7 +385,8 @@ protected:
 			{
 				pWSF = new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout);
 			}
-			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, pWSF);
+			Poco::Net::SocketAddress localAddr(_bindAddress, _localPort);
+			Poco::WebTunnel::LocalPortForwarder forwarder(localAddr, _remotePort, uri, 0, pWSF);
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
 
@@ -394,6 +408,7 @@ private:
 	bool _helpRequested;
 	Poco::UInt16 _localPort;
 	Poco::UInt16 _remotePort;
+	std::string _bindAddress;
 	std::string _username;
 	std::string _password;
 	std::string _token;
