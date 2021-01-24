@@ -7,7 +7,7 @@ add_executable(${APP_NAME} ${LOCAL_SRCS})
 
 if(ENABLE_NETSSL_WIN)
 	target_compile_definitions(${APP_NAME} PUBLIC WEBTUNNEL_ENABLE_TLS=1)
-	target_link_libraries(${APP_NAME} PocoNetSSLWin)
+	target_link_libraries(${APP_NAME} Poco::NetSSLWin)
 else()
 find_package(OpenSSL)
 if(OPENSSL_FOUND)
