@@ -108,9 +108,10 @@ Productions that comes with a
 
 ### Toolchain
 
-A C++ compiler is required to build the SDK and applications. The system's default
-compiler (gcc on Linux, clang on macOS) should be fine on reasonably recent systems.
-On Windows, Visual C++ is recommended (any version from 2008 to 2019 will do).
+A C++ compiler (C++14 or newer) is required to build the SDK and applications.
+The system's default compiler (gcc on Linux, clang on macOS) should be fine on
+reasonably recent systems.
+On Windows, Visual C++ is recommended (any version from 2015 to 2019 will do).
 
 [CMake](https://cmake.org) 3.2 (or newer) is the recommended way to build the SDK.
 
