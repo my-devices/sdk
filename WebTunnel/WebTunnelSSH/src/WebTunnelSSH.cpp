@@ -1,7 +1,7 @@
 //
 // WebTunnelSSH.cpp
 //
-// Copyright (c) 2014-2020, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2014-2021, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -44,6 +44,7 @@ using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::OptionCallback;
 using Poco::Util::HelpFormatter;
+using namespace std::string_literals;
 
 
 class SSLInitializer
@@ -74,10 +75,10 @@ public:
 		_remotePort(22)
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
-		_sshClient = findExecutable("ssh.exe");
+		_sshClient = findExecutable("ssh.exe"s);
 		if (_sshClient.empty())
 		{
-			_sshClient = findExecutable("putty.exe");
+			_sshClient = findExecutable("putty.exe"s);
 		}
 #else
 		_sshClient = "ssh";
@@ -113,80 +114,80 @@ protected:
 		Poco::Util::Application::defineOptions(options);
 
 		options.addOption(
-			Option("help", "h", "Display help information on command line arguments.")
+			Option("help"s, "h"s, "Display help information on command line arguments."s)
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleHelp)));
 
 		options.addOption(
-			Option("config-file", "c", "Load configuration data from a file.")
+			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
-				.argument("file")
+				.argument("file"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleConfig)));
 
 		options.addOption(
-			Option("ssh-client", "C", "Specify the name of the SSH client executable (default: ssh or putty.exe).")
+			Option("ssh-clients", "C"s, "Specify the name of the SSH client executable (default: ssh or putty.exe)."s)
 				.required(false)
 				.repeatable(false)
-				.argument("program")
+				.argument("program"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleClient)));
 
 		options.addOption(
-			Option("scp", "", "Use scp as SSH client for copying files between local host and target.")
+			Option("scp"s, ""s, "Use scp as SSH client for copying files between local host and target."s)
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleSCP)));
 
 		options.addOption(
-			Option("local-port", "L", "Specify local port number (default: ephemeral).")
+			Option("local-port"s, "L"s, "Specify local port number (default: ephemeral)."s)
 				.required(false)
 				.repeatable(false)
-				.argument("port")
+				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleLocalPort)));
 
 		options.addOption(
-			Option("remote-port", "R", "Specify remote port number (default: SSH/22).")
+			Option("remote-port"s, "R"s, "Specify remote port number (default: SSH/22)."s)
 				.required(false)
 				.repeatable(false)
-				.argument("port")
+				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleRemotePort)));
 
 		options.addOption(
-			Option("username", "u", "Specify username for Remote Manager server.")
+			Option("username"s, "u"s, "Specify username for Remote Manager server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("username")
+				.argument("username"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleUsername)));
 
 		options.addOption(
-			Option("password", "p", "Specify password for Remote Manager server.")
+			Option("password"s, "p"s, "Specify password for Remote Manager server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("password")
+				.argument("password"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handlePassword)));
 
 		options.addOption(
-			Option("login-name", "l", "Specify remote (SSH) login name.")
+			Option("login-name"s, "l"s, "Specify remote (SSH) login name."s)
 				.required(false)
 				.repeatable(false)
-				.argument("username")
+				.argument("username"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleLogin)));
 
 		options.addOption(
-			Option("command", "m", "Specify remote (SSH) command. This is passed as second argument to the SSH client.")
+			Option("command"s, "m"s, "Specify remote (SSH) command. This is passed as second argument to the SSH client."s)
 				.required(false)
 				.repeatable(false)
-				.argument("command")
+				.argument("command"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleCommand)));
 
 		options.addOption(
-			Option("define", "D", "Define or override a configuration property.")
+			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
-				.argument("name=value")
+				.argument("name=value"s)
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleDefine)));
 	}
 
@@ -249,10 +250,10 @@ protected:
 	{
 		HelpFormatter helpFormatter(options());
 		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]");
+		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager SSH Client.\n"
-			"Copyright (c) 2014-2020 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2014-2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SSH connection to a remote\n"
 			"host via the macchina.io Remote Manager server.\n\n"
@@ -264,11 +265,11 @@ protected:
 			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #endif
 			"\n\n"
-			"The following command-line options are supported:"
+			"The following command-line options are supported:"s
 		);
 		helpFormatter.setFooter(
 			"For more information, please visit the macchina.io "
-			"website at <https://macchina.io>."
+			"website at <https://macchina.io>."s
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -323,7 +324,7 @@ protected:
 
 	std::string findExecutable(const std::string& name)
 	{
-		std::string pathList = Poco::Environment::get("PATH");
+		std::string pathList = Poco::Environment::get("PATH"s);
 		Poco::Path p;
 		if (Poco::Path::find(pathList, name, p))
 			return p.toString();
@@ -340,15 +341,15 @@ protected:
 		}
 		else
 		{
-			Poco::Timespan connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout", 30), 0);
-			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout", 300), 0);
-			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout", 7200), 0);
+			Poco::Timespan connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout"s, 30), 0);
+			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
+			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
-			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
-			std::string cipherList = config().getString("tls.ciphers", "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-			bool extendedVerification = config().getBool("tls.extendedCertificateVerification", false);
-			std::string caLocation = config().getString("tls.caLocation", "");
+			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
+			std::string cipherList = config().getString("tls.ciphers"s, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"s);
+			bool extendedVerification = config().getBool("tls.extendedCertificateVerification"s, false);
+			std::string caLocation = config().getString("tls.caLocation"s, ""s);
 
 			Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 			if (acceptUnknownCert)
@@ -357,28 +358,28 @@ protected:
 				pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
 
 #if defined(POCO_NETSSL_WIN)
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", Poco::Net::Context::VERIFY_RELAXED);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
 #else
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", "", caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
 #endif
 			pContext->enableExtendedCertificateVerification(extendedVerification);
 			Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
 #endif
 
-			if (config().getBool("http.proxy.enable", false))
+			if (config().getBool("http.proxy.enable"s, false))
 			{
 				Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
-				proxyConfig.host = config().getString("http.proxy.host", "");
-				proxyConfig.port = static_cast<Poco::UInt16>(config().getInt("http.proxy.port", 80));
-				proxyConfig.username = config().getString("http.proxy.username", "");
-				proxyConfig.password = config().getString("http.proxy.password", "");
+				proxyConfig.host = config().getString("http.proxy.host"s, ""s);
+				proxyConfig.port = static_cast<Poco::UInt16>(config().getInt("http.proxy.port"s, 80));
+				proxyConfig.username = config().getString("http.proxy.username"s, ""s);
+				proxyConfig.password = config().getString("http.proxy.password"s, ""s);
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
 			_sshClient = config().getString("ssh.executable", _sshClient);
 			if (_sshClient.empty())
 			{
-				logger().error("No SSH client program available. Please configure the SSH client program using the ssh.executable configuration property or ssh-client option.");
+				logger().error("No SSH client program available. Please configure the SSH client program using the ssh.executable configuration property or ssh-client option."s);
 				return Poco::Util::Application::EXIT_CONFIG;
 			}
 
@@ -393,21 +394,21 @@ protected:
 
 			Poco::Process::Args sshArgs;
 			if (Poco::icompare(_sshClient, 0, 5, "putty") == 0 || Poco::icompare(_sshClient, 0, 3, "scp") == 0)
-				sshArgs.push_back("-P");
+				sshArgs.push_back("-P"s);
 			else
-				sshArgs.push_back("-p");
+				sshArgs.push_back("-p"s);
 			sshArgs.push_back(Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
 
 			std::vector<std::string>::const_iterator itArgs = ++args.begin();
 			if (!_login.empty() && Poco::icompare(_sshClient, 0, 3, "scp") != 0)
 			{
-				sshArgs.push_back("-l");
+				sshArgs.push_back("-l"s);
 				sshArgs.push_back(_login);
 			}
 			sshArgs.insert(sshArgs.end(), itArgs, args.end());
 			if (Poco::icompare(_sshClient, 0, 3, "scp") != 0)
 			{
-				sshArgs.push_back("localhost");
+				sshArgs.push_back("localhost"s);
 			}
 
 			if (!_command.empty())
@@ -415,10 +416,10 @@ protected:
 				sshArgs.push_back(_command);
 			}
 
-			logger().debug(Poco::format("Launching SSH client: %s", _sshClient));
+			logger().debug("Launching SSH client: %s"s, _sshClient);
 			Poco::ProcessHandle ph = Poco::Process::launch(_sshClient, sshArgs);
 			rc = ph.wait();
-			logger().debug(Poco::format("SSH client terminated with exit code %d", rc));
+			logger().debug("SSH client terminated with exit code %d"s, rc);
 		}
 		return rc;
 	}

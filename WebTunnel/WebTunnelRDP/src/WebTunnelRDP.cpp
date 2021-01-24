@@ -1,7 +1,7 @@
 //
 // WebTunnelRDP.cpp
 //
-// Copyright (c) 2015-2020, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2021, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -42,6 +42,7 @@ using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::OptionCallback;
 using Poco::Util::HelpFormatter;
+using namespace std::string_literals;
 
 
 class SSLInitializer
@@ -102,53 +103,53 @@ protected:
 		Poco::Util::Application::defineOptions(options);
 
 		options.addOption(
-			Option("help", "h", "Display help information on command line arguments.")
+			Option("help"s, "h"s, "Display help information on command line arguments."s)
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleHelp)));
 
 		options.addOption(
-			Option("config-file", "c", "Load configuration data from a file.")
+			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
-				.argument("file")
+				.argument("file"s)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleConfig)));
 
 		options.addOption(
-			Option("local-port", "L", "Specify local port number (default: ephemeral).")
+			Option("local-port"s, "L"s, "Specify local port number (default: ephemeral)."s)
 				.required(false)
 				.repeatable(false)
-				.argument("port")
+				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleLocalPort)));
 
 		options.addOption(
-			Option("remote-port", "R", "Specify remote port number (default: RDP/3389).")
+			Option("remote-port"s, "R"s, "Specify remote port number (default: RDP/3389)."s)
 				.required(false)
 				.repeatable(false)
-				.argument("port")
+				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleRemotePort)));
 
 		options.addOption(
-			Option("username", "u", "Specify username for Remote Manager server.")
+			Option("username"s, "u"s, "Specify username for Remote Manager server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("username")
+				.argument("username"s)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleUsername)));
 
 		options.addOption(
-			Option("password", "p", "Specify password for Remote Manager server.")
+			Option("password"s, "p"s, "Specify password for Remote Manager server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("password")
+				.argument("password"s)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handlePassword)));
 
 		options.addOption(
-			Option("define", "D", "Define or override a configuration property.")
+			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
-				.argument("name=value")
+				.argument("name=value"s)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleDefine)));
 	}
 
@@ -191,10 +192,10 @@ protected:
 	{
 		HelpFormatter helpFormatter(options());
 		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- RDP-OPTIONS]");
+		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- RDP-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager RDP Client.\n"
-			"Copyright (c) 2019-2020 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2019-2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a Remote Desktop connection to a remote\n"
 			"host via the macchina.io Remote Manager server.\n\n"
@@ -206,11 +207,11 @@ protected:
 			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #endif
 			"\n\n"
-			"The following command-line options are supported:"
+			"The following command-line options are supported:"s
 		);
 		helpFormatter.setFooter(
 			"For more information, please visit the macchina.io "
-			"website at <https://macchina.io>."
+			"website at <https://macchina.io>."s
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -272,15 +273,15 @@ protected:
 		}
 		else
 		{
-			Poco::Timespan connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout", 30), 0);
-			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout", 300), 0);
-			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout", 7200), 0);
+			Poco::Timespan connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout"s, 30), 0);
+			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
+			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
-			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
-			std::string cipherList = config().getString("tls.ciphers", "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-			bool extendedVerification = config().getBool("tls.extendedCertificateVerification", false);
-			std::string caLocation = config().getString("tls.caLocation", "");
+			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
+			std::string cipherList = config().getString("tls.ciphers"s, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"s);
+			bool extendedVerification = config().getBool("tls.extendedCertificateVerification"s, false);
+			std::string caLocation = config().getString("tls.caLocation"s, ""s);
 
 			Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 			if (acceptUnknownCert)
@@ -289,22 +290,22 @@ protected:
 				pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
 
 #if defined(POCO_NETSSL_WIN)
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", Poco::Net::Context::VERIFY_RELAXED);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
 #else
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", "", caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
 #endif
 			pContext->enableExtendedCertificateVerification(extendedVerification);
 			Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
 #endif
 
-			if (config().getBool("http.proxy.enable", false))
+			if (config().getBool("http.proxy.enable"s, false))
 			{
-				logger().information("Proxy enable");
+				logger().information("Proxy enable"s);
 				Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
-				proxyConfig.host = config().getString("http.proxy.host", "");
-				proxyConfig.port = static_cast<Poco::UInt16>(config().getInt("http.proxy.port", 80));
-				proxyConfig.username = config().getString("http.proxy.username", "");
-				proxyConfig.password = config().getString("http.proxy.password", "");
+				proxyConfig.host = config().getString("http.proxy.host"s, ""s);
+				proxyConfig.port = static_cast<Poco::UInt16>(config().getInt("http.proxy.port"s, 80));
+				proxyConfig.username = config().getString("http.proxy.username"s, ""s);
+				proxyConfig.password = config().getString("http.proxy.password"s, ""s);
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
@@ -320,20 +321,20 @@ protected:
 			Poco::Process::Args rdpArgs;
 #if defined(__APPLE__)
 			rdpExecutable = "open";
-			std::string url = Poco::format("rdp://full%%20address=s:localhost:%hu", forwarder.localPort());
-			rdpArgs.push_back("-W");
-			rdpArgs.push_back("-n");
+			std::string url = Poco::format("rdp://full%%20address=s:localhost:%hu"s, forwarder.localPort());
+			rdpArgs.push_back("-W"s);
+			rdpArgs.push_back("-n"s);
 			rdpArgs.push_back(url);
 #else
 			rdpExecutable = "mstsc";
-			rdpArgs.push_back("/v:localhost:" + Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
+			rdpArgs.push_back("/v:localhost:"s + Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
 			rdpArgs.insert(rdpArgs.end(), ++args.begin(), args.end());
 #endif
 
-			logger().debug(Poco::format("Launching Remote Desktop Connection client: %s", rdpExecutable));
+			logger().debug("Launching Remote Desktop Connection client: %s"s, rdpExecutable);
 			Poco::ProcessHandle ph = Poco::Process::launch(rdpExecutable, rdpArgs);
 			rc = ph.wait();
-			logger().debug(Poco::format("Remote Desktop client terminated with exit code %d", rc));
+			logger().debug("Remote Desktop client terminated with exit code %d"s, rc);
 		}
 		return rc;
 	}

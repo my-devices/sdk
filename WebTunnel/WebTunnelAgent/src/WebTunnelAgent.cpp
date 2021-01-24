@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2020, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2021, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -57,6 +57,7 @@ using Poco::Util::Option;
 using Poco::Util::OptionSet;
 using Poco::Util::OptionCallback;
 using Poco::Util::HelpFormatter;
+using namespace std::string_literals;
 
 
 class SSLInitializer
@@ -187,23 +188,23 @@ protected:
 		Poco::Util::ServerApplication::defineOptions(options);
 
 		options.addOption(
-			Option("help", "h", "Display help information on command line arguments.")
+			Option("help"s, "h"s, "Display help information on command line arguments."s)
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelAgent>(this, &WebTunnelAgent::handleHelp)));
 
 		options.addOption(
-			Option("config-file", "c", "Load configuration data from a file.")
+			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
-				.argument("file")
+				.argument("file"s)
 				.callback(OptionCallback<WebTunnelAgent>(this, &WebTunnelAgent::handleConfig)));
 
 		options.addOption(
-			Option("define", "D", "Define or override a configuration property.")
+			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
-				.argument("name=value")
+				.argument("name=value"s)
 				.callback(OptionCallback<WebTunnelAgent>(this, &WebTunnelAgent::handleDefine)));
 	}
 
@@ -226,17 +227,17 @@ protected:
 	{
 		HelpFormatter helpFormatter(options());
 		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS");
+		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io Remote Manager Device Agent.\n"
-			"Copyright (c) 2013-2020 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io Remote Manager.\n\n"
-			"The following command-line options are supported:");
+			"The following command-line options are supported:"s);
 		helpFormatter.setFooter(
 			"For more information, please visit the macchina.io "
-			"website at <https://macchina.io>."
+			"website at <https://macchina.io>."s
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -278,45 +279,45 @@ protected:
 
 	void addProperties(Poco::Net::HTTPRequest& request, const std::map<std::string, std::string>& props)
 	{
-		request.add("X-PTTH-Set-Property", Poco::format("device;targetHost=%s", _host.toString()));
-		request.add("X-PTTH-Set-Property", Poco::format("device;targetPorts=%s", formatPorts()));
+		request.add("X-PTTH-Set-Property"s, Poco::format("device;targetHost=%s"s, _host.toString()));
+		request.add("X-PTTH-Set-Property"s, Poco::format("device;targetPorts=%s"s, formatPorts()));
 		if (!_httpPath.empty())
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;httpPath=%s", quoteString(_httpPath)));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;httpPath=%s"s, quoteString(_httpPath)));
 		}
 		if (_httpPort != 0)
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;httpPort=%hu", _httpPort));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;httpPort=%hu"s, _httpPort));
 		}
 		if (_sshPort != 0)
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;sshPort=%hu", _sshPort));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;sshPort=%hu"s, _sshPort));
 		}
 		if (_vncPort != 0)
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;vncPort=%hu", _vncPort));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;vncPort=%hu"s, _vncPort));
 		}
 		if (_rdpPort != 0)
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;rdpPort=%hu", _rdpPort));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;rdpPort=%hu"s, _rdpPort));
 		}
 		if (!_deviceName.empty())
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;name=%s", quoteString(_deviceName)));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;name=%s"s, quoteString(_deviceName)));
 		}
 		if (!_deviceVersion.empty())
 		{
-			request.add("X-PTTH-Set-Property", Poco::format("device;version=%s", quoteString(_deviceVersion)));
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;version=%s"s, quoteString(_deviceVersion)));
 		}
 
 		if (!props.empty())
 		{
 			for (std::map<std::string, std::string>::const_iterator it = props.begin(); it != props.end(); ++it)
 			{
-				request.add("X-PTTH-Set-Property", Poco::format("device;%s=%s", it->first, quoteString(it->second)));
+				request.add("X-PTTH-Set-Property"s, Poco::format("device;%s=%s"s, it->first, quoteString(it->second)));
 			}
 		}
-		request.set("User-Agent", _userAgent);
+		request.set("User-Agent"s, _userAgent);
 	}
 
 	std::string formatPorts()
@@ -338,7 +339,7 @@ protected:
 		else
 			reflectorURI = _reflectorURI;
 
-		logger().information("Connecting to " + reflectorURI.toString() + "...");
+		logger().information("Connecting to %s..."s, reflectorURI.toString());
 
 		_pHTTPClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(reflectorURI);
 		_pHTTPClientSession->setTimeout(_httpTimeout);
@@ -368,19 +369,19 @@ protected:
 			// Note: Obtain username/password as late as possible. Reason: The username
 			// may contain ${system.nodeId} (Ethernet address), which may not be available
 			// by the time we launch, as the network interface may not be up yet.
-			std::string username = config().getString("webtunnel.username", "");
-			std::string password = config().getString("webtunnel.password", "");
+			std::string username = config().getString("webtunnel.username"s, ""s);
+			std::string password = config().getString("webtunnel.password"s, ""s);
 			if (!username.empty())
 			{
 				Poco::Net::HTTPBasicCredentials creds(username, password);
 				creds.authenticate(request);
 			}
 
-			logger().debug("Creating WebSocket...");
+			logger().debug("Creating WebSocket..."s);
 			Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket = new Poco::Net::WebSocket(*_pHTTPClientSession, request, response);
 			if (response.get(SEC_WEBSOCKET_PROTOCOL, "") == WEBTUNNEL_PROTOCOL)
 			{
-				logger().debug("WebSocket established. Creating RemotePortForwarder...");
+				logger().debug("WebSocket established. Creating RemotePortForwarder..."s);
 				pWebSocket->setNoDelay(true);
 				_retryDelay = MIN_RETRY_DELAY;
 				_pDispatcher = new Poco::WebTunnel::SocketDispatcher(_threads);
@@ -388,7 +389,7 @@ protected:
 				_pForwarder->webSocketClosed += Poco::delegate(this, &WebTunnelAgent::onClose);
 				_pForwarder->setConnectTimeout(_connectTimeout);
 				_pForwarder->setLocalTimeout(_localTimeout);
-				logger().information("WebTunnel connection established.");
+				logger().information("WebTunnel connection established."s);
 
 				if (!props.empty() && _propertiesUpdateInterval > 0)
 				{
@@ -400,7 +401,7 @@ protected:
 			}
 			else
 			{
-				std::string msg(Poco::format("The host at %s does not support the WebTunnel protocol.", reflectorURI.toString()));
+				std::string msg(Poco::format("The host at %s does not support the WebTunnel protocol."s, reflectorURI.toString()));
 				logger().error(msg);
 
 				pWebSocket->shutdown(Poco::Net::WebSocket::WS_PROTOCOL_ERROR);
@@ -426,14 +427,14 @@ protected:
 		{
 			if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_FOUND)
 			{
-				_redirectURI = Poco::URI(_reflectorURI, response.get("Location"));
+				_redirectURI = Poco::URI(_reflectorURI, response.get("Location"s));
 				_retryDelay = MIN_RETRY_DELAY;
-				logger().information("Redirected to %s.", _redirectURI.toString());
+				logger().information("Redirected to %s."s, _redirectURI.toString());
 			}
 			else
 			{
-				std::string msg = response.get("X-PTTH-Error", exc.displayText());
-				logger().error("Cannot connect to reflector at %s: %s", reflectorURI.toString(), msg);
+				std::string msg = response.get("X-PTTH-Error"s, exc.displayText());
+				logger().error("Cannot connect to reflector at %s: %s"s, reflectorURI.toString(), msg);
 				statusChanged(STATUS_ERROR, msg);
 				if (_retryDelay < MAX_RETRY_DELAY)
 				{
@@ -444,7 +445,7 @@ protected:
 		}
 		catch (Poco::Exception& exc)
 		{
-			logger().error("Cannot connect to reflector at %s: %s", reflectorURI.toString(), exc.displayText());
+			logger().error("Cannot connect to reflector at %s: %s"s, reflectorURI.toString(), exc.displayText());
 			statusChanged(STATUS_ERROR, exc.displayText());
 			if (_retryDelay < MAX_RETRY_DELAY)
 			{
@@ -460,7 +461,7 @@ protected:
 		stopPropertiesUpdateTask();
 		if (_pForwarder)
 		{
-			logger().information("Disconnecting from reflector server");
+			logger().information("Disconnecting from reflector server."s);
 
 			_pForwarder->webSocketClosed -= Poco::delegate(this, &WebTunnelAgent::onClose);
 			_pForwarder->stop();
@@ -518,15 +519,15 @@ protected:
 			}
 			catch (Poco::Exception& exc)
 			{
-				logger().warning("Exception during disconnect: " + exc.displayText());
+				logger().warning("Exception during disconnect: %s"s, exc.displayText());
 			}
 			catch (std::exception& exc)
 			{
-				logger().error(std::string("Exception during disconnect: ") + exc.what());
+				logger().error("Exception during disconnect: %s"s, std::string(exc.what()));
 			}
 			catch (...)
 			{
-				logger().error("Unknown exception during disconnect.");
+				logger().error("Unknown exception during disconnect."s);
 			}
 			connect();
 		}
@@ -538,7 +539,7 @@ protected:
 		}
 		catch (...)
 		{
-			logger().fatal("Unknown exception during connect()");
+			logger().fatal("Unknown exception during connect()"s);
 		}
 	}
 
@@ -550,7 +551,7 @@ protected:
 		}
 		catch (Poco::Exception& exc)
 		{
-			logger().warning("Exception during disconnect: " + exc.displayText());
+			logger().warning("Exception during disconnect: %s"s, exc.displayText());
 		}
 		_disconnected.set();
 	}
@@ -563,7 +564,7 @@ protected:
 			retryDelay += _random.next(250*_retryDelay);
 			Poco::Clock nextClock;
 			nextClock += retryDelay;
-			logger().information(Poco::format("Will reconnect in %.2f seconds.", retryDelay/1000000.0));
+			logger().information(Poco::format("Will reconnect in %.2f seconds."s, retryDelay/1000000.0));
 			_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnectTask), nextClock);
 		}
 	}
@@ -576,21 +577,21 @@ protected:
 	void notifyConnected(const std::string&)
 	{
 		Poco::Process::Args args;
-		args.push_back("connected");
+		args.push_back("connected"s);
 		notify(args);
 	}
 
 	void notifyDisconnected(const std::string&)
 	{
 		Poco::Process::Args args;
-		args.push_back("disconnected");
+		args.push_back("disconnected"s);
 		notify(args);
 	}
 
 	void notifyError(const std::string& msg)
 	{
 		Poco::Process::Args args;
-		args.push_back("error");
+		args.push_back("error"s);
 		args.push_back(msg);
 		notify(args);
 	}
@@ -645,7 +646,7 @@ protected:
 
 	void updateProperties(Poco::Util::TimerTask&)
 	{
-		logger().debug("Updating device properties...");
+		logger().debug("Updating device properties..."s);
 		try
 		{
 			std::map<std::string, std::string> props;
@@ -654,17 +655,17 @@ protected:
 		}
 		catch (Poco::Exception& exc)
 		{
-			logger().error("Failed to update device properties: %s", exc.displayText());
+			logger().error("Failed to update device properties: %s"s, exc.displayText());
 		}
 	}
 
 	void collectProperties(std::map<std::string, std::string>& props)
 	{
 		std::vector<std::string> keys;
-		config().keys("webtunnel.properties", keys);
+		config().keys("webtunnel.properties"s, keys);
 		for (std::vector<std::string>::const_iterator it = keys.begin(); it != keys.end(); ++it)
 		{
-			std::string fullName("webtunnel.properties.");
+			std::string fullName("webtunnel.properties."s);
 			fullName += *it;
 			std::string value = config().getString(fullName);
 			if (!value.empty() && value[0] == '`' && value[value.length() - 1] == '`')
@@ -677,7 +678,7 @@ protected:
 				}
 				catch (Poco::Exception& exc)
 				{
-					logger().warning("Command for property '%s' failed: %s", *it, exc.displayText());
+					logger().warning("Command for property '%s' failed: %s"s, *it, exc.displayText());
 				}
 			}
 			else
@@ -713,14 +714,14 @@ protected:
 
 	Poco::Net::Context::Ptr createContext(const std::string& prefix)
 	{
-		std::string cipherList = config().getString(prefix + ".ciphers", "HIGH:!DSS:!aNULL@STRENGTH");
+		std::string cipherList = config().getString(prefix + ".ciphers", "HIGH:!DSS:!aNULL@STRENGTH"s);
 		bool extendedVerification = config().getBool(prefix + ".extendedCertificateVerification", false);
-		std::string caLocation = config().getString(prefix + ".caLocation", "");
-		std::string privateKey = config().getString(prefix + ".privateKey", "");
-		std::string certificate = config().getString(prefix + ".certificate", "");
+		std::string caLocation = config().getString(prefix + ".caLocation", ""s);
+		std::string privateKey = config().getString(prefix + ".privateKey", ""s);
+		std::string certificate = config().getString(prefix + ".certificate", ""s);
 
 		Poco::Net::Context::VerificationMode vMode = Poco::Net::Context::VERIFY_RELAXED;
-		std::string vModeStr = config().getString(prefix + ".verification", "");
+		std::string vModeStr = config().getString(prefix + ".verification", ""s);
 		if (vModeStr == "none")
 			vMode = Poco::Net::Context::VERIFY_NONE;
 		else if (vModeStr == "relaxed")
@@ -744,7 +745,7 @@ protected:
 
 	int main(const std::vector<std::string>& args)
 	{
-		if (_helpRequested || !config().has("webtunnel.reflectorURI"))
+		if (_helpRequested || !config().has("webtunnel.reflectorURI"s))
 		{
 			displayHelp();
 		}
@@ -752,15 +753,15 @@ protected:
 		{
 			try
 			{
-				_reflectorURI = config().getString("webtunnel.reflectorURI");
-				_deviceName = config().getString("webtunnel.deviceName", "");
-				_deviceVersion = config().getString("webtunnel.deviceVersion", "");
-				std::string host = config().getString("webtunnel.host", "localhost");
+				_reflectorURI = config().getString("webtunnel.reflectorURI"s);
+				_deviceName = config().getString("webtunnel.deviceName"s, ""s);
+				_deviceVersion = config().getString("webtunnel.deviceVersion"s, ""s);
+				std::string host = config().getString("webtunnel.host"s, "localhost"s);
 				if (!Poco::Net::IPAddress::tryParse(host, _host))
 				{
 					_host = Poco::Net::DNS::resolveOne(host);
 				}
-				std::string ports = config().getString("webtunnel.ports", "");
+				std::string ports = config().getString("webtunnel.ports"s, ""s);
 				Poco::StringTokenizer tok(ports, ";,", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
 				for (Poco::StringTokenizer::Iterator it = tok.begin(); it != tok.end(); ++it)
 				{
@@ -771,52 +772,52 @@ protected:
 					}
 					else if (port != 0)
 					{
-						logger().error(Poco::format("Out-of-range port number specified in configuration: %d", port));
+						logger().error(Poco::format("Out-of-range port number specified in configuration: %d"s, port));
 						return Poco::Util::Application::EXIT_CONFIG;
 					}
 				}
 
 				if (_ports.empty())
 				{
-					logger().error("No ports to forward.");
+					logger().error("No ports to forward."s);
 					return Poco::Util::Application::EXIT_CONFIG;
 				}
 
-				_localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout", 7200), 0);
-				_connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout", 10), 0);
-				_remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout", 300), 0);
-				_threads = config().getInt("webtunnel.threads", 8);
-				_httpPath = config().getString("webtunnel.httpPath", "");
-				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort", 0));
-				_httpsRequired = config().getBool("webtunnel.https.enable", false);
-				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort", 0));
-				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort", 0));
-				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort", 0));
-				_userAgent = config().getString("webtunnel.userAgent", "");
-				_httpTimeout = Poco::Timespan(config().getInt("http.timeout", 30), 0);
-				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval", 0), 0);
+				_localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
+				_connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout"s, 10), 0);
+				_remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
+				_threads = config().getInt("webtunnel.threads"s, 8);
+				_httpPath = config().getString("webtunnel.httpPath"s, ""s);
+				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort"s, 0));
+				_httpsRequired = config().getBool("webtunnel.https.enable"s, false);
+				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort"s, 0));
+				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort"s, 0));
+				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort"s, 0));
+				_userAgent = config().getString("webtunnel.userAgent"s, ""s);
+				_httpTimeout = Poco::Timespan(config().getInt("http.timeout"s, 30), 0);
+				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval"s, 0), 0);
 
-				_useProxy = config().getBool("http.proxy.enable", false);
-				_proxyHost = config().getString("http.proxy.host", "");
-				_proxyPort = static_cast<Poco::UInt16>(config().getInt("http.proxy.port", 80));
-				_proxyUsername = config().getString("http.proxy.username", "");
-				_proxyPassword = config().getString("http.proxy.password", "");
+				_useProxy = config().getBool("http.proxy.enable"s, false);
+				_proxyHost = config().getString("http.proxy.host"s, ""s);
+				_proxyPort = static_cast<Poco::UInt16>(config().getInt("http.proxy.port"s, 80));
+				_proxyUsername = config().getString("http.proxy.username"s, ""s);
+				_proxyPassword = config().getString("http.proxy.password"s, ""s);
 
 				if (_httpPort != 0 && _ports.find(_httpPort) == _ports.end())
 				{
-					logger().warning(Poco::format("HTTP port (%hu) not in list of forwarded ports.", _httpPort));
+					logger().warning(Poco::format("HTTP port (%hu) not in list of forwarded ports."s, _httpPort));
 				}
 				if (_sshPort != 0 && _ports.find(_sshPort) == _ports.end())
 				{
-					logger().warning(Poco::format("SSH port (%hu) not in list of forwarded ports.", _sshPort));
+					logger().warning(Poco::format("SSH port (%hu) not in list of forwarded ports."s, _sshPort));
 				}
 				if (_vncPort != 0 && _ports.find(_vncPort) == _ports.end())
 				{
-					logger().warning(Poco::format("VNC/RFB port (%hu) not in list of forwarded ports.", _vncPort));
+					logger().warning(Poco::format("VNC/RFB port (%hu) not in list of forwarded ports."s, _vncPort));
 				}
 				if (_rdpPort != 0 && _ports.find(_rdpPort) == _ports.end())
 				{
-					logger().warning(Poco::format("RDP port (%hu) not in list of forwarded ports.", _rdpPort));
+					logger().warning(Poco::format("RDP port (%hu) not in list of forwarded ports."s, _rdpPort));
 				}
 
 				if (_userAgent.empty())
@@ -829,13 +830,13 @@ protected:
 					_userAgent += "; ";
 					_userAgent += Poco::Environment::osArchitecture();
 					_userAgent += ") POCO/";
-					_userAgent += Poco::format("%d.%d.%d",
+					_userAgent += Poco::format("%d.%d.%d"s,
 						static_cast<int>(Poco::Environment::libraryVersion() >> 24),
 						static_cast<int>((Poco::Environment::libraryVersion() >> 16) & 0xFF),
 						static_cast<int>((Poco::Environment::libraryVersion() >> 8) & 0xFF));
 				}
 
-				_notifyExec = config().getString("webtunnel.status.notify", "");
+				_notifyExec = config().getString("webtunnel.status.notify"s, ""s);
 				if (!_notifyExec.empty())
 				{
 					connected += Poco::delegate(this, &WebTunnelAgent::notifyConnected);
@@ -844,8 +845,8 @@ protected:
 				}
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
-				Poco::Net::Context::Ptr pContext = createContext("tls");
-				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate", true);
+				Poco::Net::Context::Ptr pContext = createContext("tls"s);
+				bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
 				Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 				if (acceptUnknownCert)
 					pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
@@ -855,7 +856,7 @@ protected:
 
 				if (_httpsRequired)
 				{
-					_pSocketFactory = new TLSSocketFactory(_httpPort, createContext("webtunnel.https"));
+					_pSocketFactory = new TLSSocketFactory(_httpPort, createContext("webtunnel.https"s));
 				}
 #endif // WEBTUNNEL_ENABLE_TLS
 
@@ -930,7 +931,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.10.1");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.11.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)
