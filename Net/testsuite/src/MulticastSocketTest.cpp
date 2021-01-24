@@ -47,16 +47,17 @@ MulticastSocketTest::~MulticastSocketTest()
 
 void MulticastSocketTest::testMulticast()
 {
-	try 
+	try
 	{
 		MulticastEchoServer echoServer;
 		MulticastSocket ms(SocketAddress::IPv4);
+		ms.setReceiveTimeout(Poco::Timespan(5, 0));
 		int n = ms.sendTo("hello", 5, echoServer.group());
-		assert (n == 5);
+		assertTrue (n == 5);
 		char buffer[256];
 		n = ms.receiveBytes(buffer, sizeof(buffer));
-		assert (n == 5);
-		assert (std::string(buffer, n) == "hello");
+		assertTrue (n == 5);
+		assertTrue (std::string(buffer, n) == "hello");
 		ms.close();
 	}
 	catch (Poco::NotImplementedException e)

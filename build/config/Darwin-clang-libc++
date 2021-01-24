@@ -17,7 +17,7 @@ LINKMODE ?= SHARED
 POCO_TARGET_OSARCH ?= x86_64
 POCO_HOST_OSARCH   := $(POCO_TARGET_OSARCH)
 ARCHFLAGS          ?= -arch $(POCO_TARGET_OSARCH)
-OSFLAGS            ?= -mmacosx-version-min=10.9
+OSFLAGS            ?= -mmacosx-version-min=10.9 -isysroot $(shell xcrun --show-sdk-path)
 
 OPENSSL_DIR        ?= /usr/local/opt/openssl
 
@@ -28,8 +28,8 @@ endif
 #
 # Tools
 #
-CC      = clang
-CXX     = clang++
+CC      = $(shell xcrun -find clang)
+CXX     = $(shell xcrun -find clang++)
 LINK    = $(CXX) -bind_at_load
 LIB     = libtool -static -o
 RANLIB  = ranlib
@@ -53,7 +53,7 @@ SHAREDLIBLINKEXT = .dylib
 # Compiler and Linker Flags
 #
 CFLAGS          = $(ARCHFLAGS) $(OSFLAGS) -std=c99
-CXXFLAGS        = $(ARCHFLAGS) $(OSFLAGS) -std=c++11 -stdlib=libc++ -Wall -Wno-sign-compare -Wno-unused-variable -Wno-unused-function -Wno-unneeded-internal-declaration
+CXXFLAGS        = $(ARCHFLAGS) $(OSFLAGS) -std=c++14 -stdlib=libc++ -Wall -Wno-sign-compare -Wno-unused-variable -Wno-unused-function -Wno-unneeded-internal-declaration
 LINKFLAGS       = $(ARCHFLAGS) $(OSFLAGS) -stdlib=libc++
 SHLIBFLAGS      = $(ARCHFLAGS) $(OSFLAGS) -stdlib=libc++
 DYLIBFLAGS      = $(ARCHFLAGS) $(OSFLAGS) -stdlib=libc++

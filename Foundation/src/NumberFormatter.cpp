@@ -19,11 +19,12 @@
 #include <locale>
 #endif
 #include <cstdio>
+#include <cinttypes>
 
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 	#define I64_FMT "I64"
-#elif defined(__APPLE__) 
+#elif defined(__APPLE__)
 	#define I64_FMT "q"
 #else
 	#define I64_FMT "ll"
@@ -235,8 +236,7 @@ void NumberFormatter::appendHex(std::string& str, unsigned long value, int width
 
 
 #ifdef POCO_HAVE_INT64
-
-#ifdef POCO_LONG_IS_64_BIT
+#ifdef POCO_INT64_IS_LONG
 
 
 void NumberFormatter::append(std::string& str, long long value)
@@ -422,8 +422,7 @@ void NumberFormatter::appendHex(std::string& str, UInt64 value, int width)
 }
 
 
-#endif // ifdef POCO_LONG_IS_64_BIT
-
+#endif // ifdef POCO_INT64_IS_LONG
 #endif // ifdef POCO_HAVE_INT64
 
 
@@ -477,13 +476,9 @@ void NumberFormatter::append(std::string& str, const void* ptr)
 {
 	char buffer[24];
 #if defined(POCO_PTR_IS_64_BIT)
-	#if defined(POCO_LONG_IS_64_BIT)
-		std::sprintf(buffer, "%016lX", (UIntPtr) ptr);
-	#else
-		std::sprintf(buffer, "%016" I64_FMT "X", (UIntPtr) ptr);
-	#endif
+	std::sprintf(buffer, "%016" PRIXPTR, (UIntPtr) ptr);
 #else
-	std::sprintf(buffer, "%08lX", (UIntPtr) ptr);
+	std::sprintf(buffer, "%08" PRIXPTR, (UIntPtr) ptr);
 #endif
 	str.append(buffer);
 }

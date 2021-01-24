@@ -1,29 +1,16 @@
-# POCO_BUILD_TYPE
-# POCO_STATIC
-# POCO_UNBUNDLED
-# POCO_NO_LOCALE
-#
-# ENABLE_{COMPONENT}
-# ENABLE_TESTS
-
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 project(Poco)
 
-set(CMAKE_C_STANDARD 11)
-
 file(STRINGS "${PROJECT_SOURCE_DIR}/libversion" SHARED_LIBRARY_VERSION)
-
 # Read the version information from the VERSION file
 file(STRINGS "${PROJECT_SOURCE_DIR}/VERSION" PACKAGE_VERSION)
 string(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" CPACK_PACKAGE_VERSION_MAJOR ${PACKAGE_VERSION})
-string(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" CPACK_PACKAGE_VERSION_MINOR ${PACKAGE_VERSION})
+string(REGEX REPLACE "[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" CPACK_PACKAGE_VERSION_MINOR ${PACKAGE_VERSION})
 string(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" CPACK_PACKAGE_VERSION_PATCH ${PACKAGE_VERSION})
 
-set(COMPLETE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+set(PROJECT_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 set(RELEASE_NAME "Unstable-trunk")
-set(PROJECT_VERSION ${COMPLETE_VERSION})
-set(CMAKE_C_STANDARD 99)
 
 # Put the libaries and binaries that get built into directories at the
 # top of the build tree rather than in hard-to-find leaf
@@ -35,120 +22,110 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Append our module directory to CMake
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# COMMENT REPLACED BY BIICODE
-
+if(CMAKE_VERSION VERSION_LESS "3.10")
+	list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/V39)
+endif()
+if(CMAKE_VERSION VERSION_LESS "3.14")
+	list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/V313)
+endif()
 #################################################################################
 # Setup C/C++ compiler options
 #################################################################################
 
-option(DISABLE_CPP11 "Disable C++11 if available" OFF)
-option(DISABLE_CPP14 "Disable C++14 if available" OFF)
+# C++11/14 compiler flags
+include(CXX1x)
+check_for_cxx14_compiler(CXX14_COMPILER)
 
-if (DISABLE_CPP11 OR DISABLE_CPP14)
-    add_definitions(-DPOCO_DISABLE_CPP11)
-
-    if (DISABLE_CPP14)
-        add_definitions(-DPOCO_DISABLE_CPP14)
-    endif()
+# If a C++14 compiler is available, then set the appropriate flags
+if(CXX14_COMPILER)
+	set(CMAKE_CXX_STANDARD 14)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 else()
-    # C++11/14 compiler flags
-    include(CXX1x)
-    check_for_cxx11_compiler(CXX11_COMPILER)
-
-    # If a C++11 compiler is available, then set the appropriate flags
-    if(CXX11_COMPILER)
-        enable_cxx11()
-        check_for_cxx14_compiler(CXX14_COMPILER)
-
-        # If a C++14 compiler is available, then set the appropriate flags
-        if(CXX14_COMPILER)
-            enable_cxx14()
-        endif()
-    endif()
+	message(FATAL_ERROR "Compiler does not support C++14.")
 endif()
 
-if(NOT MSVC_IDE)
-  if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-      "Choose the type of build, options are: None Debug Release" FORCE)
-  endif()
-  message(STATUS "Setting SDK build type - ${CMAKE_BUILD_TYPE}")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "")
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
 # Include some common macros to simpilfy the Poco CMake files
 include(PocoMacros)
 
-# Allow enabling and disabling components
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+if(MSVC)
+	if (BUILD_SHARED_LIBS)
+		option(POCO_MT "Set to OFF|ON (default is OFF) to control build of POCO as /MT instead of /MD" OFF)
+	else()
+		option(POCO_MT "Set to OFF|ON (default is OFF) to control build of POCO as /MT instead of /MD" ON)
+	endif()
+
+	if(BUILD_SHARED_LIBS AND POCO_MT)
+		message(FATAL_ERROR "Cannot have both BUILD_SHARED_LIBS and POCO_MT")
+	endif()
+
+	# allow disabling of internally built OpenSSL# (see below for details)
+	# if POCO pre-built OpenSSL directory is found, and POCO_DISABLE_INTERNAL_OPENSSL=OFF,
+	# the internal OpenSSL build will be used
+	option(POCO_DISABLE_INTERNAL_OPENSSL "Disable internal OpensSSL binaries use" ON)
+
+	if((NOT POCO_DISABLE_INTERNAL_OPENSSL) AND (ENABLE_NETSSL OR ENABLE_CRYPTO OR (ENABLE_DATA_MYSQL AND MINGW)))
+		include(UseEmbeddedOpenSSL)
+	endif()
+endif()
+
+option(ENABLE_WEBTUNNEL "Enable WebTunnel" ON)
 option(ENABLE_WEBTUNNELAGENT "Enable WebTunnelAgent" ON)
 option(ENABLE_WEBTUNNELCLIENT "Enable WebTunnelClient" ON)
 option(ENABLE_WEBTUNNELSSH "Enable WebTunnelSSH" ON)
 option(ENABLE_WEBTUNNELVNC "Enable WebTunnelVNC" ON)
 option(ENABLE_WEBTUNNELRDP "Enable WebTunnelRDP" ON)
-option(ENABLE_XML "Enable XML" OFF)
-option(ENABLE_JSON "Enable JSON" OFF)
-option(ENABLE_PAGECOMPILER "Enable PageCompiler" OFF)
-option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" OFF)
 
 if(WIN32)
-option(ENABLE_NETSSL "Enable NetSSL" OFF)
-option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" ON)
-option(ENABLE_CRYPTO "Enable Crypto" OFF)
+	option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" ON)
+	option(ENABLE_NETSSL "Enable NetSSL" OFF)
+	option(ENABLE_CRYPTO "Enable Crypto" OFF)
 else()
-option(ENABLE_NETSSL "Enable NetSSL" ON)
-option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" OFF)
-option(ENABLE_CRYPTO "Enable Crypto" ON)
+	option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" OFF)
+	find_package(OpenSSL)
+	if(OPENSSL_FOUND)
+		option(ENABLE_NETSSL "Enable NetSSL" ON)
+		option(ENABLE_CRYPTO "Enable Crypto" ON)
+	else()
+		option(ENABLE_NETSSL "Enable NetSSL" OFF)
+		option(ENABLE_CRYPTO "Enable Crypto" OFF)
+	endif()
 endif()
 
-option(FORCE_OPENSSL "Force usage of OpenSSL even under windows" OFF)
+# Allow enabling and disabling components
+option(ENABLE_FOUNDATION "Enable Foundation, required by all components except CppUnit" ON)
+option(ENABLE_XML "Enable XML" ON)
+option(ENABLE_JSON "Enable JSON" ON)
+option(ENABLE_UTIL "Enable Util" ON)
+option(ENABLE_NET "Enable Net" ON)
+option(ENABLE_PAGECOMPILER "Enable PageCompiler" ON)
+option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" ON)
 
 option(ENABLE_TESTS
-  "Set to OFF|ON (default is OFF) to control build of POCO tests & samples" OFF)
-
-option(POCO_STATIC
-  "Set to OFF|ON (default is OFF) to control build of POCO as STATIC library" ON)
+	"Set to OFF|ON (default is OFF) to control build of POCO tests & samples" OFF)
 
 option(POCO_UNBUNDLED
-  "Set to OFF|ON (default is OFF) to control linking dependencies as external" OFF)
-
-if(MSVC)
-    option(POCO_MT
-      "Set to OFF|ON (default is OFF) to control build of POCO as /MT instead of /MD" ON)
-
-    option(ENABLE_MSVC_MP
-      "Set to OFF|ON (default is OFF) to control parallel build of POCO with MSVC" ON)
-endif()
-
-# Uncomment from next two lines to force static or dynamic library, default is autodetection
-if(POCO_STATIC)
-    set(LIB_MODE_DEFINITIONS -DPOCO_STATIC -DPOCO_NO_AUTOMATIC_LIBS)
-    set(LIB_MODE STATIC)
-    message(STATUS "Building static libraries")
-else(POCO_STATIC)
-    set(LIB_MODE SHARED)
-    set(LIB_MODE_DEFINITIONS -DPOCO_NO_AUTOMATIC_LIBS)
-    message(STATUS "Building dynamic libraries")
-endif(POCO_STATIC)
+	"Set to OFF|ON (default is OFF) to control linking dependencies as external" OFF)
 
 if(ENABLE_TESTS)
-  option(ENABLE_LONG_RUNNING_TESTS "Enable long running test" ON)
-  include(CTest)
-  enable_testing()
-  message(STATUS "Building with unittests & samples")
+	include(CTest)
+	enable_testing()
+	message(STATUS "Building with unittests & samples")
 else()
-  message(STATUS "Building without tests & samples")
+	message(STATUS "Building without tests & samples")
 endif()
 
 if(POCO_UNBUNDLED)
-  add_definitions(-DPOCO_UNBUNDLED)
-  message(STATUS "Using external sqlite, zlib, pcre, expat, ...")
+	message(STATUS "Using external sqlite, zlib, pcre, expat, ...")
 else()
-  message(STATUS "Using internal sqlite, zlib, pcre, expat, ...")
+	message(STATUS "Using internal sqlite, zlib, pcre, expat, ...")
 endif()
 
 include(DefinePlatformSpecifc)
@@ -157,84 +134,139 @@ include(DefinePlatformSpecifc)
 set(Poco_COMPONENTS "")
 
 if(ENABLE_TESTS)
-   add_subdirectory(CppUnit)
+	add_subdirectory(CppUnit)
+	set(ENABLE_XML ON CACHE BOOL "Enable XML" FORCE)
+	set(ENABLE_JSON ON CACHE BOOL "Enable JSON" FORCE)
 endif()
 
-add_subdirectory(Foundation)
-add_subdirectory(Net)
-list(APPEND Poco_COMPONENTS "Net")
-add_subdirectory(Util)
-list(APPEND Poco_COMPONENTS "Util")
-add_subdirectory(WebTunnel)
-list(APPEND Poco_COMPONENTS "WebTunnel")
+if(ENABLE_PAGECOMPILER_FILE2PAGE)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
+endif()
 
-if(ENABLE_WEBTUNNELAGENT)
-add_subdirectory(WebTunnel/WebTunnelAgent)
+if(ENABLE_PAGECOMPILER)
+	set(ENABLE_NET ON CACHE BOOL "Enable Net" FORCE)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
 endif()
-if(ENABLE_WEBTUNNELCLIENT)
-add_subdirectory(WebTunnel/WebTunnelClient)
+
+if(ENABLE_NETSSL_WIN)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
+	if(ENABLE_TESTS)
+		set(ENABLE_CRYPTO ON CACHE BOOL "Enable Crypto" FORCE)
+	endif()
 endif()
-if(ENABLE_WEBTUNNELSSH)
-add_subdirectory(WebTunnel/WebTunnelSSH)
+
+if(ENABLE_NETSSL)
+	set(ENABLE_CRYPTO ON CACHE BOOL "Enable Crypto" FORCE)
+	set(ENABLE_NET ON CACHE BOOL "Enable Net" FORCE)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
 endif()
-if(ENABLE_WEBTUNNELVNC)
-add_subdirectory(WebTunnel/WebTunnelVNC)
+
+if(ENABLE_CRYPTO AND ENABLE_TESTS)
+	set(ENABLE_NETSSL ON CACHE BOOL "Enable NetSSL" FORCE)
+	set(ENABLE_NET ON CACHE BOOL "Enable Net" FORCE)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
 endif()
-if(ENABLE_WEBTUNNELRDP)
-add_subdirectory(WebTunnel/WebTunnelRDP)
+
+if(ENABLE_NET AND ENABLE_TESTS)
+	set(ENABLE_UTIL ON CACHE BOOL "Enable Util" FORCE)
+endif()
+
+if(ENABLE_UTIL AND ENABLE_TESTS)
+	set(ENABLE_JSON ON CACHE BOOL "Enable JSON" FORCE)
+	set(ENABLE_XML ON CACHE BOOL "Enable XML" FORCE)
+endif()
+
+if(ENABLE_FOUNDATION)
+	add_subdirectory(Foundation)
 endif()
 
 if(ENABLE_XML)
-add_subdirectory(XML)
-list(APPEND Poco_COMPONENTS "XML")
+	add_subdirectory(XML)
+	list(APPEND Poco_COMPONENTS "XML")
 endif()
+
 if(ENABLE_JSON)
-add_subdirectory(JSON)
-list(APPEND Poco_COMPONENTS "JSON")
+	add_subdirectory(JSON)
+	list(APPEND Poco_COMPONENTS "JSON")
+endif()
+
+if(ENABLE_UTIL)
+	add_subdirectory(Util)
+	list(APPEND Poco_COMPONENTS "Util")
+endif()
+
+if(ENABLE_NET)
+	add_subdirectory(Net)
+	list(APPEND Poco_COMPONENTS "Net")
 endif()
 
 
 #NetSSL
 
-
 if(WIN32 AND EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_Win AND ENABLE_NETSSL_WIN)
-    add_subdirectory(NetSSL_Win)
-    list(APPEND Poco_COMPONENTS "NetSSL_Win")
+	add_subdirectory(NetSSL_Win)
+	list(APPEND Poco_COMPONENTS "NetSSL_Win")
 endif(WIN32 AND EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_Win AND ENABLE_NETSSL_WIN)
 
-find_package(OpenSSL)
 if(OPENSSL_FOUND)
-    include_directories("${OPENSSL_INCLUDE_DIR}")
-    if(EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_OpenSSL AND ENABLE_NETSSL)
-    add_subdirectory(NetSSL_OpenSSL)
-    list(APPEND Poco_COMPONENTS "NetSSL_OpenSSL")
-    endif()
-    if(EXISTS ${PROJECT_SOURCE_DIR}/Crypto AND ENABLE_CRYPTO)
-    add_subdirectory(Crypto)
-    list(APPEND Poco_COMPONENTS "Crypto")
-    endif()
+	if(EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_OpenSSL AND ENABLE_NETSSL)
+		add_subdirectory(NetSSL_OpenSSL)
+		list(APPEND Poco_COMPONENTS "NetSSL_OpenSSL")
+	endif()
+	if(EXISTS ${PROJECT_SOURCE_DIR}/Crypto AND ENABLE_CRYPTO)
+		add_subdirectory(Crypto)
+		list(APPEND Poco_COMPONENTS "Crypto")
+	endif()
 endif(OPENSSL_FOUND)
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/PageCompiler AND ENABLE_PAGECOMPILER)
-add_subdirectory(PageCompiler)
-list(APPEND Poco_COMPONENTS "PageCompiler")
+	add_subdirectory(PageCompiler)
+	list(APPEND Poco_COMPONENTS "PageCompiler")
 endif()
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/PageCompiler/File2Page AND ENABLE_PAGECOMPILER_FILE2PAGE)
-add_subdirectory(PageCompiler/File2Page)
-list(APPEND Poco_COMPONENTS "File2Page")
+	add_subdirectory(PageCompiler/File2Page)
+	list(APPEND Poco_COMPONENTS "File2Page")
 endif()
+
+if(ENABLE_WEBTUNNEL)
+	add_subdirectory(WebTunnel)
+	list(APPEND Poco_COMPONENTS "WebTunnel")
+endif()
+
+if(ENABLE_WEBTUNNELAGENT)
+	add_subdirectory(WebTunnel/WebTunnelAgent)
+	list(APPEND Poco_COMPONENTS "WebTunnelAgent")
+endif()
+if(ENABLE_WEBTUNNELCLIENT)
+	add_subdirectory(WebTunnel/WebTunnelClient)
+	list(APPEND Poco_COMPONENTS "WebTunnelClient")
+endif()
+if(ENABLE_WEBTUNNELSSH)
+	add_subdirectory(WebTunnel/WebTunnelSSH)
+	list(APPEND Poco_COMPONENTS "WebTunnelSSH")
+endif()
+if(ENABLE_WEBTUNNELVNC)
+	add_subdirectory(WebTunnel/WebTunnelVNC)
+	list(APPEND Poco_COMPONENTS "WebTunnelVNC")
+endif()
+if(ENABLE_WEBTUNNELRDP)
+	add_subdirectory(WebTunnel/WebTunnelRDP)
+	list(APPEND Poco_COMPONENTS "WebTunnelRDP")
+endif()
+
 
 
 #############################################################
 # Uninstall stuff see: http://www.vtk.org/Wiki/CMake_FAQ
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY)
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
-  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+	"${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+)
 
 #############################################################
 # Enable packaging
@@ -254,43 +286,59 @@ include(CPack)
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion
+	"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
 )
 
-configure_file(cmake/PocoConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake" @ONLY)
+# Set config script install location in a location that find_package() will
+# look for, which is different on MS Windows than for UNIX
+# Note: also set in POCO_GENERATE_PACKAGE macro in cmake/PocoMacros.cmake
+if(WIN32)
+	set(PocoConfigPackageLocation "cmake")
+else()
+	set(PocoConfigPackageLocation "lib${LIB_SUFFIX}/cmake/${PROJECT_NAME}")
+endif()
+
+configure_file(cmake/${PROJECT_NAME}Config.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake" @ONLY)
 install(
-    FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake
-    DESTINATION
-        "lib${LIB_SUFFIX}/cmake/${PROJECT_NAME}"
-    COMPONENT
-        Devel
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake
+	DESTINATION
+		"${PocoConfigPackageLocation}"
+	COMPONENT
+		Devel
 )
 
-# in tree build settings
-#configure_file(PocoBuildTreeSettings.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/PocoBuildTreeSettings.cmake @ONLY)
-
+if(POCO_UNBUNDLED)
+	install(FILES cmake/FindPCRE.cmake
+			DESTINATION "${PocoConfigPackageLocation}")
+	install(FILES cmake/V39/FindEXPAT.cmake
+			DESTINATION "${PocoConfigPackageLocation}/V39")
+	install(FILES cmake/V313/FindSQLite3.cmake
+			DESTINATION "${PocoConfigPackageLocation}/V313")
+endif()
 
 message(STATUS "CMake ${CMAKE_VERSION} successfully configured ${PROJECT_NAME} using ${CMAKE_GENERATOR} generator")
-message(STATUS "Installation target path: ${CMAKE_INSTALL_PREFIX}")
-
-message(STATUS "C_FLAGS:  =${CMAKE_C_FLAGS}")
-message(STATUS "CMAKE_C_FLAGS_DEBUG:=${CMAKE_C_FLAGS_DEBUG}")
-message(STATUS "CMAKE_C_FLAGS_RELEASE:=${CMAKE_C_FLAGS_RELEASE}")
-message(STATUS "CMAKE_C_FLAGS_MINSIZEREL:=${CMAKE_C_FLAGS_MINSIZEREL}")
-message(STATUS "CMAKE_C_FLAGS_RELWITHDEBINFO:=${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-message(STATUS "")
-message(STATUS "")
-message(STATUS "CXX_FLAGS:=${CMAKE_CXX_FLAGS}")
-message(STATUS "CMAKE_CXX_FLAGS_DEBUG:=${CMAKE_CXX_FLAGS_DEBUG}")
-message(STATUS "CMAKE_CXX_FLAGS_RELEASE:=${CMAKE_CXX_FLAGS_RELEASE}")
-message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL:=${CMAKE_CXX_FLAGS_MINSIZEREL}")
-message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO:=${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+message(STATUS "${PROJECT_NAME} package version: ${PROJECT_VERSION}")
+if(BUILD_SHARED_LIBS)
+	message(STATUS "Building dynamic libraries")
+else()
+	message(STATUS "Building static libraries")
+endif()
+message(STATUS "[cmake] Installation target path: ${CMAKE_INSTALL_PREFIX}")
+if(CMAKE_TOOLCHAIN_FILE)
+	message(STATUS "[cmake] Use toolchain file:		${CMAKE_TOOLCHAIN_FILE}")
+endif()
+message(STATUS "[cmake] Bulid for OS type:		${CMAKE_SYSTEM_NAME}")
+message(STATUS "[cmake] Build for OS version:	${CMAKE_SYSTEM_VERSION}")
+message(STATUS "[cmake] Build for CPU type:		${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "[cmake] Build type:				${CMAKE_BUILD_TYPE}")
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+message(STATUS "[cmake] Build with cxx flags:	${CMAKE_CXX_FLAGS_${BUILD_TYPE}} ${CMAKE_CXX_FLAGS}")
+message(STATUS "[cmake] Build with c flags:		${CMAKE_C_FLAGS_${BUILD_TYPE}} ${CMAKE_C_FLAGS}")
 
 foreach(component ${Poco_COMPONENTS})
-message(STATUS "Building: ${component}")
+	message(STATUS "Building: ${component}")
 endforeach()
-
