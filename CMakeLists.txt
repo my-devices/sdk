@@ -101,8 +101,8 @@ endif()
 
 # Allow enabling and disabling components
 option(ENABLE_FOUNDATION "Enable Foundation, required by all components except CppUnit" ON)
-option(ENABLE_XML "Enable XML" ON)
-option(ENABLE_JSON "Enable JSON" ON)
+option(ENABLE_XML "Enable XML" OFF)
+option(ENABLE_JSON "Enable JSON" OFF)
 option(ENABLE_UTIL "Enable Util" ON)
 option(ENABLE_NET "Enable Net" ON)
 option(ENABLE_PAGECOMPILER "Enable PageCompiler" ON)
