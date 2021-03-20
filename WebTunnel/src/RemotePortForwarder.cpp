@@ -134,7 +134,7 @@ bool RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 		{
 			if (_logger.debug())
 			{
-				_logger.debug("Closing channel %hu", channel);
+				_logger.debug("Actively closing channel %hu", channel);
 			}
 			removeChannel(channel);
 			n = 0;
@@ -237,6 +237,10 @@ bool RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 			return openChannel(channel, portOrErrorCode);
 
 		case Protocol::WT_OP_CLOSE:
+			if (_logger.debug())
+			{
+				_logger.debug("Passively closing channel %hu", channel);
+			}
 			removeChannel(channel);
 			return false;
 
