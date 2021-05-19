@@ -19,6 +19,7 @@
 #include "Poco/BinaryWriter.h"
 #include "Poco/MemoryStream.h"
 #include "Poco/CountingStream.h"
+#include <cstring>
 
 
 namespace Poco {
