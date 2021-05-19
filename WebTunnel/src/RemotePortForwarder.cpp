@@ -144,10 +144,18 @@ bool RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 	}
 	catch (Poco::Exception& exc)
 	{
-		_logger.error("Error reading from locally forwarded socket for channel %hu: %s", channel, exc.displayText());
 		removeChannel(channel);
 		n = 0;
-		hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_ERROR, 0, channel, Protocol::WT_ERR_SOCKET);
+		// Workaround for some HTTPS servers that do not orderly close a TLS connection.
+		if (std::strcmp(exc.name(), "SSL connection unexpectedly closed") == 0)
+		{
+			hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_CLOSE, 0, channel);
+		}
+		else
+		{
+			_logger.error("Error reading from locally forwarded socket for channel %hu: %s", channel, exc.displayText());
+			hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_ERROR, 0, channel, Protocol::WT_ERR_SOCKET);
+		}
 		expectMore = false;
 	}
 	try
