@@ -309,6 +309,10 @@ protected:
 		{
 			request.add("X-PTTH-Set-Property"s, Poco::format("device;version=%s"s, quoteString(_deviceVersion)));
 		}
+		if (!_tenant.empty())
+		{
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;tenant=%s"s, quoteString(_tenant)));
+		}
 
 		if (!props.empty())
 		{
@@ -756,6 +760,7 @@ protected:
 				_reflectorURI = config().getString("webtunnel.reflectorURI"s);
 				_deviceName = config().getString("webtunnel.deviceName"s, ""s);
 				_deviceVersion = config().getString("webtunnel.deviceVersion"s, ""s);
+				_tenant = config().getString("webtunnel.tenant"s, ""s);
 				std::string host = config().getString("webtunnel.host"s, "localhost"s);
 				if (!Poco::Net::IPAddress::tryParse(host, _host))
 				{
@@ -891,6 +896,7 @@ private:
 	bool _helpRequested;
 	std::string _deviceName;
 	std::string _deviceVersion;
+	std::string _tenant;
 	Poco::Net::IPAddress _host;
 	std::set<Poco::UInt16> _ports;
 	Poco::URI _reflectorURI;
@@ -931,7 +937,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.11.1");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.11.2");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)
