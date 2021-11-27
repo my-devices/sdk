@@ -1,16 +1,16 @@
-# macchina.io Remote Manager VNC Client Wrapper (WebTunnelVNC)
+# macchina.io REMOTE VNC Client Wrapper (WebTunnelVNC)
 
 `WebTunnelVNC` is a command-line program that sets up a tunnel for a VNC remote desktop connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-Remote Manager, and then launches a VNC client to open a VNC session.
+REMOTE, and then launches a VNC client to open a VNC session.
 
-Note: Remote Manager has a built-in web-based VNC viewer, so `WebTunnelVNC` only
+Note: macchina.io REMOTE has a built-in web-based VNC viewer, so `WebTunnelVNC` only
 needs to be used if the web-based VNC viewer does not work with a specific device
 or cannot be used for other reasons.
 
 Note that in contrast to `WebTunnelAgent`, which typically runs on an embedded or IoT
 device, `WebTunnelVNC`, like `WebTunnelClient` and `WebTunnelSSH`, runs on a PC or Mac that you want to connect to the
-device. You'll have to build the [macchina.io Remote Manager SDK](../../README.md)
+device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
 for your machine to get the `WebTunnelVNC` program.
 
 ## Running WebTunnelVNC
@@ -27,7 +27,7 @@ to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net).
 WebTunnelVNC https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-`WebTunnelVNC` will prompt for your Remote Manager username and password and
+`WebTunnelVNC` will prompt for your macchina.io REMOTE username and password and
 then launch the VNC client with correct parameters for host, port number and
 remote user name.
 

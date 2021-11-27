@@ -132,14 +132,14 @@ protected:
 				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleRemotePort)));
 
 		options.addOption(
-			Option("username"s, "u"s, "Specify username for Remote Manager server."s)
+			Option("username"s, "u"s, "Specify username for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
 				.argument("username"s)
 				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleUsername)));
 
 		options.addOption(
-			Option("password"s, "p"s, "Specify password for Remote Manager server."s)
+			Option("password"s, "p"s, "Specify password for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
 				.argument("password"s)
@@ -194,13 +194,13 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- VNC-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
-			"macchina.io Remote Manager VNC Client.\n"
+			"macchina.io REMOTE VNC Client.\n"
 			"Copyright (c) 2015-2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a VNC connection to a remote\n"
-			"host via the macchina.io Remote Manager server.\n\n"
+			"host via the macchina.io REMOTE server.\n\n"
 			"<Remote-URI> specifies the URI of the remote device via the\n"
-			"Remote Manager server, e.g.:\n"
+			"macchina.io REMOTE server, e.g.:\n"
 #if defined(WEBTUNNEL_ENABLE_TLS)
 			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
 #else
@@ -210,8 +210,8 @@ protected:
 			"The following command-line options are supported:"s
 		);
 		helpFormatter.setFooter(
-			"For more information, please visit the macchina.io "
-			"website at <https://macchina.io>."s
+			"For more information, please visit the macchina.io REMOTE "
+			"website at <https://macchina.io/remote>."s
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -235,12 +235,12 @@ protected:
 	{
 		if (_username.empty())
 		{
-			std::cout << "Remote Manager Username: " << std::flush;
+			std::cout << "macchina.io REMOTE Username: " << std::flush;
 			std::getline(std::cin, _username);
 		}
 		if (_password.empty())
 		{
-			std::cout << "Remote Manager Password: " << std::flush;
+			std::cout << "macchina.io REMOTE Password: " << std::flush;
 			echo(false);
 			std::getline(std::cin, _password);
 			echo(true);

@@ -1,12 +1,12 @@
-# macchina.io Remote Manager SSH Client Wrapper (WebTunnelSSH)
+# macchina.io REMOTE SSH Client Wrapper (WebTunnelSSH)
 
 `WebTunnelSSH` is a command-line program that sets up a tunnel for a SSH connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-Remote Manager, and then launches an SSH client to open an SSH session.
+REMOTE, and then launches an SSH client to open an SSH session.
 
 Note that in contrast to `WebTunnelAgent`, which typically runs on an embedded or IoT
 device, `WebTunnelSSH`, like `WebTunnelClient`, runs on a PC or Mac that you want to connect to the
-device. You'll have to build the [macchina.io Remote Manager SDK](../../README.md)
+device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
 for your machine to get the `WebTunnelSSH` program.
 
 ## Running WebTunnelSSH
@@ -38,7 +38,7 @@ executable has been configured (using the `ssh.executable` configuration propert
 or `/ssh-client` command-line argument), an error message is printed and
 `WebTunnelSSH` exits.
 
-`WebTunnelSSH` will prompt for your Remote Manager username and password and
+`WebTunnelSSH` will prompt for your macchina.io REMOTE username and password and
 then launch the SSH client with correct parameters for host, port number and
 remote user name.
 
@@ -84,7 +84,7 @@ WebTunnelSSH -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-de
 ```
 
 This can also be used to run a script (via pipe of redirection of stdin).
-However, in this case, the Remote Manager username and password must be passed as
+However, in this case, the macchina.io REMOTE username and password must be passed as
 command-line arguments, and `bash` or another shell must be specified as command to execute via `ssh`:
 
 ```

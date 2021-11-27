@@ -1,16 +1,16 @@
-# macchina.io Remote Manager Device Agent (WebTunnelAgent)
+# macchina.io REMOTE Device Agent (WebTunnelAgent)
 
-In order to connect a device to macchina.io Remote Manager, a program (Remote Manager Device Agent
+In order to connect a device to macchina.io REMOTE, a program (macchina.io REMOTE Device Agent
 or `WebTunnelAgent`) needs to be installed on the device. For initial testing, the agent can also be
 installed on a Windows, Linux or macOS machine in the same network as the device.
 
-`WebTunnelAgent` is built as part of the [macchina.io Remote Manager SDK](../../README.md).
+`WebTunnelAgent` is built as part of the [macchina.io REMOTE SDK](../../README.md).
 
 ## Running WebTunnelAgent
 
 `WebTunnelAgent` needs a configuration file named `WebTunnelAgent.properties` to work.
 The easiest way to obtain the configuration file is to generate and download it from the
-Remote Manager Account page. A [basic configuration file](WebTunnelAgent.properties)
+macchina.io REMOTE Account page. A [basic configuration file](WebTunnelAgent.properties)
 is also available in this directory.
 
 The configuration file should be located in the same directory as `WebTunnelAgent`.
@@ -185,7 +185,7 @@ This can be used to introduce "macro" settings which are referenced in multiple 
 This setting specifies the domain UUID which is used to associate the device with a user account
 or user group. It can also be used to group devices. The value should be an all lower-case
 UUID like `d5f6e710-49c9-4e21-9cd7-2ae0054c3f13`. How domains are assigned to devices
-and users depends on the specific Remote Manager server instance. For example, the
+and users depends on the specific macchina.io REMOTE server instance. For example, the
 [public test server](https://reflector.my-devices.net) assigns a unique domain UUID to
 each new registered user account.
 
@@ -195,7 +195,7 @@ unless device authentication has been enabled.
 #### webtunnel.deviceId
 
 The device ID is used to uniquely address the device and therefore must be unique
-for all devices on a Remote Manager server.
+for all devices on a macchina.io REMOTE server.
 The ID must be a valid domain name, as it will be used as part of the device URL.
 It may contain letters `a`-`z` and digits `0`-`9`, as well as dashes (`-`),
 but must not begin with a dash.
@@ -208,11 +208,11 @@ multiple network adapters.
 #### webtunnel.deviceName
 
 This optional property can be used to set the device `name` property shown in the
-Remote Manager dashboard and device page.
+macchina.io REMOTE dashboard and device page.
 
 Note that if enabled, this will set the `name` property of the device only once,
 when the device is created on the server when the initial connection is made.
-Further changes to the device name have to be made directly on the Remote Manager
+Further changes to the device name have to be made directly on the macchina.io REMOTE
 web interface, or through its API.
 
 You can specify a name, or use a configuration variable like
@@ -222,18 +222,18 @@ You can specify a name, or use a configuration variable like
 #### webtunnel.deviceVersion
 
 This optional property can be used to set the device `version` property shown
-in the Remote Manager device page (and optionally dashboard, if configured).
+in the macchina.io REMOTE device page (and optionally dashboard, if configured).
 It's intended to report the device's firmware version number or something equivalent.
 
 Note that if enabled, this will cause the device `version` property to be
-set every time `WebTunnelAgent` connects to the Remote Manager, therefore
-overwriting any changes made in the Remote Manager's web interface, shell
+set every time `WebTunnelAgent` connects to the macchina.io REMOTE, therefore
+overwriting any changes made in the macchina.io REMOTE web interface, shell
 or API.
 
 #### webtunnel.userAgent
 
 This optional property can be used to set the device `userAgent` property
-shown in the Remote Manager device page.
+shown in the macchina.io REMOTE device page.
 
 #### webtunnel.host
 
@@ -265,33 +265,33 @@ Set this property to `true` if the device only has a HTTPS server. In this case,
 #### webtunnel.httpPath
 
 This optional setting specifies the default URI path of the device's web server.
-It will be used by the Remote Manager web user interface to construct the
+It will be used by the macchina.io REMOTE web user interface to construct the
 URL of the device.
 
 #### webtunnel.sshPort
 
 The optional setting specifies the port number of the device's SSH server.
-Used to enable SSH support in the Remote Manager web interface.
+Used to enable SSH support in the macchina.io REMOTE web interface.
 The port number must also be included in the webtunnel.ports list.
-If not set SSH access will not be enabled via the Remote Manager web interface.
+If not set SSH access will not be enabled via the macchina.io REMOTE web interface.
 
 #### webtunnel.vncPort
 
 The optional setting specifies the port number of the device's VNC server.
-Used to enable VNC support in the Remote Manager web interface.
+Used to enable VNC support in the macchina.io REMOTE web interface.
 The port number must also be included in the webtunnel.ports list.
-If not set VNC access will not be enabled via the Remote Manager web interface.
+If not set VNC access will not be enabled via the macchina.io REMOTE web interface.
 
 #### webtunnel.rdpPort
 
 The optional setting specifies the port number of the device's RDP server.
-Used to enable RDP support in the Remote Manager web interface.
+Used to enable RDP support in the macchina.io REMOTE web interface.
 The port number must also be included in the webtunnel.ports list.
-If not set RDP access will not be enabled via the Remote Manager web interface.
+If not set RDP access will not be enabled via the macchina.io REMOTE web interface.
 
 #### webtunnel.reflectorURI
 
-The URL of the Remote Manager server.
+The URL of the macchina.io REMOTE server.
 
 #### webtunnel.username
 
@@ -308,7 +308,7 @@ webtunnel.username = ${webtunnel.deviceId}@${webtunnel.domain}
 
 The device password, used for authenticating the device.
 Device authentication is disabled on the public demo server, so can be left
-empty. Device authentication can be enabled for private Remote Manager instances.
+empty. Device authentication can be enabled for private macchina.io REMOTE instances.
 
 #### webtunnel.connectTimeout
 
@@ -322,15 +322,15 @@ i.e., the connection to the device's web server.
 
 #### webtunnel.remoteTimeout
 
-The timeout (given in seconds) for the WebTunnel connection to the Remote Manager
+The timeout (given in seconds) for the WebTunnel connection to the macchina.io REMOTE
 server. If half of the timeout expires, the `WebTunnelAgent` will send a PING message to the
-Remote Manager server. If the PING is not answered by the server, the `WebTunnelAgent`
+macchina.io REMOTE server. If the PING is not answered by the server, the `WebTunnelAgent`
 will terminate the connection and attempt to re-connect.
 
 #### webtunnel.status.notify
 
 This optional setting specifies the path to an executable that is started whenever
-the state of the tunnel connection to the Remote Manager changes. The current state
+the state of the tunnel connection to the macchina.io REMOTE changes. The current state
 will be passed as command-line argument to the executable and will be one of:
 
   * `connected`: the tunnel connection has been established.
@@ -346,7 +346,7 @@ The number of I/O threads the `WebTunnelAgent` should use. Should be left at the
 #### webtunnel.properties
 
 This setting specifies additional device properties that are sent to the
-Remote Manager. Format is:
+macchina.io REMOTE. Format is:
 
 ```
 webtunnel.properties.<property> = <value>
@@ -371,15 +371,15 @@ to combine commands with a pipe, e.g.:
 webtunnel.properties.cpuLoad = `uptime | awk '{print $10}'`
 ```
 
-To send updates to properties to the Remote Manager server periodically, and not
+To send updates to properties to the macchina.io REMOTE server periodically, and not
 just when connecting the tunnel, see `webtunnel.propertiesUpdateInterval`.
 
 #### webtunnel.propertiesUpdateInterval
 
 This optional setting specifies the interval in seconds in which property
-updates are sent to the Remote Manager server. If set to 0 (default), any
+updates are sent to the macchina.io REMOTE server. If set to 0 (default), any
 defined properties (see `webtunnel.properties`) will only be sent when
-the agent connects (or reconnects) to the Remote Manager server.
+the agent connects (or reconnects) to the macchina.io REMOTE server.
 If set to a non-zero value, property updates will be sent periodically.
 
 
@@ -388,12 +388,12 @@ If set to a non-zero value, property updates will be sent periodically.
 #### http.timeout
 
 The timeout (given in seconds) for the initial HTTP(S) connection to the
-Remote Manager server.
+macchina.io REMOTE server.
 
 #### http.proxy.enable
 
 Enable (set to `true`) or disable (set to `false`) HTTP proxy support for the
-HTTP/WebTunnel connection to the Remote Manager server.
+HTTP/WebTunnel connection to the macchina.io REMOTE server.
 If enabled, the proxy host, port, username and password should also be specified.
 
 #### http.proxy.host
@@ -420,7 +420,7 @@ if no proxy authentication is required.
 #### tls.acceptUnknownCertificate
 
 Enable (`true`) or disable (`false`) accepting an unknown certificate from the
-Remote Manager server or the device web server. Should only be used for testing purposes,
+macchina.io REMOTE server or the device web server. Should only be used for testing purposes,
 e.g., while using a self-signed certificate. Should not be used in production setups.
 
 #### tls.ciphers
@@ -431,7 +431,7 @@ if `WebTunnelAgent` has been built with OpenSSL.
 #### tls.verification
 
 This optional setting specifies the certificate validation mode for the connection
-to the Remote Manager server. Use one of the following values.
+to the macchina.io REMOTE server. Use one of the following values.
 
   * `none`: The server certificate is not validated.
   * `relaxed`: The server certificate is validated if one is presented by the server.

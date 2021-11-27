@@ -1,22 +1,22 @@
-# The macchina.io Remote Manager SDK
+# The macchina.io REMOTE SDK
 
-## About macchina.io Remote Manager
+## About macchina.io REMOTE
 
-[macchina.io Remote Manager](https://macchina.io) provides secure remote access to connected devices
+[macchina.io REMOTE](https://macchina.io/remote) provides secure remote access to connected devices
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
-Virtual Network Computing (VNC). With macchina.io Remote Manager, any network-connected device
-running the Remote Manager Agent software (*WebTunnelAgent*, contained in this SDK)
+Virtual Network Computing (VNC). With macchina.io REMOTE, any network-connected device
+running the macchina.io REMOTE Device Agent software (*WebTunnelAgent*, contained in this SDK)
 can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
 
 This even works if the device is behind a NAT router, firewall or proxy server.
 The device becomes just another host on the internet, addressable via its own URL and
-protected by the Remote Manager server against unauthorized or malicious access.
-macchina.io Remote Manager is a great solution for secure remote support and maintenance,
+protected by the macchina.io REMOTE server against unauthorized or malicious access.
+macchina.io REMOTE is a great solution for secure remote support and maintenance,
 as well as for providing secure remote access to devices for end-users via web or
 mobile apps.
 
-Visit [macchina.io](https://macchina.io/remote.html) to learn more and to register for a free account.
+Visit [macchina.io/remote](https://macchina.io/remote) to learn more and to register for a free account.
 Specifically, see the [Getting Started](https://macchina.io/remote_signup.html) page and the
 [Frequently Asked Questions](https://macchina.io/remote_faq.html) for
 information on how to use this SDK and the included *WebTunnelAgent* executable.
@@ -26,27 +26,33 @@ There is also a [blog post](https://macchina.io/blog/?p=257) showing step-by-ste
 
 ## About This SDK
 
-The macchina.io Remote Manager SDK is based on the
-[POCO C++ Libraries](http://pocoproject.org). You may want to read README_POCO
+The macchina.io REMOTE SDK is based on the
+[POCO C++ Libraries](https://pocoproject.org). You may want to read README_POCO
 as well as it contains important information regarding the directory structure
 and the build system of the SDK.
 
-The SDK contains the WebTunnel library, which implements the tunnel protocol used by Remote Manager.
+The SDK contains the WebTunnel library, which implements the tunnel protocol used by macchina.io REMOTE.
 Furthermore, the following executables are included:
 
-  - [*WebTunnelAgent*](WebTunnel/WebTunnelAgent/README.md): This executable runs on the device and creates the secure tunnel between the device
-    and the Remote Manager server. This is the most important component of the Remote Manager SDK.
-  - [*WebTunnelClient*](WebTunnel/WebTunnelClient/README.md): This executable can run on a client PC to create a secure tunnel from the PC to the
-    device, via the Remote Manager server. It is required for tunneling protocols like SSH or other TCP-based
-    protocols not directly supported by the Remote Manager server.
-  - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC
-    to the device, then launches a SSH client using that tunnel connection.
-  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to
-    the device, then launches a VNC viewer using that tunnel connection.
-  - [*WebTunnelRDP*](WebTunnel/WebTunnelRDP/README.md): This is a variant of WebTunnelClient that first creates a tunnel connection from your PC to
-    the device, then launches the Microsoft Remote Desktop client using that tunnel connection.
+  - [*WebTunnelAgent*](WebTunnel/WebTunnelAgent/README.md): This executable, also known as Device Agent, runs on the device and creates the secure tunnel between the device
+    and the macchina.io REMOTE server. This is the most important component of the macchina.io REMOTE SDK.
+  - [*WebTunnelClient*](WebTunnel/WebTunnelClient/README.md): This executable can run on a client machine
+    (Windows, macOS or Linux) to create a secure tunnel from the client machine to the remote device, via
+    macchina.io REMOTE. It is required for tunneling TCP-based protocols not directly supported by
+    macchina.io REMOTE, such Modbus/TCP.
+  - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first
+    creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
+    then launches a SSH client using that tunnel connection.
+  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelClient that first
+    creates a tunnel connection from your local machine (Windows, macOS or Linux) to a remote device
+    running a VNC (Virtual Network Computing) server, then launches a VNC remote desktop client using
+    that tunnel connection.
+  - [*WebTunnelRDP*](WebTunnel/WebTunnelRDP/README.md): This is a variant of WebTunnelClient that first
+    creates a tunnel connection from your local machine (Windows, macOS) to a remote Windows device
+    (which must have the remote desktop feature enabled), then launches a Microsoft Remote Desktop (RDP)
+    client using that tunnel connection.
 
-The macchina.io Remote Manager SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
+The macchina.io REMOTE SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
 ## Pre-Built Executables
@@ -80,12 +86,12 @@ instructions.
 
 ### Libraries
 
-The macchina.io Remote Manager SDK requires OpenSSL 1.0 or newer
+The macchina.io REMOTE SDK requires OpenSSL 1.0 or newer
 on Linux and macOS systems.
 We recommend using at least OpenSSL 1.0.2r or 1.1.1b.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
-does not have OpenSSL, please get it from <http://www.openssl.org> or
+does not have OpenSSL, please get it from <https://www.openssl.org> or
 another source. You do not have to build OpenSSL yourself - a binary
 distribution is fine. For example, via Debian APT:
 
@@ -140,7 +146,7 @@ $ brew install cmake openssl
 ## Building with CMake (Linux, macOS, Windows)
 
 [CMake](https://cmake.org) (version 3.2 or newer) is the recommended build system for
-building the macchina.io Remote Manager SDK.
+building the macchina.io REMOTE SDK.
 
 ```
 $ git clone https://github.com/my-devices/sdk.git
@@ -255,7 +261,7 @@ and modifying compiler/linker settings if necessary).
 Specify the name of your new build configuration in the call to `buildsdk.sh`.
 
 For more information regarding the build system, see the POCO C++
-Libraries documentation at <http://pocoproject.org/docs>.
+Libraries documentation at <https://docs.pocoproject.org/>.
 
 A final note: `buildsdk.sh` only builds the release configuration.
 If you need a debug build, see below.

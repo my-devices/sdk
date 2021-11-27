@@ -1,12 +1,12 @@
-# macchina.io Remote Manager Client (WebTunnelClient)
+# macchina.io REMOTE Client (WebTunnelClient)
 
 `WebTunnelClient` is a command-line program that sets up a tunnel for a TCP connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-Remote Manager.
+REMOTE.
 
 Note that in contrast to `WebTunnelAgent`, which typically runs on an embedded or IoT
 device, `WebTunnelClient` runs on a PC or Mac that you want to connect to the
-device. You'll have to build the [macchina.io Remote Manager SDK](../../README.md)
+device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
 for your machine to get the `WebTunnelClient` program.
 
 ## Running WebTunnelClient
@@ -35,7 +35,7 @@ If running on Windows, the parameters must be passed Windows-style:
 WebTunnelClient https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net /remote 22 /local 2222
 ```
 
-`WebTunnelClient` will prompt for your Remote Manager username and password.
+`WebTunnelClient` will prompt for your macchina.io REMOTE username and password.
 When no longer needed, the tunnel can be terminated by typing `CTRL-C`.
 
 You can now start your SSH client and connect it to port 2222 on your local machine

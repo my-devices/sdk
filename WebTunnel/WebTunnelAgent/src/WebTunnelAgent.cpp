@@ -229,15 +229,15 @@ protected:
 		helpFormatter.setCommand(commandName());
 		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
-			"macchina.io Remote Manager Device Agent.\n"
+			"macchina.io REMOTE Device Agent.\n"
 			"Copyright (c) 2013-2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
-			"clients via the macchina.io Remote Manager.\n\n"
+			"clients via the macchina.io REMOTE.\n\n"
 			"The following command-line options are supported:"s);
 		helpFormatter.setFooter(
-			"For more information, please visit the macchina.io "
-			"website at <https://macchina.io>."s
+			"For more information, please visit the macchina.io REMOTE "
+			"website at <https://macchina.io/remote>."s
 		);
 		helpFormatter.setIndent(8);
 		helpFormatter.format(std::cout);
@@ -937,7 +937,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.11.2");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.12.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

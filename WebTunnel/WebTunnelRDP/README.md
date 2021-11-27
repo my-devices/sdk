@@ -1,12 +1,12 @@
-# macchina.io Remote Manager RDP Client Wrapper (WebTunnelRDP)
+# macchina.io REMOTE RDP Client Wrapper (WebTunnelRDP)
 
 `WebTunnelRDP` is a command-line program that sets up a tunnel for a Microsoft Remote Desktop connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-Remote Manager, and then launches the Microsoft Remote Desktop client to open a RDP session.
+REMOTE, and then launches the Microsoft Remote Desktop client to open a RDP session.
 
 Note that in contrast to `WebTunnelAgent`, which typically runs on an embedded or IoT
 device, `WebTunnelRDP`, like `WebTunnelClient` and `WebTunnelSSH`, runs on a PC or Mac that you want to connect to the
-device. You'll have to build the [macchina.io Remote Manager SDK](../../README.md)
+device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
 for your machine to get the `WebTunnelRDP` program.
 
 ## Running WebTunnelRDP
@@ -23,7 +23,7 @@ to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net).
 WebTunnelRDP https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-`WebTunnelRDP` will prompt for your Remote Manager username and password and
+`WebTunnelRDP` will prompt for your macchina.io REMOTE username and password and
 then launch the Remote Desktop client with correct parameters for host and port number.
 
 
