@@ -273,7 +273,7 @@ add_custom_target(uninstall
 
 include(InstallRequiredSystemLibraries)
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "macchina.io Remote Manager SDK")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "macchina.io REMOTE SDK")
 set(CPACK_PACKAGE_VENDOR "Applied Informatics Software Engineering GmbH")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
