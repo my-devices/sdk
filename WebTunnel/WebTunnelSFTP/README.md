@@ -41,6 +41,18 @@ or `/sftp-client` command-line argument), an error message is printed and
 then launch the SFTP client with correct parameters for host, port number and
 remote user name.
 
+### Passing Options to the SFTP Client
+
+`WebTunnelSFTP` can pass command-line options to the SFTP client. SFTP command-line arguments
+are given on the `WebTunnelSFTP` command-line, separated with a `--`. For example, to use
+a private key for authentication:
+
+```
+WebTunnelSFTP -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
+```
+
+On Windows, the `--` is not required.
+
 ### Command-Line Arguments Help
 
 You can run `WebTunnelSFTP` without command-line options (or with `--help`
