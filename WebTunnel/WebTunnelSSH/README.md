@@ -47,7 +47,10 @@ remote user name.
 On platforms supporting the `scp` program for secure file transfers, `WebTunnelSSH`
 can also be used to launch `scp` instead of `ssh`.
 
-To copy a file `file.txt` to the remote system using `scp`.
+However, there's also a separate [`WebTunnelSCP`](../WebTunnelSCP/README.md)
+client program which is a bit easier to use.
+
+To copy a file `file.txt` to the remote system using `scp` with `WebTunnelSSH`:
 
 ```
 WebTunnelSSH --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt

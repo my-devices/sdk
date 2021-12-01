@@ -1,5 +1,5 @@
 //
-// WebTunnelSFTP.cpp
+// WebTunnelSCP.cpp
 //
 // Copyright (c) 2014-2021, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
@@ -66,22 +66,22 @@ public:
 };
 
 
-class WebTunnelSFTP: public Poco::Util::Application
+class WebTunnelSCP: public Poco::Util::Application
 {
 public:
-	WebTunnelSFTP():
+	WebTunnelSCP():
 		_helpRequested(false),
 		_localPort(0),
 		_remotePort(22)
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
-		_sftpClient = findExecutable("sftp.exe"s);
+		_scpClient = findExecutable("scp.exe"s);
 #else
-		_sftpClient = "sftp";
+		_scpClient = "scp";
 #endif
 	}
 
-	~WebTunnelSFTP()
+	~WebTunnelSCP()
 	{
 	}
 
@@ -113,21 +113,21 @@ protected:
 			Option("help"s, "h"s, "Display help information on command line arguments."s)
 				.required(false)
 				.repeatable(false)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleHelp)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleHelp)));
 
 		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
 				.argument("file"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleConfig)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleConfig)));
 
 		options.addOption(
-			Option("sftp-client", "C"s, "Specify the name of the SFTP client executable (default: sftp)."s)
+			Option("SCP-client", "C"s, "Specify the name of the SCP client executable (default: scp)."s)
 				.required(false)
 				.repeatable(false)
 				.argument("program"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleClient)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleClient)));
 
 		options.addOption(
 			Option("local-port"s, "L"s, "Specify local port number (default: ephemeral)."s)
@@ -135,7 +135,7 @@ protected:
 				.repeatable(false)
 				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleLocalPort)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleLocalPort)));
 
 		options.addOption(
 			Option("remote-port"s, "R"s, "Specify remote port number (default: SSH/22)."s)
@@ -143,35 +143,28 @@ protected:
 				.repeatable(false)
 				.argument("port"s)
 				.validator(new Poco::Util::IntValidator(1, 65535))
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleRemotePort)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleRemotePort)));
 
 		options.addOption(
 			Option("username"s, "u"s, "Specify username for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
 				.argument("username"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleUsername)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleUsername)));
 
 		options.addOption(
 			Option("password"s, "p"s, "Specify password for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
 				.argument("password"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handlePassword)));
-
-		options.addOption(
-			Option("login-name"s, "l"s, "Specify remote (SSH) login name."s)
-				.required(false)
-				.repeatable(false)
-				.argument("username"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleLogin)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handlePassword)));
 
 		options.addOption(
 			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
 				.argument("name=value"s)
-				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleDefine)));
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleDefine)));
 	}
 
 	void handleHelp(const std::string& name, const std::string& value)
@@ -186,7 +179,7 @@ protected:
 
 	void handleClient(const std::string& name, const std::string& value)
 	{
-		_sftpClient = value;
+		_scpClient = value;
 	}
 
 	void handleLocalPort(const std::string& name, const std::string& value)
@@ -209,11 +202,6 @@ protected:
 		_password = value;
 	}
 
-	void handleLogin(const std::string& name, const std::string& value)
-	{
-		_login = value;
-	}
-
 	void handleDefine(const std::string& name, const std::string& value)
 	{
 		defineProperty(value);
@@ -223,20 +211,16 @@ protected:
 	{
 		HelpFormatter helpFormatter(options());
 		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SFTP-OPTIONS]"s);
+		helpFormatter.setUsage("OPTIONS [-- SCP-OPTIONS] <source...> <target>"s);
 		helpFormatter.setHeader("\n"
-			"macchina.io REMOTE SFTP Client.\n"
+			"macchina.io REMOTE SCP Client.\n"
 			"Copyright (c) 2021 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
-			"This application is used to launch a SFTP (Secure/SSH File Transfer Protocol)\n"
+			"This application is used to launch a SCP (Secure/SSH File Copy)\n"
 			"connection to a remote host via the macchina.io REMOTE server.\n\n"
-			"<Remote-URI> specifies the URI of the remote device via the\n"
-			"macchina.io REMOTE server, e.g.:\n"
-#if defined(WEBTUNNEL_ENABLE_TLS)
-			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
-#else
-			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
-#endif
+			"A remote source or target is specified by using the macchina.io REMOTE\n"
+			"device hostname, in the form <user>@<hostname>:<file>, like with scp:\n"
+			"pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net:file.txt"
 			"\n\n"
 			"The following command-line options are supported:"s
 		);
@@ -349,40 +333,71 @@ protected:
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
-			_sftpClient = config().getString("sftp.executable", _sftpClient);
-			if (_sftpClient.empty())
+			_scpClient = config().getString("scp.executable", _scpClient);
+			if (_scpClient.empty())
 			{
-				logger().error("No SFTP client program available. Please configure the SFTP client program using the sftp.executable configuration property or sftp-client option."s);
+				logger().error("No SCP client program available. Please configure the SCP client program using the scp.executable configuration property or scp-client option."s);
 				return Poco::Util::Application::EXIT_CONFIG;
 			}
 
+			std::string remoteHost;
+			Poco::Process::Args scpArgs;
+			for (const auto& arg: args)
+			{
+				auto minPos = arg.find('-');
+				auto atPos = arg.find('@');
+				auto colonPos = arg.find(':');
+				if (minPos != 0 && atPos != std::string::npos && colonPos != std::string::npos && atPos < colonPos)
+				{
+					if (remoteHost.empty())
+					{
+						const std::string remoteLogin(arg, 0, atPos);
+						const std::string remotePath(arg, colonPos + 1);
+						remoteHost.assign(arg, atPos + 1, colonPos - atPos - 1);
+
+						scpArgs.push_back(Poco::format("%s@localhost:%s"s, remoteLogin, remotePath));
+					}
+					else
+					{
+						logger().error("Only one remote location can be specified."s);
+						return Poco::Util::Application::EXIT_USAGE;
+					}
+				}
+				else
+				{
+					scpArgs.push_back(arg);
+				}
+			}
+
+			if (remoteHost.empty())
+			{
+				logger().error("No remote location has been specified."s);
+				return Poco::Util::Application::EXIT_USAGE;
+			}
+
+			std::string protocol;
+#if defined(WEBTUNNEL_ENABLE_TLS)
+			protocol = "https";
+#else
+			protocol = "http";
+#endif
+			protocol = config().getString("webtunnel.protocol"s, protocol);
+
+			Poco::URI uri(Poco::format("%s://%s"s, protocol, remoteHost));
+
 			promptLogin();
 
-			Poco::URI uri(args[0]);
 			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout));
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
 
 			Poco::UInt16 localPort = forwarder.localPort();
+			scpArgs.insert(scpArgs.begin(), Poco::format("-P%hu"s, localPort));
 
-			std::string sftpURI = "sftp://";
-			if (!_login.empty())
-			{
-				sftpURI += _login;
-				sftpURI += "@";
-			}
-
-			sftpURI += Poco::format("localhost:%hu"s, localPort);
-
-			Poco::Process::Args sftpArgs;
-			std::vector<std::string>::const_iterator itArgs = ++args.begin();
-			sftpArgs.insert(sftpArgs.end(), itArgs, args.end());
-			sftpArgs.push_back(sftpURI);
-
-			logger().debug("Launching SFTP client: %s"s, _sftpClient);
-			Poco::ProcessHandle ph = Poco::Process::launch(_sftpClient, sftpArgs);
+			logger().debug("Launching SCP client: %s"s, _scpClient);
+			Poco::ProcessHandle ph = Poco::Process::launch(_scpClient, scpArgs);
 			rc = ph.wait();
-			logger().debug("SFTP client terminated with exit code %d"s, rc);
+			logger().debug("SCP client terminated with exit code %d"s, rc);
 		}
 		return rc;
 	}
@@ -393,10 +408,10 @@ private:
 	Poco::UInt16 _remotePort;
 	std::string _username;
 	std::string _password;
-	std::string _login;
-	std::string _sftpClient;
+	std::string _scpClient;
+	std::string _protocol;
 	SSLInitializer _sslInitializer;
 };
 
 
-POCO_APP_MAIN(WebTunnelSFTP)
+POCO_APP_MAIN(WebTunnelSCP)

@@ -43,6 +43,9 @@ Furthermore, the following executables are included:
   - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SSH client using that tunnel connection.
+  - [*WebTunnelSCP*](WebTunnel/WebTunnelSCP/README.md): This is a variant of WebTunnelClient that first
+    creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
+    then launches a SCP (Secure/SSH File Copy) client (`scp`) using that tunnel connection.
   - [*WebTunnelSFTP*](WebTunnel/WebTunnelSFTP/README.md): This is a variant of WebTunnelClient that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SFTP (Secure/SSH File Transfer Protocol) client using that tunnel connection.
