@@ -112,6 +112,7 @@ public:
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		SocketImpl* sockImpl = socket.impl();
 		return sockImpl &&
 			(_socketMap.find(sockImpl) != _socketMap.end());
@@ -120,6 +121,7 @@ public:
 	bool empty() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		return _socketMap.empty();
 	}
 
@@ -159,10 +161,7 @@ public:
 	{
 		PollSet::SocketModeMap result;
 
-		{
-			Poco::FastMutex::ScopedLock lock(_mutex);
-			if(_socketMap.empty()) return result;
-		}
+		if (_socketMap.empty()) return result;
 
 		Poco::Timespan remainingTime(timeout);
 		int rc;
@@ -203,9 +202,9 @@ public:
 	}
 
 private:
-	mutable Poco::FastMutex         _mutex;
-	int                             _epollfd;
-	std::map<void*, Socket>         _socketMap;
+	mutable Poco::FastMutex _mutex;
+	int _epollfd;
+	std::map<void*, Socket> _socketMap;
 	std::vector<struct epoll_event> _events;
 };
 
@@ -242,6 +241,7 @@ public:
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		SocketImpl* sockImpl = socket.impl();
 		return sockImpl &&
 			(_socketMap.find(sockImpl->sockfd()) != _socketMap.end());
@@ -250,6 +250,7 @@ public:
 	bool empty() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		return _socketMap.empty();
 	}
 
@@ -263,8 +264,10 @@ public:
 			if (it->fd == fd)
 			{
 				it->events = 0;
-				it->revents = 0;
-				setMode(it->fd, it->events, mode);
+				if (mode & PollSet::POLL_READ)
+					it->events |= POLLIN;
+				if (mode & PollSet::POLL_WRITE)
+					it->events |= POLLOUT;
 			}
 		}
 	}
@@ -305,7 +308,11 @@ public:
 				pfd.fd = it->first;
 				pfd.events = 0;
 				pfd.revents = 0;
-				setMode(pfd.fd, pfd.events, it->second);
+				if (it->second & PollSet::POLL_READ)
+					pfd.events |= POLLIN;
+				if (it->second & PollSet::POLL_WRITE)
+					pfd.events |= POLLOUT;
+
 				_pollfds.push_back(pfd);
 			}
 			_addMap.clear();
@@ -346,20 +353,16 @@ public:
 					std::map<poco_socket_t, Socket>::const_iterator its = _socketMap.find(it->fd);
 					if (its != _socketMap.end())
 					{
-						if ((it->revents & POLLIN)
-#ifdef _WIN32
-						|| (it->revents & POLLHUP)
-#endif
-							)
+						if (it->revents & POLLIN)
 							result[its->second] |= PollSet::POLL_READ;
-						if ((it->revents & POLLOUT)
-#ifdef _WIN32
-							&& (_wantPOLLOUT.find(it->fd) != _wantPOLLOUT.end())
-#endif
-							)
+						if (it->revents & POLLOUT)
 							result[its->second] |= PollSet::POLL_WRITE;
 						if (it->revents & POLLERR)
 							result[its->second] |= PollSet::POLL_ERROR;
+#ifdef _WIN32
+						if (it->revents & POLLHUP)
+							result[its->second] |= PollSet::POLL_READ;
+#endif
 					}
 					it->revents = 0;
 				}
@@ -370,55 +373,11 @@ public:
 	}
 
 private:
-
-#ifdef _WIN32
-
-	void setMode(poco_socket_t fd, short& target, int mode)
-	{
-		if (mode & PollSet::POLL_READ)
-			target |= POLLIN;
-
-		if (mode & PollSet::POLL_WRITE)
-			_wantPOLLOUT.insert(fd);
-		else
-			_wantPOLLOUT.erase(fd);
-		target |= POLLOUT;
-	}
-
-	bool hasSignaledFDs()
-	{
-		for (const auto& pollfd : _pollfds)
-		{
-			if ((pollfd.revents | POLLOUT) &&
-				(_wantPOLLOUT.find(pollfd.fd) != _wantPOLLOUT.end()))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-#else
-
-	void setMode(poco_socket_t fd, short& target, int mode)
-	{
-		if (mode & PollSet::POLL_READ)
-			target |= POLLIN;
-
-		if (mode & PollSet::POLL_WRITE)
-			target |= POLLOUT;
-	}
-
-#endif
-
-	mutable Poco::FastMutex         _mutex;
+	mutable Poco::FastMutex _mutex;
 	std::map<poco_socket_t, Socket> _socketMap;
-#ifdef _WIN32
-	std::set<poco_socket_t>         _wantPOLLOUT;
-#endif
-	std::map<poco_socket_t, int>    _addMap;
-	std::set<poco_socket_t>         _removeSet;
-	std::vector<pollfd>             _pollfds;
+	std::map<poco_socket_t, int> _addMap;
+	std::set<poco_socket_t> _removeSet;
+	std::vector<pollfd> _pollfds;
 };
 
 
@@ -434,36 +393,42 @@ public:
 	void add(const Socket& socket, int mode)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		_map[socket] = mode;
 	}
 
 	void remove(const Socket& socket)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		_map.erase(socket);
 	}
 
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		return _map.find(socket) != _map.end();
 	}
 
 	bool empty() const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		return _map.empty();
 	}
 
 	void update(const Socket& socket, int mode)
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		_map[socket] = mode;
 	}
 
 	void clear()
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
+
 		_map.clear();
 	}
 
