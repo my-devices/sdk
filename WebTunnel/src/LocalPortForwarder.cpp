@@ -22,6 +22,7 @@
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPBasicCredentials.h"
+#include "Poco/Net/NetException.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Format.h"
 #include "Poco/Buffer.h"
@@ -194,9 +195,16 @@ public:
 		{
 			n = socket.receiveBytes(_buffer.begin(), static_cast<int>(_buffer.size()));
 		}
+		catch (Poco::Net::ConnectionResetException& exc)
+		{
+			_logger.debug("Exception while receiving data from local socket: " + exc.displayText());
+			shutdown(*_pWebSocket, Poco::Net::WebSocket::WS_UNEXPECTED_CONDITION, _logger);
+			cleanupDispatcher(socket, *_pWebSocket);
+			return false;
+		}
 		catch (Poco::Exception& exc)
 		{
-			_logger.error("Exception while receiving data: " + exc.displayText());
+			_logger.error("Exception while receiving data from local socket: " + exc.displayText());
 			shutdown(*_pWebSocket, Poco::Net::WebSocket::WS_UNEXPECTED_CONDITION, _logger);
 			cleanupDispatcher(socket, *_pWebSocket);
 			return false;
@@ -266,9 +274,15 @@ public:
 		{
 			n = webSocket.receiveFrame(_buffer.begin(), static_cast<int>(_buffer.size()), flags);
 		}
+		catch (Poco::Net::ConnectionResetException& exc)
+		{
+			_logger.debug("Exception while receiving data from remote socket: " + exc.displayText());
+			cleanupDispatcher(socket, _streamSocket);
+			return false;
+		}
 		catch (Poco::Exception& exc)
 		{
-			_logger.error("Exception while receiving data: " + exc.displayText());
+			_logger.error("Exception while receiving data from remote socket: " + exc.displayText());
 			cleanupDispatcher(socket, _streamSocket);
 			return false;
 		}
