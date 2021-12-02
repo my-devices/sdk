@@ -146,6 +146,7 @@ public:
 
 	void cleanupDispatcher(Poco::Net::StreamSocket& socket1, Poco::Net::StreamSocket& socket2)
 	{
+		Poco::FastMutex::ScopedLock lock(_dispatcherMutex);
 		if (_pDispatcher)
 		{
 			_pDispatcher->removeSocket(socket1);
@@ -168,6 +169,7 @@ public:
 	}
 
 protected:
+	Poco::FastMutex _dispatcherMutex;
 	Poco::SharedPtr<SocketDispatcher> _pDispatcher;
 	Poco::Buffer<char> _buffer;
 };
