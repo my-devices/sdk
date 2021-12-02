@@ -48,6 +48,27 @@ or `/ssh-client` command-line argument), an error message is printed and
 then launch the SSH client with correct parameters for host, port number and
 remote SSH login name.
 
+### Disabling Host Fingerprint Checking and Authenticity Warning
+
+When connecting via SSH to a remote host with `WebTunnelSSH`, the `ssh` client will
+usually warn you that the authenticity of the remote host can't be established, and
+will prompt you to continue. This can be annoying, especially since `WebTunnelSSH`
+normally uses an ephemeral (random) port number that `ssh` connects to. Therefore
+you will also end up with lots of entries in your `known_hosts` file.
+This can be disabled by adding the following section to the `ssh` configuration
+file (usually located in `~/.ssh/config`):
+
+```
+Host localhost
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  LogLevel QUIET
+```
+
+The above settings will disable validation of the remote host key and prevent warnings
+when `ssh` connects to `localhost`, as it does when invoked from `WebTunnelSSH`.
+It also prevents `ssh` from writing an entry to the `known_hosts` file.
+
 ### Using WebTunnelSSH for Transferring Files Using SCP
 
 On platforms supporting the `scp` program for secure file transfers, `WebTunnelSSH`
