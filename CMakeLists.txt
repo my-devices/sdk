@@ -47,7 +47,7 @@ else()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 # Include some common macros to simpilfy the Poco CMake files
