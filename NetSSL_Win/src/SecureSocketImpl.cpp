@@ -657,16 +657,16 @@ SECURITY_STATUS SecureSocketImpl::decodeBufferFull(BYTE* pBuffer, DWORD bufSize,
 		}
 		else
 		{
-			// everything decoded
-			if (securityStatus != SEC_E_OK && securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
+			if (securityStatus == SEC_E_OK)
 			{
-				throw SSLException("Failed to decode data", Utility::formatError(securityStatus));
-			}
-			else if (securityStatus == SEC_E_OK)
-			{
+				// everything decoded
 				pBuffer = 0;
 				bufSize = 0;
 			}
+			else if (securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
+ 			{
+ 				return securityStatus;
+ 			}
 		}
 
 		if (securityStatus == SEC_I_RENEGOTIATE)
