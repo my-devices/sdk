@@ -31,8 +31,15 @@ If running on Windows, the parameters must be passed Windows-style:
 WebTunnelSFTP /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-Furthermore, on Windows, `WebTunnelSFTP` first looks for `sftp.exe`, which is
-available in newer releases of Windows 10. If no SFTP client executable could be found,
+It's also possible to specify remote username and the remote device address in a single
+argument:
+
+```
+WebTunnelSFTP pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+```
+
+On Windows, `WebTunnelSFTP` first looks for `sftp.exe`, which is available in newer
+releases of Windows 10 as an optional install. If no SFTP client executable could be found,
 and also no executable has been configured (using the `sftp.executable` configuration property
 or `/sftp-client` command-line argument), an error message is printed and
 `WebTunnelSFTP` exits.

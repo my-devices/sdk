@@ -358,10 +358,32 @@ protected:
 
 			promptLogin();
 
-			Poco::URI uri(args[0]);
+			std::string remoteURI = args[0];
+			if (remoteURI.compare(0, 8, "https://") != 0 && remoteURI.compare(0, 7, "http://") != 0)
+			{
+				if (remoteURI.compare(0, 7, "sftp://") == 0)
+				{
+					remoteURI.erase(0, 7);
+				}
+				std::string protocol;
+#if defined(WEBTUNNEL_ENABLE_TLS)
+				protocol = "https";
+#else
+				protocol = "http";
+#endif
+				protocol = config().getString("webtunnel.protocol"s, protocol);
+				protocol += "://";
+				remoteURI.insert(0, protocol);
+			}
+			Poco::URI uri(remoteURI);
 			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout));
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
+
+			if (_login.empty())
+			{
+				_login = uri.getUserInfo();
+			}
 
 			Poco::UInt16 localPort = forwarder.localPort();
 
