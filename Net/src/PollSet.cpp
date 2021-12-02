@@ -320,12 +320,6 @@ public:
 			Poco::Timestamp start;
 #ifdef _WIN32
 			rc = WSAPoll(&_pollfds[0], static_cast<ULONG>(_pollfds.size()), static_cast<INT>(remainingTime.totalMilliseconds()));
-			// see https://github.com/pocoproject/poco/issues/3248
-			if ((remainingTime > 0) && (rc > 0) && !hasSignaledFDs())
-			{
-				rc = -1;
-				WSASetLastError(WSAEINTR);
-			}
 #else
 			rc = ::poll(&_pollfds[0], _pollfds.size(), remainingTime.totalMilliseconds());
 #endif
