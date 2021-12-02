@@ -30,17 +30,23 @@ If running on Windows, the parameters must be passed Windows-style:
 WebTunnelSSH /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-Furthermore, on Windows, `WebTunnelSSH` first looks for `ssh.exe`, which is
-available in newer releases of Windows 10. If `ssh.exe` cannot be found in the
-executables search path (`PATH` environment variable), `WebTunnelSSH` looks
-for `putty.exe`. If no SSH client executable could be found, and also no
-executable has been configured (using the `ssh.executable` configuration property
+It is also possible to specify remote username and remote device address in one argument:
+
+```
+WebTunnelSSH pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+```
+
+On Windows, `WebTunnelSSH` first looks for `ssh.exe`, which is
+available in newer releases of Windows 10 as an optional install.
+If `ssh.exe` cannot be found in the executables search path (`PATH` environment variable),
+`WebTunnelSSH` looks for `putty.exe`. If no SSH client executable could be found, and also
+no executable has been configured (using the `ssh.executable` configuration property
 or `/ssh-client` command-line argument), an error message is printed and
 `WebTunnelSSH` exits.
 
 `WebTunnelSSH` will prompt for your macchina.io REMOTE username and password and
 then launch the SSH client with correct parameters for host, port number and
-remote user name.
+remote SSH login name.
 
 ### Using WebTunnelSSH for Transferring Files Using SCP
 
