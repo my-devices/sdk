@@ -127,7 +127,7 @@ protected:
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleConfig)));
 
 		options.addOption(
-			Option("ssh-clients", "C"s, "Specify the name of the SSH client executable (default: ssh or putty.exe)."s)
+			Option("ssh-client", "C"s, "Specify the name of the SSH client executable (default: ssh or putty.exe)."s)
 				.required(false)
 				.repeatable(false)
 				.argument("program"s)

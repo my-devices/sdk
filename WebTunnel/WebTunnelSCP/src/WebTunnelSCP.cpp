@@ -123,7 +123,7 @@ protected:
 				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleConfig)));
 
 		options.addOption(
-			Option("SCP-client", "C"s, "Specify the name of the SCP client executable (default: scp)."s)
+			Option("scp-client", "C"s, "Specify the name of the SCP client executable (default: scp)."s)
 				.required(false)
 				.repeatable(false)
 				.argument("program"s)
