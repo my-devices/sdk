@@ -40,7 +40,7 @@ Furthermore, the following executables are included:
     and the macchina.io REMOTE server. This is the most important component of the macchina.io REMOTE SDK.
   - [`remote-client`](WebTunnel/WebTunnelClient/README.md): This executable can run on a client machine
     (Windows, macOS or Linux) to create a secure tunnel from the client machine to the remote device, via
-    macchina.io REMOTE. It is required for tunneling TCP-based protocols not directly supported by
+    the macchina.io REMOTE server. It is required for tunneling TCP-based protocols not directly supported by
     macchina.io REMOTE, such Modbus/TCP, OPC-UA, database connections, etc.
   - [`remote-ssh`](WebTunnel/WebTunnelSSH/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
