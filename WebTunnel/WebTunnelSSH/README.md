@@ -37,7 +37,8 @@ remote-ssh pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
 On Windows, `remote-ssh` first looks for `ssh.exe`, which is
-available in newer releases of Windows 10 as an optional install.
+available in newer releases of Windows 10 as an
+[optional install](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse).
 If `ssh.exe` cannot be found in the executables search path (`PATH` environment variable),
 `remote-ssh` looks for `putty.exe`. If no SSH client executable could be found, and also
 no executable has been configured (using the `ssh.executable` configuration property
