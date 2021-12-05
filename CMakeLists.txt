@@ -107,8 +107,8 @@ option(ENABLE_XML "Enable XML" OFF)
 option(ENABLE_JSON "Enable JSON" OFF)
 option(ENABLE_UTIL "Enable Util" ON)
 option(ENABLE_NET "Enable Net" ON)
-option(ENABLE_PAGECOMPILER "Enable PageCompiler" ON)
-option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" ON)
+option(ENABLE_PAGECOMPILER "Enable PageCompiler" OFF)
+option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" OFF)
 
 option(ENABLE_TESTS
 	"Set to OFF|ON (default is OFF) to control build of POCO tests & samples" OFF)
