@@ -14,7 +14,7 @@ endif
 
 objects = WebTunnelVNC
 
-target         = WebTunnelVNC
+target         = remote-vnc
 target_version = 1
 target_libs    = $(tlslibs) PocoWebTunnel PocoUtil PocoNet PocoXML PocoJSON PocoFoundation
 

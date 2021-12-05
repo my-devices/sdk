@@ -1,4 +1,4 @@
-set(APP_NAME "WebTunnelSFTP")
+set(APP_NAME "remote-sftp")
 
 set(LOCAL_SRCS "")
 aux_source_directory(src LOCAL_SRCS)

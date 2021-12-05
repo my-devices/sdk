@@ -14,7 +14,7 @@ endif
 
 objects = WebTunnelSSH
 
-target         = WebTunnelSSH
+target         = remote-ssh
 target_version = 1
 target_libs    = $(tlslibs) PocoWebTunnel PocoUtil PocoNet PocoXML PocoJSON PocoFoundation
 

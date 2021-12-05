@@ -14,7 +14,7 @@ endif
 
 objects = WebTunnelSFTP
 
-target         = WebTunnelSFTP
+target         = remote-sftp
 target_version = 1
 target_libs    = $(tlslibs) PocoWebTunnel PocoUtil PocoNet PocoXML PocoJSON PocoFoundation
 

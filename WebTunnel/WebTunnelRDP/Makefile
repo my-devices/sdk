@@ -14,7 +14,7 @@ endif
 
 objects = WebTunnelRDP
 
-target         = WebTunnelRDP
+target         = remote-rdp
 target_version = 1
 target_libs    = $(tlslibs) PocoWebTunnel PocoUtil PocoNet PocoXML PocoJSON PocoFoundation
 

@@ -1,4 +1,4 @@
-set(APP_NAME "WebTunnelClient")
+set(APP_NAME "remote-client")
 
 set(LOCAL_SRCS "")
 aux_source_directory(src LOCAL_SRCS)

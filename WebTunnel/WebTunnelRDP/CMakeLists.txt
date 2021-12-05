@@ -1,4 +1,4 @@
-set(APP_NAME "WebTunnelRDP")
+set(APP_NAME "remote-rdp")
 
 set(LOCAL_SRCS "")
 aux_source_directory(src LOCAL_SRCS)

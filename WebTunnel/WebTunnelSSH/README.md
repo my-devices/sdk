@@ -1,58 +1,58 @@
-# macchina.io REMOTE SSH Client Wrapper (WebTunnelSSH)
+# macchina.io REMOTE SSH Client Wrapper (remote-ssh)
 
-`WebTunnelSSH` is a command-line program that sets up a tunnel for a SSH connection from your
+`remote-ssh` is a command-line program that sets up a tunnel for a SSH connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
 REMOTE, and then launches an SSH client to open an SSH session.
 
 Note that in contrast to `WebTunnelAgent`, which typically runs on an embedded or IoT
-device, `WebTunnelSSH`, like `WebTunnelClient`, runs on a PC or Mac that you want to connect to the
+device, `remote-ssh`, like `remote-client`, runs on a PC or Mac that you want to connect to the
 device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
-for your machine to get the `WebTunnelSSH` program.
+for your machine to get the `remote-ssh` program.
 
-## Running WebTunnelSSH
+## Running remote-ssh
 
-`WebTunnelSSH` does not need a configuration file, all parameters can be passed
+`remote-ssh` does not need a configuration file, all parameters can be passed
 via command-line arguments. Some settings can also be set using a configuration file
 (see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md) for more
 information on configuration files), but in most cases no configuration file is needed.
 
-To run `WebTunnelSSH`, you'll need to specify the URL of the remote device to connect
+To run `remote-ssh`, you'll need to specify the URL of the remote device to connect
 to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net), as well as the
 user name to connect to.
 
 ```
-WebTunnelSSH -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-WebTunnelSSH /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
 It is also possible to specify remote username and remote device address in one argument:
 
 ```
-WebTunnelSSH pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
-On Windows, `WebTunnelSSH` first looks for `ssh.exe`, which is
+On Windows, `remote-ssh` first looks for `ssh.exe`, which is
 available in newer releases of Windows 10 as an optional install.
 If `ssh.exe` cannot be found in the executables search path (`PATH` environment variable),
-`WebTunnelSSH` looks for `putty.exe`. If no SSH client executable could be found, and also
+`remote-ssh` looks for `putty.exe`. If no SSH client executable could be found, and also
 no executable has been configured (using the `ssh.executable` configuration property
 or `/ssh-client` command-line argument), an error message is printed and
-`WebTunnelSSH` exits.
+`remote-ssh` exits.
 
-`WebTunnelSSH` will prompt for your macchina.io REMOTE username and password and
+`remote-ssh` will prompt for your macchina.io REMOTE username and password and
 then launch the SSH client with correct parameters for host, port number and
 remote SSH login name.
 
 ### Disabling Host Fingerprint Checking and Authenticity Warning
 
-When connecting via SSH to a remote host with `WebTunnelSSH`, the `ssh` client will
+When connecting via SSH to a remote host with `remote-ssh`, the `ssh` client will
 usually warn you that the authenticity of the remote host can't be established, and
-will prompt you to continue. This can be annoying, especially since `WebTunnelSSH`
+will prompt you to continue. This can be annoying, especially since `remote-ssh`
 normally uses an ephemeral (random) port number that `ssh` connects to. Therefore
 you will also end up with lots of entries in your `known_hosts` file.
 This can be disabled by adding the following section to the `ssh` configuration
@@ -66,51 +66,51 @@ Host localhost
 ```
 
 The above settings will disable validation of the remote host key and prevent warnings
-when `ssh` connects to `localhost`, as it does when invoked from `WebTunnelSSH`.
+when `ssh` connects to `localhost`, as it does when invoked from `remote-ssh`.
 It also prevents `ssh` from writing an entry to the `known_hosts` file.
 
-### Using WebTunnelSSH for Transferring Files Using SCP
+### Using remote-ssh for Transferring Files Using SCP
 
-On platforms supporting the `scp` program for secure file transfers, `WebTunnelSSH`
+On platforms supporting the `scp` program for secure file transfers, `remote-ssh`
 can also be used to launch `scp` instead of `ssh`.
 
-However, there's also a separate [`WebTunnelSCP`](../WebTunnelSCP/README.md)
+However, there's also a separate [`remote-scp`](../WebTunnelSCP/README.md)
 client program which is a bit easier to use.
 
-To copy a file `file.txt` to the remote system using `scp` with `WebTunnelSSH`:
+To copy a file `file.txt` to the remote system using `scp` with `remote-ssh`:
 
 ```
-WebTunnelSSH --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
+remote-ssh --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
 ```
 
 or, on Windows 10 (with SSH):
 
 ```
-WebTunnelSSH /scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
+remote-ssh /scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
 ```
 
 Note that the remote host name must be specified as `localhost` in this case, as
-`scp` actually connects to a local port that is forwarded by `WebTunnelSSH` to the
+`scp` actually connects to a local port that is forwarded by `remote-ssh` to the
 remote device.
 
 ### Passing Options to the SSH Client
 
-`WebTunnelSSH` can pass command-line options to the SSH client. SSH command-line arguments
-are given on the `WebTunnelSSH` command-line, separated with a `--`. For example, to use
+`remote-ssh` can pass command-line options to the SSH client. SSH command-line arguments
+are given on the `remote-ssh` command-line, separated with a `--`. For example, to use
 a private key for authentication:
 
 ```
-WebTunnelSSH -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
+remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
 ```
 
 ### Passing a Command or Script to the SSH Client
 
-`WebTunnelSSH` can pass a command for the remote system to `ssh`.
+`remote-ssh` can pass a command for the remote system to `ssh`.
 To do so, specify the command using the `--command` (short: `-m`; Windows: `/command`) option.
 The given command will be passed to `ssh` after the extra options and the hostname:
 
 ```
-WebTunnelSSH -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 ```
 
 This can also be used to run a script (via pipe of redirection of stdin).
@@ -118,10 +118,10 @@ However, in this case, the macchina.io REMOTE username and password must be pass
 command-line arguments, and `bash` or another shell must be specified as command to execute via `ssh`:
 
 ```
-WebTunnelSSH -l pi -u rmuser -p rmpasswd -m bash https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net <script.sh
+remote-ssh -l pi -u rmuser -p rmpasswd -m bash https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net <script.sh
 ```
 
 ### Command-Line Arguments Help
 
-You can run `WebTunnelSSH` without command-line options (or with `--help`
+You can run `remote-ssh` without command-line options (or with `--help`
 or `/help` on Windows) to see a help screen with available command-line options.

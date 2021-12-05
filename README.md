@@ -5,7 +5,7 @@
 [macchina.io REMOTE](https://macchina.io/remote) provides secure remote access to connected devices
 via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
 Virtual Network Computing (VNC). With macchina.io REMOTE, any network-connected device
-running the macchina.io REMOTE Device Agent software (*WebTunnelAgent*, contained in this SDK)
+running the macchina.io REMOTE Device Agent software (`WebTunnelAgent`, contained in this SDK)
 can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
 
@@ -19,7 +19,7 @@ mobile apps.
 Visit [macchina.io/remote](https://macchina.io/remote) to learn more and to register for a free account.
 Specifically, see the [Getting Started](https://macchina.io/remote_signup.html) page and the
 [Frequently Asked Questions](https://macchina.io/remote_faq.html) for
-information on how to use this SDK and the included *WebTunnelAgent* executable.
+information on how to use this SDK and the included `WebTunnelAgent` executable.
 
 There is also a [blog post](https://macchina.io/blog/?p=257) showing step-by-step instructions to connect a Raspberry Pi.
 
@@ -31,29 +31,29 @@ The macchina.io REMOTE SDK is based on the
 as well as it contains important information regarding the directory structure
 and the build system of the SDK.
 
-The SDK contains the WebTunnel library, which implements the tunnel protocol used by macchina.io REMOTE.
+The SDK contains the `WebTunnel` library, which implements the tunnel protocol used by macchina.io REMOTE.
 Furthermore, the following executables are included:
 
-  - [*WebTunnelAgent*](WebTunnel/WebTunnelAgent/README.md): This executable, also known as Device Agent, runs on the device and creates the secure tunnel between the device
+  - [`WebTunnelAgent`](WebTunnel/WebTunnelAgent/README.md): This executable, also known as Device Agent, runs on the device and creates the secure tunnel between the device
     and the macchina.io REMOTE server. This is the most important component of the macchina.io REMOTE SDK.
-  - [*WebTunnelClient*](WebTunnel/WebTunnelClient/README.md): This executable can run on a client machine
+  - [`remote-client`](WebTunnel/WebTunnelClient/README.md): This executable can run on a client machine
     (Windows, macOS or Linux) to create a secure tunnel from the client machine to the remote device, via
     macchina.io REMOTE. It is required for tunneling TCP-based protocols not directly supported by
-    macchina.io REMOTE, such Modbus/TCP.
-  - [*WebTunnelSSH*](WebTunnel/WebTunnelSSH/README.md): This is a variant of WebTunnelClient that first
+    macchina.io REMOTE, such Modbus/TCP, OPC-UA, database connections, etc.
+  - [`remote-ssh`](WebTunnel/WebTunnelSSH/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SSH client using that tunnel connection.
-  - [*WebTunnelSCP*](WebTunnel/WebTunnelSCP/README.md): This is a variant of WebTunnelClient that first
+  - [`remote-scp`](WebTunnel/WebTunnelSCP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SCP (Secure/SSH File Copy) client (`scp`) using that tunnel connection.
-  - [*WebTunnelSFTP*](WebTunnel/WebTunnelSFTP/README.md): This is a variant of WebTunnelClient that first
+  - [`remote-sftp`](WebTunnel/WebTunnelSFTP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SFTP (Secure/SSH File Transfer Protocol) client using that tunnel connection.
-  - [*WebTunnelVNC*](WebTunnel/WebTunnelVNC/README.md): This is a variant of WebTunnelClient that first
+  - [`remote-vnc`](WebTunnel/WebTunnelVNC/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to a remote device
     running a VNC (Virtual Network Computing) server, then launches a VNC remote desktop client using
     that tunnel connection.
-  - [*WebTunnelRDP*](WebTunnel/WebTunnelRDP/README.md): This is a variant of WebTunnelClient that first
+  - [`remote-rdp`](WebTunnel/WebTunnelRDP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS) to a remote Windows device
     (which must have the remote desktop feature enabled), then launches a Microsoft Remote Desktop (RDP)
     client using that tunnel connection.
@@ -64,7 +64,7 @@ The macchina.io REMOTE SDK is licensed under the [Boost Software License](https:
 ## Pre-Built Executables
 
 Pre-built executables for Windows, macOS and some Linux distributions
-(including Raspbian) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
+(including Raspberry Pi OS) are available from the [macchina.io website](https://macchina.io/remote_downloads.html).
 
 
 ## Easy Install from Source (Linux and macOS)
@@ -79,7 +79,7 @@ $ curl https://raw.githubusercontent.com/my-devices/agent-installer/master/insta
 ```
 
 The script should work on most Debian and RedHat-based Linux distributions including
-Ubuntu and Raspbian. On macOS, [Homebrew](https://brew.sh) must be installed.
+Ubuntu and Raspberry Pi OS. On macOS, [Homebrew](https://brew.sh) must be installed.
 
 The script will install all required dependencies, then get the sources from
 GitHub and run the steps necessary (see below) to build and install the binaries in `/usr/local/bin/`.
@@ -94,7 +94,8 @@ instructions.
 
 The macchina.io REMOTE SDK requires OpenSSL 1.0 or newer
 on Linux and macOS systems.
-We recommend using at least OpenSSL 1.0.2r or 1.1.1b.
+We recommend using at 1.1.1l or newer.
+Note: OpenSSL 3.0 is not yet supported.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
 does not have OpenSSL, please get it from <https://www.openssl.org> or
@@ -108,7 +109,7 @@ $ apt-get install openssl libssl-dev
 On macOS, the easiest way to install OpenSSL is via [Homebrew](https://brew.sh):
 
 ```
-$ brew install openssl
+$ brew install openssl@1.1
 ```
 
 On Windows, OpenSSL is optional. The default (with CMake) is to build using
@@ -131,7 +132,7 @@ On Windows, Visual C++ is recommended (any version from 2015 to 2019 will do).
 
 All dependencies can be installed with the following commands:
 
-#### Debian Linux (including Ubuntu and Raspbian)
+#### Debian Linux (including Ubuntu and Raspberry Pi OS)
 
 ```
 $ sudo apt-get -y update && sudo apt-get -y install git g++ make cmake libssl-dev
@@ -146,7 +147,7 @@ $ sudo yum install -y git gcc-c++ make cmake3 openssl-devel
 #### macOS (with Homebrew)
 
 ```
-$ brew install cmake openssl
+$ brew install cmake openssl@1.1
 ```
 
 ## Building with CMake (Linux, macOS, Windows)
@@ -165,18 +166,18 @@ $ cmake --build . --config Release
 
 On macOS, it's necessary to tell CMake where to find the OpenSSL headers
 and libraries by setting the `OPENSSL_ROOT_DIR` CMake variable.
-For example, if OpenSSL has been installed with Homebrew,
+For example, if OpenSSL 1.1.x has been installed with Homebrew,
 the `cmake` invocation becomes:
 
 ```
-$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1
 ```
 
 If you want to link statically with OpenSSL libraries (recommended on
 macOS), add the `-DOPENSSL_USE_STATIC_LIBS=TRUE` option, e.g.:
 
 ```
-$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_USE_STATIC_LIBS=TRUE
+$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 -DOPENSSL_USE_STATIC_LIBS=TRUE
 ```
 
 Other common ways of building with CMake (e.g., `cmake-gui`) will also work.
@@ -239,10 +240,10 @@ $ ./buildsdk.sh
 ```
 
 It will make the necessary invocations of
-the configure script and GNU make to build WebTunnelAgent and
-WebTunnelClient, along with the required libraries. With this
-build, the required POCO libraries (Foundation, Net, Util, WebTunnel,
-Crypto and NetSSL_OpenSSL) will be linked statically into the final
+the configure script and GNU make to build `WebTunnelAgent` and
+the client command-line tools, along with the required libraries. With this
+build, the required POCO libraries (`Foundation`, `Net`, `Util`, `WebTunnel`,
+`Crypto` and `NetSSL_OpenSSL`) will be linked statically into the final
 applications. If you don't want this, because you want to use other
 parts of POCO in your project and link the shared libraries, you'll
 have to run the necessary commands manually. You'll also have to
@@ -282,7 +283,7 @@ manually, as described in README_POCO.
 $ ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static
 $ make -s -j8 DEFAULT_TARGET=static_release
 $ export POCO_BASE=`pwd`
-$ cd WebTunnel/Agent
+$ cd WebTunnel/WebTunnelAgent
 $ make -s DEFAULT_TARGET=shared_release
 ```
 
@@ -297,11 +298,11 @@ A few notes on the arguments:
   * `DEFAULT_TARGET=static_release` instructs the build system to only build
     the release configuration.
   * `DEFAULT_TARGET=shared_release` (in the second call to GNU make for building the
-    WebTunnelAgent and WebTunnelClient executables) instructs the build system to
+    `WebTunnelAgent` and command-line client executables) instructs the build system to
     link against the shared runtime libraries (C and C++ standard libraries, OpenSSL),
     but use the static POCO libraries (since only these are available).
   * `WEBTUNNEL_ENABLE_TLS=1` enables SSL/TLS support for WebTunnelAgent and
-    WebTunnelClient.
+    the command-line client tools.
 
 If your system does not have OpenSSL, run configure and GNU make as follows:
 
@@ -320,7 +321,7 @@ call to `./configure` and the final call to GNU make.
 $ ./configure --cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION --no-tests --no-samples --static --config=Angstrom
 $ make -s -j8 DEFAULT_TARGET=static_release
 $ export POCO_BASE=`pwd`
-$ cd WebTunnel/Agent
+$ cd WebTunnel/WebTunnelAgent
 $ make -s POCO_CONFIG=Angstrom DEFAULT_TARGET=shared_release
 ```
 

@@ -1,4 +1,4 @@
-set(APP_NAME "WebTunnelSSH")
+set(APP_NAME "remote-ssh")
 
 set(LOCAL_SRCS "")
 aux_source_directory(src LOCAL_SRCS)

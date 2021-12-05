@@ -1,4 +1,4 @@
-set(APP_NAME "WebTunnelVNC")
+set(APP_NAME "remote-vnc")
 
 set(LOCAL_SRCS "")
 aux_source_directory(src LOCAL_SRCS)
