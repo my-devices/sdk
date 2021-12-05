@@ -3,8 +3,9 @@
 ## About macchina.io REMOTE
 
 [macchina.io REMOTE](https://macchina.io/remote) provides secure remote access to connected devices
-via HTTP or other TCP-based protocols and applications such as secure shell (SSH) or
-Virtual Network Computing (VNC). With macchina.io REMOTE, any network-connected device
+via HTTP or other TCP-based protocols and applications such as secure shell (SSH),
+secure file transfer (SFTP), Virtual Network Computing (VNC) or remote desktop (RDP).
+With macchina.io REMOTE, any network-connected device
 running the macchina.io REMOTE Device Agent software (`WebTunnelAgent`, contained in this SDK)
 can be securely accessed remotely over the internet from browsers, mobile apps, desktop,
 server or cloud applications.
@@ -34,7 +35,8 @@ and the build system of the SDK.
 The SDK contains the `WebTunnel` library, which implements the tunnel protocol used by macchina.io REMOTE.
 Furthermore, the following executables are included:
 
-  - [`WebTunnelAgent`](WebTunnel/WebTunnelAgent/README.md): This executable, also known as Device Agent, runs on the device and creates the secure tunnel between the device
+  - [`WebTunnelAgent`](WebTunnel/WebTunnelAgent/README.md): This executable, also known as
+    **macchina.io REMOTE Device Agent**, runs on the device and creates the secure tunnel between the device
     and the macchina.io REMOTE server. This is the most important component of the macchina.io REMOTE SDK.
   - [`remote-client`](WebTunnel/WebTunnelClient/README.md): This executable can run on a client machine
     (Windows, macOS or Linux) to create a secure tunnel from the client machine to the remote device, via
