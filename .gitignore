@@ -43,6 +43,7 @@ cmake_*
 *.rar
 *.tar
 *.zip
+*.mine
 
 # Logs and databases #
 ######################

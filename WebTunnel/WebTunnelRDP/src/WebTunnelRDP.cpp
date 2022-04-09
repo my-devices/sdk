@@ -1,7 +1,7 @@
 //
 // WebTunnelRDP.cpp
 //
-// Copyright (c) 2015-2021, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2022, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -195,7 +195,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- RDP-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE RDP Client.\n"
-			"Copyright (c) 2019-2021 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2019-2022 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a Remote Desktop connection to a remote\n"
 			"host via the macchina.io REMOTE server.\n\n"
@@ -282,6 +282,30 @@ protected:
 			std::string cipherList = config().getString("tls.ciphers"s, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"s);
 			bool extendedVerification = config().getBool("tls.extendedCertificateVerification"s, false);
 			std::string caLocation = config().getString("tls.caLocation"s, ""s);
+			std::string tlsMinVersion = config().getString("tls.minVersion", ""s);
+
+			Poco::Net::Context::VerificationMode vMode = Poco::Net::Context::VERIFY_RELAXED;
+			std::string vModeStr = config().getString("tls.verification", ""s);
+			if (vModeStr == "none")
+				vMode = Poco::Net::Context::VERIFY_NONE;
+			else if (vModeStr == "relaxed")
+				vMode = Poco::Net::Context::VERIFY_RELAXED;
+			else if (vModeStr == "strict")
+				vMode = Poco::Net::Context::VERIFY_STRICT;
+			else if (vModeStr != "")
+				throw Poco::InvalidArgumentException("tls.verification", vModeStr);
+
+			Poco::Net::Context::Protocols minProto = Poco::Net::Context::PROTO_TLSV1_2;
+			if (tlsMinVersion == "tlsv1")
+				minProto = Poco::Net::Context::PROTO_TLSV1;
+			else if (tlsMinVersion == "tlsv1_1")
+				minProto = Poco::Net::Context::PROTO_TLSV1_1;
+			else if (tlsMinVersion == "tlsv1_2")
+				minProto = Poco::Net::Context::PROTO_TLSV1_2;
+			else if (tlsMinVersion == "tlsv1_3")
+				minProto = Poco::Net::Context::PROTO_TLSV1_3;
+			else if (tlsMinVersion != "")
+				throw Poco::InvalidArgumentException("tls.minVersion", tlsMinVersion);
 
 			Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 			if (acceptUnknownCert)
@@ -290,10 +314,11 @@ protected:
 				pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
 
 #if defined(POCO_NETSSL_WIN)
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, vMode);
 #else
-			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+			Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, ""s, caLocation, vMode, 5, true, cipherList);
 #endif
+			pContext->requireMinimumProtocol(minProto);
 			pContext->enableExtendedCertificateVerification(extendedVerification);
 			Poco::Net::SSLManager::instance().initializeClient(0, pCertificateHandler, pContext);
 #endif

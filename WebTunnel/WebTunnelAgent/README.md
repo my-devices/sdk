@@ -428,6 +428,17 @@ e.g., while using a self-signed certificate. Should not be used in production se
 This setting is used to specify a list of acceptable OpenSSL ciphers. Only used
 if `WebTunnelAgent` has been built with OpenSSL.
 
+#### tls.minVersion
+
+This setting is used to specify the minimum TLS version required by `WebTunnelAgent`
+when connecting to the macchina.io REMOTE server. The following values can be
+specified:
+
+  * `tlsv1` (TLS version 1.0)
+  * `tlsv1_1` (TLS version 1.1)
+  * `tlsv1_2` (TLS version 1.2, default)
+  * `tlsv1_3` (TLS version 1.3)
+
 #### tls.verification
 
 This optional setting specifies the certificate validation mode for the connection

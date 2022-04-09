@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2021, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2022, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -149,6 +149,7 @@ public:
 		_sshPort(0),
 		_vncPort(0),
 		_rdpPort(0),
+		_appPort(0),
 		_useProxy(false),
 		_proxyPort(0),
 		_threads(8),
@@ -230,7 +231,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE Device Agent.\n"
-			"Copyright (c) 2013-2021 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2022 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io REMOTE.\n\n"
@@ -300,6 +301,10 @@ protected:
 		if (_rdpPort != 0)
 		{
 			request.add("X-PTTH-Set-Property"s, Poco::format("device;rdpPort=%hu"s, _rdpPort));
+		}
+		if (_appPort != 0)
+		{
+			request.add("X-PTTH-Set-Property"s, Poco::format("device;appPort=%hu"s, _appPort));
 		}
 		if (!_deviceName.empty())
 		{
@@ -723,6 +728,7 @@ protected:
 		std::string caLocation = config().getString(prefix + ".caLocation", ""s);
 		std::string privateKey = config().getString(prefix + ".privateKey", ""s);
 		std::string certificate = config().getString(prefix + ".certificate", ""s);
+		std::string tlsMinVersion = config().getString(prefix + ".minVersion", ""s);
 
 		Poco::Net::Context::VerificationMode vMode = Poco::Net::Context::VERIFY_RELAXED;
 		std::string vModeStr = config().getString(prefix + ".verification", ""s);
@@ -732,15 +738,30 @@ protected:
 			vMode = Poco::Net::Context::VERIFY_RELAXED;
 		else if (vModeStr == "strict")
 			vMode = Poco::Net::Context::VERIFY_STRICT;
+		else if (vModeStr != "")
+			throw Poco::InvalidArgumentException(prefix + ".verification", vModeStr);
+
+		Poco::Net::Context::Protocols minProto = Poco::Net::Context::PROTO_TLSV1_2;
+		if (tlsMinVersion == "tlsv1")
+			minProto = Poco::Net::Context::PROTO_TLSV1;
+		else if (tlsMinVersion == "tlsv1_1")
+			minProto = Poco::Net::Context::PROTO_TLSV1_1;
+		else if (tlsMinVersion == "tlsv1_2")
+			minProto = Poco::Net::Context::PROTO_TLSV1_2;
+		else if (tlsMinVersion == "tlsv1_3")
+			minProto = Poco::Net::Context::PROTO_TLSV1_3;
+		else if (tlsMinVersion != "")
+			throw Poco::InvalidArgumentException(prefix + ".minVersion", tlsMinVersion);
 
 #if defined(POCO_NETSSL_WIN)
 		int options = Poco::Net::Context::OPT_DEFAULTS;
 		if (!certificate.empty()) options |= Poco::Net::Context::OPT_LOAD_CERT_FROM_FILE;
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, certificate, vMode, options);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, certificate, vMode, options);
 #else
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, privateKey, certificate, caLocation, vMode, 5, true, cipherList);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, privateKey, certificate, caLocation, vMode, 5, true, cipherList);
 #endif // POCO_NETSSL_WIN
 
+		pContext->requireMinimumProtocol(minProto);
 		pContext->enableExtendedCertificateVerification(extendedVerification);
 		return pContext;
 	}
@@ -798,6 +819,7 @@ protected:
 				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort"s, 0));
 				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort"s, 0));
 				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort"s, 0));
+				_appPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.appPort"s, 0));
 				_userAgent = config().getString("webtunnel.userAgent"s, ""s);
 				_httpTimeout = Poco::Timespan(config().getInt("http.timeout"s, 30), 0);
 				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval"s, 0), 0);
@@ -823,6 +845,10 @@ protected:
 				if (_rdpPort != 0 && _ports.find(_rdpPort) == _ports.end())
 				{
 					logger().warning(Poco::format("RDP port (%hu) not in list of forwarded ports."s, _rdpPort));
+				}
+				if (_appPort != 0 && _ports.find(_appPort) == _ports.end())
+				{
+					logger().warning("Application port (%hu) not in list of forwarded ports."s, _appPort);
 				}
 
 				if (_userAgent.empty())
@@ -908,6 +934,7 @@ private:
 	Poco::UInt16 _sshPort;
 	Poco::UInt16 _vncPort;
 	Poco::UInt16 _rdpPort;
+	Poco::UInt16 _appPort;
 	bool _useProxy;
 	std::string _proxyHost;
 	Poco::UInt16 _proxyPort;
@@ -937,7 +964,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.12.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.13.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)
