@@ -481,6 +481,17 @@ This setting is used to specify a list of acceptable OpenSSL ciphers for the HTT
 connection to the device web server. Only used if `WebTunnelAgent` has been built
 with OpenSSL.
 
+#### webtunnel.https.minVersion
+
+This setting is used to specify the minimum TLS version required by `WebTunnelAgent`
+when connecting to the device web server via HTTPS. The following values can be
+specified:
+
+  * `tlsv1` (TLS version 1.0)
+  * `tlsv1_1` (TLS version 1.1)
+  * `tlsv1_2` (TLS version 1.2, default)
+  * `tlsv1_3` (TLS version 1.3)
+
 #### webtunnel.https.verification
 
 This optional setting specifies the certificate validation mode for the HTTPS connection
