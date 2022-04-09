@@ -272,22 +272,32 @@ URL of the device.
 
 The optional setting specifies the port number of the device's SSH server.
 Used to enable SSH support in the macchina.io REMOTE web interface.
-The port number must also be included in the webtunnel.ports list.
+The port number must also be included in the `webtunnel.ports` list.
 If not set SSH access will not be enabled via the macchina.io REMOTE web interface.
 
 #### webtunnel.vncPort
 
 The optional setting specifies the port number of the device's VNC server.
 Used to enable VNC support in the macchina.io REMOTE web interface.
-The port number must also be included in the webtunnel.ports list.
+The port number must also be included in the `webtunnel.ports` list.
 If not set VNC access will not be enabled via the macchina.io REMOTE web interface.
 
 #### webtunnel.rdpPort
 
-The optional setting specifies the port number of the device's RDP server.
+This optional setting specifies the port number of the device's RDP server.
 Used to enable RDP support in the macchina.io REMOTE web interface.
-The port number must also be included in the webtunnel.ports list.
+The port number must also be included in the `webtunnel.ports` list.
 If not set RDP access will not be enabled via the macchina.io REMOTE web interface.
+
+#### webtunnel.appPort
+
+This optional setting specifies the port number of the device's
+application protocol server.
+This can be used for tunneling protocols such as Modbus/TCP (502),
+OPC-UA (4840) or other custom application protocols.
+Used to enable transparent TCP tunneling support in the
+macchina.io REMOTE web interface, via macchina.io REMOTE Helper.
+The port number must also be included in the `webtunnel.ports` list.
 
 #### webtunnel.reflectorURI
 
