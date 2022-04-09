@@ -499,7 +499,7 @@ void RemotePortForwarder::updateProperties(const std::map<std::string, std::stri
 	writeProperties(bufferWriter, props);
 
 	Poco::FastMutex::ScopedLock lock(_webSocketMutex);
-	_pWebSocket->sendFrame(buffer.begin(), payloadSize + Protocol::WT_FRAME_HEADER_SIZE, Poco::Net::WebSocket::FRAME_BINARY);
+	_pWebSocket->sendFrame(buffer.begin(), static_cast<int>(payloadSize + Protocol::WT_FRAME_HEADER_SIZE), Poco::Net::WebSocket::FRAME_BINARY);
 }
 
 
