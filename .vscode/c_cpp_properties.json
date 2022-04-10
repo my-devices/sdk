@@ -1,0 +1,56 @@
+{
+	"env": {
+		"POCO_BASE": "${workspaceFolder}",
+		"pocoIncludePath": [
+			"${POCO_BASE}/CppUnit/include",
+			"${POCO_BASE}/Foundation/include",
+			"${POCO_BASE}/XML/include",
+			"${POCO_BASE}/JSON/include",
+			"${POCO_BASE}/Util/include",
+			"${POCO_BASE}/Net/include",
+			"${POCO_BASE}/Crypto/include",
+			"${POCO_BASE}/NetSSL_OpenSSL/include",
+			"${POCO_BASE}/WebTunnel/include"
+		]
+  },
+  "configurations": [
+    {
+      "name": "Mac",
+      "intelliSenseMode": "clang-x64",
+      "includePath": ["${pocoIncludePath}"],
+      "macFrameworkPath": ["/System/Library/Frameworks"],
+      "defines": [
+        "WEBTUNNEL_ENABLE_TLS=1"
+      ],
+      "forcedInclude": [],
+      "compilerPath": "/usr/bin/clang",
+      "cStandard": "c11",
+      "cppStandard": "c++14",
+      "compileCommands": "",
+      "browse": {
+        "path": ["${workspaceFolder}"],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+      }
+    },
+    {
+      "name": "Linux",
+      "intelliSenseMode": "gcc-x64",
+      "includePath": ["${pocoIncludePath}"],
+      "defines": [
+        "WEBTUNNEL_ENABLE_TLS=1"
+      ],
+      "forcedInclude": [],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c11",
+      "cppStandard": "c++14",
+      "compileCommands": "",
+      "browse": {
+        "path": ["${workspaceFolder}"],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+      }
+    }
+  ],
+  "version": 4
+}
