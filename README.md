@@ -96,8 +96,7 @@ instructions.
 
 The macchina.io REMOTE SDK requires OpenSSL 1.0 or newer
 on Linux and macOS systems.
-We recommend using at 1.1.1l or newer.
-OpenSSL 3.0 is not yet supported.
+We recommend using OpenSSL version 1.1.1l or newer (including OpenSSL 3).
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
 does not have OpenSSL, please get it from <https://www.openssl.org> or

@@ -191,7 +191,7 @@ void PrintHandler::value(double d)
 void PrintHandler::value(bool b)
 {
 	arrayValue();
-	_out << b;
+	_out << (b ? "true" : "false");
 	_objStart = false;
 }
 

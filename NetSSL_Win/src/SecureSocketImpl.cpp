@@ -664,9 +664,9 @@ SECURITY_STATUS SecureSocketImpl::decodeBufferFull(BYTE* pBuffer, DWORD bufSize,
 				bufSize = 0;
 			}
 			else if (securityStatus != SEC_E_INCOMPLETE_MESSAGE && securityStatus != SEC_I_RENEGOTIATE && securityStatus != SEC_I_CONTEXT_EXPIRED)
- 			{
- 				return securityStatus;
- 			}
+			{
+				return securityStatus;
+			}
 		}
 
 		if (securityStatus == SEC_I_RENEGOTIATE)

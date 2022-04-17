@@ -95,14 +95,14 @@ public:
 	reference operator[](size_type i) 
 		/// Element access without range check. If the index is not small than the given size, the behavior is undefined.
 	{ 
-		poco_assert( i < N && "out of range" ); 
+		poco_assert_dbg(i < N && "out of range");
 		return elems[i];
 	}
 
 	const_reference operator[](size_type i) const 
 		/// Element access without range check. If the index is not small than the given size, the behavior is undefined.
 	{	 
-		poco_assert( i < N && "out of range" ); 
+		poco_assert_dbg(i < N && "out of range");
 		return elems[i]; 
 	}
 

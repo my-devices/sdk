@@ -72,11 +72,27 @@ int Timezone::utcOffset()
 	
 int Timezone::dst()
 {
-	std::time_t now = std::time(NULL);
-	struct std::tm t;
-	if (!localtime_r(&now, &t))
+	return dst(Poco::Timestamp());
+}
+
+
+int Timezone::dst(const Poco::Timestamp& timestamp)
+{
+	std::time_t time = timestamp.epochTime();
+	struct std::tm local;
+	if (!localtime_r(&time, &local))
 		throw Poco::SystemException("cannot get local time DST offset");
-	return t.tm_isdst == 1 ? 3600 : 0;
+	if (local.tm_isdst > 0)
+	{
+#if defined(__CYGWIN__)
+		return local.__TM_GMTOFF - utcOffset();
+#elif defined(_BSD_SOURCE) || defined(__APPLE__)  || defined(__FreeBSD__) || defined (__OpenBSD__) || POCO_OS == POCO_OS_LINUX || POCO_OS == POCO_OS_ANDROID
+		return local.tm_gmtoff - utcOffset();
+#else
+		return 3600;
+#endif
+	}
+	else return 0;
 }
 
 

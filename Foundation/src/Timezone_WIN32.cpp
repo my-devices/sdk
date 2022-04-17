@@ -38,12 +38,25 @@ int Timezone::dst()
 }
 
 
+int Timezone::dst(const Poco::Timestamp& timestamp)
+{
+	if (isDst(timestamp))
+	{
+		TIME_ZONE_INFORMATION tzInfo;
+		GetTimeZoneInformation(&tzInfo);
+		return -tzInfo.DaylightBias*60;
+	}
+	else return 0;
+}
+
+
 bool Timezone::isDst(const Timestamp& timestamp)
 {
 	std::time_t time = timestamp.epochTime();
-	struct std::tm* tms = std::localtime(&time);
-	if (!tms) throw Poco::SystemException("cannot get local time DST flag");
-	return tms->tm_isdst > 0;
+	struct std::tm local;
+	if (localtime_s(&local, &time))
+		throw Poco::SystemException("cannot get local time DST flag");
+	return local.tm_isdst > 0;
 }
 
 	

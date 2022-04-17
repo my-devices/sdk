@@ -38,6 +38,11 @@ public:
 		/// daylight saving time is in use.
 		///     local time = UTC + utcOffset() + dst().
 	
+	static int dst(const Poco::Timestamp& timestamp);
+		/// Returns the daylight saving time offset in seconds if
+		/// daylight saving time is in use for the given time.
+		///     local time = UTC + utcOffset() + dst().
+
 	static bool isDst(const Timestamp& timestamp);
 		/// Returns true if daylight saving time is in effect
 		/// for the given time. Depending on the operating system

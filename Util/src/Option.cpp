@@ -32,8 +32,7 @@ Option::Option():
 	_repeatable(false), 
 	_argRequired(false),
 	_pValidator(0),
-	_pCallback(0),
-	_pConfig(0)
+	_pCallback(0)
 {
 }
 
@@ -54,7 +53,6 @@ Option::Option(const Option& option):
 {
 	if (_pValidator) _pValidator->duplicate();
 	if (_pCallback) _pCallback = _pCallback->clone();
-	if (_pConfig) _pConfig->duplicate();
 }
 
 
@@ -65,8 +63,7 @@ Option::Option(const std::string& fullName, const std::string& shortName):
 	_repeatable(false),
 	_argRequired(false),
 	_pValidator(0),
-	_pCallback(0),
-	_pConfig(0)
+	_pCallback(0)
 {
 }
 
@@ -79,8 +76,7 @@ Option::Option(const std::string& fullName, const std::string& shortName, const 
 	_repeatable(false),
 	_argRequired(false),
 	_pValidator(0),
-	_pCallback(0),
-	_pConfig(0)
+	_pCallback(0)
 {
 }
 
@@ -94,8 +90,7 @@ Option::Option(const std::string& fullName, const std::string& shortName, const 
 	_argName(argName),
 	_argRequired(argRequired),
 	_pValidator(0),
-	_pCallback(0),
-	_pConfig(0)
+	_pCallback(0)
 {
 }
 
@@ -103,7 +98,6 @@ Option::Option(const std::string& fullName, const std::string& shortName, const 
 Option::~Option()
 {
 	if (_pValidator) _pValidator->release();
-	if (_pConfig) _pConfig->release();
 	delete _pCallback;
 }
 
@@ -200,12 +194,10 @@ Option& Option::binding(const std::string& propertyName)
 }
 
 
-Option& Option::binding(const std::string& propertyName, AbstractConfiguration* pConfig)
+Option& Option::binding(const std::string& propertyName, AbstractConfiguration::Ptr pConfig)
 {
 	_binding = propertyName;
-	if (_pConfig) _pConfig->release();
 	_pConfig = pConfig;
-	if (_pConfig) _pConfig->duplicate();
 	return *this;
 }
 

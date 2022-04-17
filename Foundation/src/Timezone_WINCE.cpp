@@ -43,6 +43,18 @@ int Timezone::dst()
 }
 
 
+int Timezone::dst(const Poco::Timestamp& timestamp)
+{
+	if (isDst(timestamp))
+	{
+		TIME_ZONE_INFORMATION tzInfo;
+		GetTimeZoneInformation(&tzInfo);
+		return -tzInfo.DaylightBias*60;
+	}
+	else return 0;
+}
+
+
 bool Timezone::isDst(const Timestamp& timestamp)
 {
 	std::time_t time = timestamp.epochTime();
