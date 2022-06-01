@@ -12,20 +12,20 @@ for your machine to get the `remote-client` program.
 In addition to `remote-client`, there are also more specialized command-line client
 programs for specific protocols:
 
-  - [`remote-ssh`](WebTunnel/WebTunnelSSH/README.md): This is a variant of `remote-client` that first
+  - [`remote-ssh`](../WebTunnelSSH/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SSH client using that tunnel connection.
-  - [`remote-scp`](WebTunnel/WebTunnelSCP/README.md): This is a variant of `remote-client` that first
+  - [`remote-scp`](../WebTunnelSCP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SCP (Secure/SSH File Copy) client (`scp`) using that tunnel connection.
-  - [`remote-sftp`](WebTunnel/WebTunnelSFTP/README.md): This is a variant of `remote-client` that first
+  - [`remote-sftp`](../WebTunnelSFTP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SFTP (Secure/SSH File Transfer Protocol) client using that tunnel connection.
-  - [`remote-vnc`](WebTunnel/WebTunnelVNC/README.md): This is a variant of `remote-client` that first
+  - [`remote-vnc`](../WebTunnelVNC/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to a remote device
     running a VNC (Virtual Network Computing) server, then launches a VNC remote desktop client using
     that tunnel connection.
-  - [`remote-rdp`](WebTunnel/WebTunnelRDP/README.md): This is a variant of `remote-client` that first
+  - [`remote-rdp`](../WebTunnelRDP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS) to a remote Windows device
     (which must have the remote desktop feature enabled), then launches a Microsoft Remote Desktop (RDP)
     client using that tunnel connection.
