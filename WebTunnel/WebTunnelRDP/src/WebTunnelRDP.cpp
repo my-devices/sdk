@@ -27,6 +27,8 @@
 #include "Poco/Util/IntValidator.h"
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/TemporaryFile.h"
+#include "Poco/FileStream.h"
 #include "Poco/Process.h"
 #include "Poco/Format.h"
 #include "Poco/String.h"
@@ -67,16 +69,9 @@ public:
 class WebTunnelRDP: public Poco::Util::Application
 {
 public:
-	WebTunnelRDP():
-		_helpRequested(false),
-		_localPort(0),
-		_remotePort(3389)
-	{
-	}
+	WebTunnelRDP() = default;
 
-	~WebTunnelRDP()
-	{
-	}
+	~WebTunnelRDP() = default;
 
 protected:
 	void initialize(Poco::Util::Application& self)
@@ -151,6 +146,12 @@ protected:
 				.repeatable(true)
 				.argument("name=value"s)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleDefine)));
+
+		options.addOption(
+			Option("fullscreen"s, "f"s, "Start RDP client in full-screen mode."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleFullScreen)));
 	}
 
 	void handleHelp(const std::string& name, const std::string& value)
@@ -186,6 +187,11 @@ protected:
 	void handleDefine(const std::string& name, const std::string& value)
 	{
 		defineProperty(value);
+	}
+
+	void handleFullScreen(const std::string& name, const std::string& value)
+	{
+		_fullScreen = true;
 	}
 
 	void displayHelp()
@@ -346,12 +352,32 @@ protected:
 			Poco::Process::Args rdpArgs;
 #if defined(__APPLE__)
 			rdpExecutable = "open";
-			std::string url = Poco::format("rdp://full%%20address=s:localhost:%hu"s, forwarder.localPort());
+			const std::string rdpPath(Poco::TemporaryFile::tempName() + ".rdp");
+			Poco::FileOutputStream rdpFile(rdpPath);
+			rdpFile 
+				<< "full address:s:localhost:" << forwarder.localPort() << "\n"
+				<< "autoreconnection enabled:i:1\n"
+				<< "disable menu anims:i:1\n"
+				<< "screen mode id:i:" << (_fullScreen ? 2 : 1) << "\n";
+
+			rdpFile.close();
+			Poco::TemporaryFile::registerForDeletion(rdpPath);
+
+			rdpArgs.push_back("-a"s);
+			rdpArgs.push_back("Microsoft Remote Desktop"s);
 			rdpArgs.push_back("-W"s);
 			rdpArgs.push_back("-n"s);
-			rdpArgs.push_back(url);
+			rdpArgs.push_back(rdpPath);
+#else
+#if defined(POCO_OS_FAMILY_UNIX)
+			rdpExecutable = "xfreerdp";
 #else
 			rdpExecutable = "mstsc";
+#endif
+			if (_fullScreen)
+			{
+				rdpArgs.push_back("/f");
+			}
 			rdpArgs.push_back("/v:localhost:"s + Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
 			rdpArgs.insert(rdpArgs.end(), ++args.begin(), args.end());
 #endif
@@ -365,9 +391,10 @@ protected:
 	}
 
 private:
-	bool _helpRequested;
-	Poco::UInt16 _localPort;
-	Poco::UInt16 _remotePort;
+	bool _helpRequested = false;
+	bool _fullScreen = false;
+	Poco::UInt16 _localPort = 0;
+	Poco::UInt16 _remotePort = 3389;
 	std::string _username;
 	std::string _password;
 	SSLInitializer _sslInitializer;
