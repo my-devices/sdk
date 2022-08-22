@@ -157,6 +157,7 @@ protected:
 			Option("remote-username"s, "U"s, "Specify remote (Windows) username."s)
 				.required(false)
 				.repeatable(false)
+				.argument("username")
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleRemoteUsername)));
 
 	}
