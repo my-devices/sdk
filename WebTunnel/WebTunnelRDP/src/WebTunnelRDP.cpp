@@ -152,6 +152,13 @@ protected:
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleFullScreen)));
+
+		options.addOption(
+			Option("remote-username"s, "U"s, "Specify remote (Windows) username."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleRemoteUsername)));
+
 	}
 
 	void handleHelp(const std::string& name, const std::string& value)
@@ -182,6 +189,11 @@ protected:
 	void handlePassword(const std::string& name, const std::string& value)
 	{
 		_password = value;
+	}
+
+	void handleRemoteUsername(const std::string& name, const std::string& value)
+	{
+		_remoteUsername = value;
 	}
 
 	void handleDefine(const std::string& name, const std::string& value)
@@ -360,6 +372,11 @@ protected:
 				<< "disable menu anims:i:1\n"
 				<< "screen mode id:i:" << (_fullScreen ? 2 : 1) << "\n";
 
+			if (!_remoteUsername.empty())
+			{
+				rdpFile << "username:s:" << _remoteUsername;
+			}
+
 			rdpFile.close();
 			Poco::TemporaryFile::registerForDeletion(rdpPath);
 
@@ -371,6 +388,12 @@ protected:
 #else
 #if defined(POCO_OS_FAMILY_UNIX)
 			rdpExecutable = "xfreerdp";
+			if (_remoteUsername.empty())
+			{
+				std::cout << "Windows Username: " << std::flush;
+				std::getline(std::cin, _remoteUsername);				
+			}
+			rdpArgs.push_back("/u:"s + _remoteUsername);
 #else
 			rdpExecutable = "mstsc";
 #endif
@@ -397,6 +420,7 @@ private:
 	Poco::UInt16 _remotePort = 3389;
 	std::string _username;
 	std::string _password;
+	std::string _remoteUsername;
 	SSLInitializer _sslInitializer;
 };
 
