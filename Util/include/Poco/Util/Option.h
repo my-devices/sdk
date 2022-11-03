@@ -126,7 +126,7 @@ public:
 		///
 		/// The configuration will automatically receive the option's argument.
 
-	Option& binding(const std::string& propertyName, AbstractConfiguration* pConfig);
+	Option& binding(const std::string& propertyName, AbstractConfiguration::Ptr pConfig);
 		/// Binds the option to the configuration property with the given name, 
 		/// using the given AbstractConfiguration.
 		///
