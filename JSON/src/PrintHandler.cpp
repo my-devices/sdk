@@ -71,7 +71,7 @@ bool PrintHandler::printFlat() const
 unsigned PrintHandler::indent()
 {
 	if (!printFlat()) return _indent;
-	
+
 	return 0;
 }
 
@@ -119,9 +119,9 @@ void PrintHandler::endArray()
 void PrintHandler::key(const std::string& k)
 {
 	if (!_objStart) comma();
-	
+
 	_objStart = true;
-		
+
 	_out << _tab;
 	Stringifier::formatString(k, _out, _options);
 	if (!printFlat()) _out << ' ';
@@ -205,7 +205,7 @@ void PrintHandler::comma()
 void PrintHandler::arrayValue()
 {
 	if (!_objStart) comma();
-	if (array()) 
+	if (array())
 	{
 		_out << _tab;
 	}

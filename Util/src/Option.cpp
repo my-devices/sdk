@@ -27,9 +27,9 @@ namespace Poco {
 namespace Util {
 
 
-Option::Option(): 
-	_required(false), 
-	_repeatable(false), 
+Option::Option():
+	_required(false),
+	_repeatable(false),
 	_argRequired(false),
 	_pValidator(0),
 	_pCallback(0)
@@ -129,7 +129,7 @@ void Option::swap(Option& option)
 	std::swap(_pConfig, option._pConfig);
 }
 
-	
+
 Option& Option::shortName(const std::string& name)
 {
 	_shortName = name;
@@ -143,14 +143,14 @@ Option& Option::fullName(const std::string& name)
 	return *this;
 }
 
-	
+
 Option& Option::description(const std::string& text)
 {
 	_description = text;
 	return *this;
 }
 
-	
+
 Option& Option::required(bool flag)
 {
 	_required = flag;
@@ -164,7 +164,7 @@ Option& Option::repeatable(bool flag)
 	return *this;
 }
 
-	
+
 Option& Option::argument(const std::string& name, bool required)
 {
 	_argName     = name;
@@ -172,7 +172,7 @@ Option& Option::argument(const std::string& name, bool required)
 	return *this;
 }
 
-	
+
 Option& Option::noArgument()
 {
 	_argName.clear();
@@ -219,7 +219,7 @@ Option& Option::validator(Validator* pValidator)
 
 bool Option::matchesShort(const std::string& option) const
 {
-	return option.length() > 0 
+	return option.length() > 0
 		&& !_shortName.empty() && option.compare(0, _shortName.length(), _shortName) == 0;
 }
 
@@ -237,7 +237,7 @@ bool Option::matchesPartial(const std::string& option) const
 {
 	std::string::size_type pos = option.find_first_of(":=");
 	std::string::size_type len = pos == std::string::npos ? option.length() : pos;
-	return option.length() > 0 
+	return option.length() > 0
 		&& icompare(option, 0, len, _fullName, 0, len) == 0;
 }
 

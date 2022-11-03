@@ -26,6 +26,12 @@ remote-rdp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
 `remote-rdp` will prompt for your macchina.io REMOTE username and password and
 then launch the Remote Desktop client with correct parameters for host and port number.
 
+The following RDP clients are used:
+
+  - `mstsc.exe` on Windows
+  - [`Microsoft Remote Desktop.app`](https://apps.apple.com/us/app/microsoft-remote-desktop/id1295203466) on macOS (launched via a temporarily created `.rdp` file)
+  - [`xfreerdp`](https://www.freerdp.com) on Linux and other Unix platforms
+
 
 ### Command-Line Arguments Help
 
