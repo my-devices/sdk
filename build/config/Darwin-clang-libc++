@@ -15,7 +15,7 @@ ARCHFLAGS          ?= -arch $(OSARCH)
 SANITIZEFLAGS      ?=
 OSFLAGS            ?= -mmacosx-version-min=10.11 -isysroot $(shell xcrun --show-sdk-path)
 
-OPENSSL_DIR        ?= /usr/local/opt/openssl@1.1
+OPENSSL_DIR        ?= /usr/local/opt/openssl
 
 #
 # Tools
