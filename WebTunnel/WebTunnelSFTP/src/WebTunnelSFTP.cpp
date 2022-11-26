@@ -233,9 +233,9 @@ protected:
 			"<Remote-URI> specifies the URI of the remote device via the\n"
 			"macchina.io REMOTE server, e.g.:\n"
 #if defined(WEBTUNNEL_ENABLE_TLS)
-			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
+			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io"
 #else
-			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net"
+			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io"
 #endif
 			"\n\n"
 			"The following command-line options are supported:"s

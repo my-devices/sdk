@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
-# Short-Description: Start/stop my-devices.net WebTunnelAgent
+# Short-Description: Start/stop macchina.io REMOTE WebTunnelAgent
 ### END INIT INFO
 
 . /lib/lsb/init-functions

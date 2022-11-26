@@ -17,10 +17,10 @@ via command-line arguments. Some settings can also be set using a configuration 
 information on configuration files), but in most cases no configuration file is needed.
 
 To run `remote-rdp`, you'll need to specify the URL of the remote device to connect
-to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net).
+to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io).
 
 ```
-remote-rdp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-rdp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 `remote-rdp` will prompt for your macchina.io REMOTE username and password and
