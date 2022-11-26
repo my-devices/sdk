@@ -18,24 +18,24 @@ via command-line arguments. Some settings can also be set using a configuration 
 information on configuration files), but in most cases no configuration file is needed.
 
 To run `remote-sftp`, you'll need to specify the URL of the remote device to connect
-to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net), as well as the
+to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io), as well as the
 user name to connect to.
 
 ```
-remote-sftp -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-sftp -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-remote-sftp /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-sftp /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 It's also possible to specify remote username and the remote device address in a single
 argument:
 
 ```
-remote-sftp pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-sftp pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 On Windows, `remote-sftp` first looks for `sftp.exe`, which is available in newer
@@ -55,7 +55,7 @@ are given on the `remote-sftp` command-line, separated with a `--`. For example,
 a private key for authentication:
 
 ```
-remote-sftp -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
+remote-sftp -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io -- -i ~/.ssh/mysecret
 ```
 
 On Windows, the `--` is not required.

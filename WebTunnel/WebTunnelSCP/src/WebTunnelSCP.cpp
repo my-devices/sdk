@@ -220,7 +220,7 @@ protected:
 			"connection to a remote host via the macchina.io REMOTE server.\n\n"
 			"A remote source or target is specified by using the macchina.io REMOTE\n"
 			"device hostname, in the form <user>@<hostname>:<file>, like with scp:\n"
-			"pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net:file.txt"
+			"pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:file.txt"
 			"\n\n"
 			"The following command-line options are supported:"s
 		);

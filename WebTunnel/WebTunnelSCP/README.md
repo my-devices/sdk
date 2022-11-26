@@ -18,19 +18,19 @@ via command-line arguments. Some settings can also be set using a configuration 
 information on configuration files), but in most cases no configuration file is needed.
 
 To run `remote-scp`, you'll need to specify the macchina.io REMOTE fully-qualified
-host name of the remote device to connect to (e.g. 8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net),
+host name of the remote device to connect to (e.g. 8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io),
 as well as the SSH login to connect with.
 
-To copy a file (`file.txt`) from the remote device (`8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net`)
+To copy a file (`file.txt`) from the remote device (`8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io`)
 to the local machine's current directory (`.`), using remote SSH login `pi`:
 ```
-remote-scp pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net:file.txt .
+remote-scp pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:file.txt .
 ```
 
 To copy a file (`file.txt`) from the local machine to the home directory on the remote device
-(`8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net`), using remote SSH login `pi`:
+(`8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io`), using remote SSH login `pi`:
 ```
-remote-scp file.txt pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net:
+remote-scp file.txt pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:
 ```
 
 `remote-scp` will prompt for your macchina.io REMOTE username and password, set-up
@@ -44,7 +44,7 @@ are given on the `remote-scp` command-line, separated with a `--`. For example, 
 a private key for authentication:
 
 ```
-remote-scp -- -i ~/.ssh/mysecret pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net:file.txt .
+remote-scp -- -i ~/.ssh/mysecret pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:file.txt .
 ```
 
 On Windows, the `--` is not required.

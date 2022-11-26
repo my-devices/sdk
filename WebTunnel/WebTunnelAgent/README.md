@@ -186,7 +186,7 @@ This setting specifies the domain UUID which is used to associate the device wit
 or user group. It can also be used to group devices. The value should be an all lower-case
 UUID like `d5f6e710-49c9-4e21-9cd7-2ae0054c3f13`. How domains are assigned to devices
 and users depends on the specific macchina.io REMOTE server instance. For example, the
-[public test server](https://reflector.my-devices.net) assigns a unique domain UUID to
+[public test server](https://reflector.remote.macchina.io) assigns a unique domain UUID to
 each new registered user account.
 
 Please note that it's not allowed to change the domain UUID of an already registered device

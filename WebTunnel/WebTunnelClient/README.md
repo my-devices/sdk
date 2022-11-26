@@ -38,7 +38,7 @@ via command-line arguments. Some settings can also be set using a configuration 
 information on configuration files), but in most cases no configuration file is needed.
 
 To run `remote-client`, you'll need to specify the URL of the remote device to connect
-to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net), as well as
+to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io), as well as
 the remote port number - the port number on the device you want to connect to, and the
 local port number - the port number on your machine that will be forwarded to the device's
 remote port.
@@ -47,13 +47,13 @@ For example, to forward the SSH port (22) of an embedded Linux device to your lo
 machine (port 2222), run:
 
 ```
-remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -R 22 -L 2222
+remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io -R 22 -L 2222
 ```
 
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net /remote 22 /local 2222
+remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io /remote 22 /local 2222
 ```
 
 `remote-client` will prompt for your macchina.io REMOTE username and password.
@@ -79,7 +79,7 @@ to specify the command. Arguments for the command can be specified at the end of
 command-line, separated by `--`. Example:
 
 ```
-remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -R 22 -L 2222 -C ssh -- -p 22 localhost
+remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io -R 22 -L 2222 -C ssh -- -p 22 localhost
 ```
 
 Given command to execute, `remote-client` will terminate as soon as the specified program has

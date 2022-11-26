@@ -17,23 +17,23 @@ via command-line arguments. Some settings can also be set using a configuration 
 information on configuration files), but in most cases no configuration file is needed.
 
 To run `remote-ssh`, you'll need to specify the URL of the remote device to connect
-to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net), as well as the
+to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io), as well as the
 user name to connect to.
 
 ```
-remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-remote-ssh /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 It is also possible to specify remote username and remote device address in one argument:
 
 ```
-remote-ssh pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 On Windows, `remote-ssh` first looks for `ssh.exe`, which is
@@ -81,13 +81,13 @@ client program which is a bit easier to use.
 To copy a file `file.txt` to the remote system using `scp` with `remote-ssh`:
 
 ```
-remote-ssh --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
+remote-ssh --scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io file.txt pi@localhost:file.txt
 ```
 
 or, on Windows 10 (with SSH):
 
 ```
-remote-ssh /scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net file.txt pi@localhost:file.txt
+remote-ssh /scp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io file.txt pi@localhost:file.txt
 ```
 
 Note that the remote host name must be specified as `localhost` in this case, as
@@ -101,7 +101,7 @@ are given on the `remote-ssh` command-line, separated with a `--`. For example, 
 a private key for authentication:
 
 ```
-remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net -- -i ~/.ssh/mysecret
+remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io -- -i ~/.ssh/mysecret
 ```
 
 ### Passing a Command or Script to the SSH Client
@@ -111,7 +111,7 @@ To do so, specify the command using the `--command` (short: `-m`; Windows: `/com
 The given command will be passed to `ssh` after the extra options and the hostname:
 
 ```
-remote-ssh -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net
+remote-ssh -l pi -m "ls -l" https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 This can also be used to run a script (via pipe of redirection of stdin).
@@ -119,7 +119,7 @@ However, in this case, the macchina.io REMOTE username and password must be pass
 command-line arguments, and `bash` or another shell must be specified as command to execute via `ssh`:
 
 ```
-remote-ssh -l pi -u rmuser -p rmpasswd -m bash https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.my-devices.net <script.sh
+remote-ssh -l pi -u rmuser -p rmpasswd -m bash https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io <script.sh
 ```
 
 ### Command-Line Arguments Help
