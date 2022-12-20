@@ -1,0 +1,15 @@
+[Unit]
+Description=WebTunnelAgent
+After=syslog.target network.target 
+StartLimitIntervalSec=0
+
+[Service]
+Type=forking
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/local/sbin/WebTunnelAgent --config=/etc/WebTunnelAgent.properties --pidfile=/var/run/WebTunnelAgent.pid --daemon
+PIDFile=/var/run/WebTunnelAgent.pid
+
+[Install]
+WantedBy=multi-user.target

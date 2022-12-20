@@ -48,6 +48,8 @@ for more information.
 
 ### Automatically Starting WebTunnelAgent on Linux
 
+#### init.d
+
 A Debian-style Linux init script for `/etc/init.d/` is [included](etc/init.d/WebTunnelAgent)
 with the source code. It expects the `WebTunnelAgent` executable to be located in
 `/usr/local/sbin/WebTunnelAgent` and the configuration file in `/etc/WebTunnelAgent.properties`.
@@ -67,6 +69,22 @@ and start with:
 
 ```
 sudo /etc/init.d/WebTunnelAgent start
+```
+
+#### systemd 
+
+A *systemd* service file is available in 
+[etc/systemd/system/WebTunnelAgent.service](etc/systemd/system/WebTunnelAgent.service).
+The file must be copied to the target system to `/etc/systemd/system/WebTunnelAgent.properties`.
+Like the `init.d` script, it expects the `WebTunnelAgent` executable to be located in
+`/usr/local/sbin/WebTunnelAgent` and the configuration file in `/etc/WebTunnelAgent.properties`.
+
+To start the service and make it run automatically at startup:
+
+```
+sudo systemctl daemon-reload
+sudo systemctl start WebTunnelAgent
+sudo systemctl enable WebTunnelAgent
 ```
 
 ### Running WebTunnelAgent as Windows Service
