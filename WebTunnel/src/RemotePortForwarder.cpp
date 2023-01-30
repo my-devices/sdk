@@ -354,42 +354,57 @@ bool RemotePortForwarder::openChannel(Poco::UInt16 channel, Poco::UInt16 port)
 	{
 		if (_logger.debug())
 		{
-			_logger.debug("Opening channel %hu for port %hu", channel, port);
+			_logger.debug("Opening channel %hu to port %hu", channel, port);
 		}
 		try
 		{
 			Poco::Net::SocketAddress addr(_host, port);
 			Poco::Net::StreamSocket streamSocket(_pSocketFactory->createSocket(addr, _connectTimeout));
-			_dispatcher.addSocket(streamSocket, new TunnelMultiplexer(*this, channel), _localTimeout);
+			SocketDispatcher::SocketHandler::Ptr pMultiplexer = new TunnelMultiplexer(*this, channel);
+			
+			try
+			{
+				// Note: we must send the WT_OP_OPEN_CONFIRM before adding the socket
+				// to the dispatcher, otherwise a race condition may occur and the 
+				// first data packet from the target may arrive at the server before
+				// the WT_OP_OPEN_CONFIRM.
+				sendResponse(channel, Protocol::WT_OP_OPEN_CONFIRM, 0);
+			}
+			catch (Poco::Exception& exc)
+			{
+				_logger.error("Failed to send open confirmation for channel %hu to port %hu: %s", channel, port, exc.displayText());
+				return false;
+			}
+
+			_dispatcher.addSocket(streamSocket, pMultiplexer, _localTimeout);
 			_channelMap[channel] = streamSocket;
 		}
 		catch (Poco::Net::ConnectionRefusedException& exc)
 		{
 			lock.unlock();
-			_logger.error("Failed to open channel %hu for port %hu: %s", channel, port, exc.displayText());
+			_logger.error("Failed to open channel %hu to port %hu: %s", channel, port, exc.displayText());
 			sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_CONN_REFUSED);
 			return false;
 		}
 		catch (Poco::TimeoutException& exc)
 		{
 			lock.unlock();
-			_logger.error("Failed to open channel %hu for port %hu: %s", channel, port, exc.displayText());
+			_logger.error("Failed to open channel %hu to port %hu: %s", channel, port, exc.displayText());
 			sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_TIMEOUT);
 			return false;
 		}
 		catch (Poco::Exception& exc)
 		{
 			lock.unlock();
-			_logger.error("Failed to open channel %hu for port %hu: %s", channel, port, exc.displayText());
+			_logger.error("Failed to open channel %hu to port %hu: %s", channel, port, exc.displayText());
 			sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_SOCKET);
 			return false;
 		}
-		sendResponse(channel, Protocol::WT_OP_OPEN_CONFIRM, 0);
 		return true;
 	}
 	else
 	{
-		_logger.warning("Open request for existing channel %hu (port %hu)", channel, port);
+		_logger.warning("Open request for existing channel %hu to port %hu.", channel, port);
 		lock.unlock();
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_CHANNEL_IN_USE);
 		return false;
