@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2022, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2023, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -231,7 +231,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE Device Agent.\n"
-			"Copyright (c) 2013-2022 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2023 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io REMOTE.\n\n"
@@ -570,7 +570,7 @@ protected:
 		if (!_stopped.tryWait(1))
 		{
 			Poco::Clock::ClockDiff retryDelay(static_cast<Poco::Clock::ClockDiff>(_retryDelay)*1000);
-			retryDelay += _random.next(250*_retryDelay);
+			retryDelay += _random.next(500*_retryDelay);
 			Poco::Clock nextClock;
 			nextClock += retryDelay;
 			logger().information(Poco::format("Will reconnect in %.2f seconds."s, retryDelay/1000000.0));
@@ -964,7 +964,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.14.1");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.15.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)
