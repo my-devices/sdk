@@ -110,7 +110,7 @@ $ apt-get install openssl libssl-dev
 On macOS, the easiest way to install OpenSSL is via [Homebrew](https://brew.sh):
 
 ```
-$ brew install openssl@1.1
+$ brew install openssl
 ```
 
 On Windows, OpenSSL is optional. The default (with CMake) is to build using
@@ -148,7 +148,7 @@ $ sudo yum install -y git gcc-c++ make cmake3 openssl-devel
 #### macOS (with Homebrew)
 
 ```
-$ brew install cmake openssl@1.1
+$ brew install cmake openssl
 ```
 
 ## Building with CMake (Linux, macOS, Windows)
@@ -171,7 +171,14 @@ For example, if OpenSSL 1.1.x has been installed with Homebrew,
 the `cmake` invocation becomes:
 
 ```
-$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1
+$ cmake .. -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+```
+
+On an Apple Silicon Mac, Homebrew installs packages in `/opt/homebrew`,
+so the command becomes:
+
+```
+$ cmake .. -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
 ```
 
 If you want to link statically with OpenSSL libraries (recommended on
