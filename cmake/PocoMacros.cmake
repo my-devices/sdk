@@ -263,7 +263,7 @@ endmacro()
 #    Example: POCO_INSTALL(Foundation)
 macro(POCO_INSTALL target_name)
 install(
-    DIRECTORY include/Poco
+    DIRECTORY include/
     DESTINATION include
     COMPONENT Devel
     PATTERN ".svn" EXCLUDE
