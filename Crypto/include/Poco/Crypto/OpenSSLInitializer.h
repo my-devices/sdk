@@ -68,6 +68,13 @@ public:
 	static void enableFIPSMode(bool enabled);
 		/// Enable or disable FIPS mode. If FIPS is not available, this method doesn't do anything.
 
+	static void enableLegacyProvider(bool enabled);
+		/// Enable or disable Legacy provider.
+		///
+		/// If required, the OpenSSL 3.0 Legacy provider must be explicitly
+		/// enabled by calling this method with true as argument, before
+		/// initialize() is called.
+
 protected:
 	enum
 	{
@@ -91,6 +98,7 @@ private:
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	static bool _enableLegacyProvider;
 	static OSSL_PROVIDER* _defaultProvider;
 	static OSSL_PROVIDER* _legacyProvider;
 #endif
