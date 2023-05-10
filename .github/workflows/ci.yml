@@ -2,22 +2,22 @@ name: macchina-remote-sdk-ci
 on: [push]
 jobs:
   linux-gcc-cmake:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
       - run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
 
   macos-clang-cmake:
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
-      - run: brew install openssl@1.1
+      - uses: actions/checkout@v3
+      - run: brew install openssl@3
       - run: cmake -H. -Bcmake-build -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 && cmake --build cmake-build --target all
 
   windows-msvc-cmake:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: cmake -S. -Bcmake-build
       - run: cmake --build cmake-build --config Release
