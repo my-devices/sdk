@@ -69,7 +69,10 @@ $ cmake --build cmake-build-ios --config Release && cmake --install cmake-build-
     libraries are in `./cmake-install-ios/lib`. You can of course changes these
     locations by modifying the respective CMake arguments (`CMAKE_INSTALL_PREFIX`).
   - The resulting static libraries must be linked to your iOS application in your
-    app's Xcode project file.
+    app's Xcode project file. The libraries are `libWebTunnelClient.a`, `libPocoWebTunnel.a`, 
+    `libPocoNetSSL.a`, `libPocoCrypto.a`, `libPocoNet.a`, `libPocoUtil.a`, and `libPocoFoundation.a`.
+    Furthermore, the OpenSSL libraries (`libcrypto-iOS.a` and `libssl-iOS.a`) must also be
+    linked to the iOS application.
   - See the [CMake documentation on cross-compiling for iOS](https://cmake.org/cmake/help/v3.20/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-or-watchos)
     for more information.
 
