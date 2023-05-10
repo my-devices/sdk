@@ -57,7 +57,7 @@ $ cmake . -Bcmake-build-ios -GXcode \
 $ cmake --build cmake-build-ios --config Release && cmake --install cmake-build-ios --config Release
 ```
 
-Notes:
+**Notes**
 
   - The paths to the OpenSSL include directory and the `libssl` and `libcrypto` libraries
     are directly passed to CMake (`-DOPENSSL_INCLUDE_DIR=...`, `-DOPENSSL_CRYPTO_LIBRARY=...`,
