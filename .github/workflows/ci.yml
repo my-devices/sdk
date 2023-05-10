@@ -6,18 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
-      - run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
 
   macos-clang-cmake:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
-      - run: brew install openssl@3
-      - run: cmake -H. -Bcmake-build -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 && cmake --build cmake-build --target all
+      - run: brew install openssl@3 ninja
+      - run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@3 -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
 
   windows-msvc-cmake:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
-      - run: cmake -S. -Bcmake-build
+      - run: cmake -S. -Bcmake-build -DENABLE_WEBTUNNELCLIENTLIB=ON
       - run: cmake --build cmake-build --config Release
