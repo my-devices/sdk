@@ -12,7 +12,19 @@ device through the macchina.io REMOTE server tunneling feature.
   - [CMake](https://cmake.org) 3.19.5 or newer 
   - [Ninja](https://ninja-build.org)
   - OpenSSL 1.1.1 or 3.0.x compiled for Android
-  
+
+### Installing the Android NDK
+
+On Windows and Linux, [download](https://developer.android.com/ndk/downloads) the 
+`android-ndk-*.zip` file for your platform and unpack it in a directory of your choice.
+
+On macOS, use [Homebrew](https://formulae.brew.sh/cask/android-ndk) to install the NDK:
+
+```
+$ brew install --cask android-ndk
+```
+
+
 ### Installing CMake
 
 **Windows**
@@ -108,7 +120,6 @@ $ cmake . -Bcmake-build-android-arm64-v8a -GNinja \
     -DENABLE_WEBTUNNELVNC=NO \
     -DENABLE_WEBTUNNELRDP=NO \
     -DENABLE_WEBTUNNELCLIENTLIB=YES \
-    -DWEBTUNNELCLIENTLIB_SHARED=YES \
     -DOPENSSL_INCLUDE_DIR=`pwd`/../openssl_3.0.8_arm64-v8a/include \
     -DOPENSSL_CRYPTO_LIBRARY=`pwd`/../openssl_3.0.8_arm64-v8a/lib/libcrypto.a \
     -DOPENSSL_SSL_LIBRARY=`pwd`/../openssl_3.0.8_arm64-v8a/lib/libssl.a
