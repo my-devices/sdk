@@ -115,10 +115,17 @@ endif
 	find $(INSTALLDIR)/lib -name "libPoco*" -type f -exec rm -f  {} \;
 	find $(INSTALLDIR)/lib -name "libPoco*" -type l -exec rm -f {} \;
 
-libexecs =  Foundation-libexec XML-libexec JSON-libexec Util-libexec Net-libexec Crypto-libexec NetSSL_OpenSSL-libexec WebTunnel-libexec PageCompiler-libexec PageCompiler/File2Page-libexec 
-tests    =  Foundation-tests XML-tests JSON-tests Util-tests Net-tests Crypto-tests NetSSL_OpenSSL-tests 
+libexecs =  Foundation-libexec XML-libexec JSON-libexec Util-libexec Net-libexec Crypto-libexec NetSSL_OpenSSL-libexec WebTunnel-libexec PageCompiler-libexec PageCompiler/File2Page-libexec
+tests    =  Foundation-tests XML-tests JSON-tests Util-tests Net-tests Crypto-tests NetSSL_OpenSSL-tests
 samples  =  Foundation-samples Encodings-samples XML-samples JSON-samples Util-samples Net-samples Crypto-samples NetSSL_OpenSSL-samples
-cleans   =  Foundation-clean Encodings-clean XML-clean JSON-clean Util-clean Net-clean Crypto-clean NetSSL_OpenSSL-clean WebTunnel-cleans PageCompiler-clean PageCompiler/File2Page-clean 
+cleans   =  Foundation-clean Encodings-clean XML-clean JSON-clean Util-clean Net-clean Crypto-clean NetSSL_OpenSSL-clean WebTunnel-cleans PageCompiler-clean PageCompiler/File2Page-clean
+
+ifdef ENABLE_JWT
+COMPONENTS += JWT
+libexecs   += JWT-libexec
+tests      += JWT-tests
+cleans     += JWT-clean
+endif
 
 .PHONY: $(libexecs)
 .PHONY: $(tests)
@@ -249,6 +256,16 @@ PageCompiler/File2Page-libexec:  Net-libexec Util-libexec XML-libexec Foundation
 
 PageCompiler/File2Page-clean:
 	$(MAKE) -C $(POCO_BASE)/PageCompiler/File2Page clean
+
+JWT-libexec: Foundation-libexec JSON-libexec Crypto-libexec
+	$(MAKE) -C $(POCO_BASE)/JWT
+
+JWT-tests: JWT-libexec cppunit
+	$(MAKE) -C $(POCO_BASE)/JWT/testsuite
+
+JWT-clean:
+	$(MAKE) -C $(POCO_BASE)/JWT clean
+	$(MAKE) -C $(POCO_BASE)/JWT/testsuite clean
 
 clean: cleans CppUnit-clean
 
