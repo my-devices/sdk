@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.13.0)
 
 project(Poco)
 
@@ -85,7 +85,8 @@ option(ENABLE_WEBTUNNELSCP "Enable WebTunnelSCP" ON)
 option(ENABLE_WEBTUNNELSFTP "Enable WebTunnelSFTP" ON)
 option(ENABLE_WEBTUNNELVNC "Enable WebTunnelVNC" ON)
 option(ENABLE_WEBTUNNELRDP "Enable WebTunnelRDP" ON)
-option(WEBTUNNELCLIENTLIB_SHARED "Enable shared WebTunnelClientLib" OFF)
+option(WEBTUNNELCLIENTLIB_SHARED "Build WebTunnelClientLib as a shared library" OFF)
+option(WEBTUNNELCLIENTLIB_MODULE "Build WebTunnelClientLib as a module" OFF)
 
 if(WIN32)
 	option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" ON)

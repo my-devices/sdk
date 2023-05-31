@@ -211,7 +211,8 @@ increases their size.
 You should run `xxx-yyy-linux-strip` on the resulting executables to reduce their
 size before deploying them to the device.
 
-NOTE: See [README_iOS.md](README_iOS.md) for iOS builds.
+NOTE: See [README_iOS.md](README_iOS.md) for iOS builds 
+and [README_Android.md](README_Android.md) for Android builds.
 
 ### Installing
 
