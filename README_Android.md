@@ -128,7 +128,7 @@ $ cmake --build cmake-build-android-arm64-v8a && cmake --install cmake-build-and
 
 **Notes**
 
-  - The above command only builds for a single target architecture (`arm64-v8a``).
+  - The above command only builds for a single target architecture (`arm64-v8a`).
     The commands need to be repeated for additional architectures (e.g., `x86_64` for the simulator),
     with `arm64-v8a` replaced with `x86_64` in the arguments.
   - The paths to the OpenSSL include directory and the `libssl` and `libcrypto` libraries
