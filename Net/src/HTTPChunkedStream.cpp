@@ -77,7 +77,7 @@ int HTTPChunkedStreamBuf::readFromDevice(char* buffer, std::streamsize length)
 		{
 			_chunk = -1;
 			return eof;
-	}
+		}
 	}
 	if (_chunk > 0)
 	{
