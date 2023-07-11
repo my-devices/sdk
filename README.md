@@ -206,6 +206,10 @@ the SDK can be cross-compiled for embedded Linux systems:
 $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mytoolchain.cmake -DCMAKE_INSTALL_PREFIX=/path/to/target
 ```
 
+If the cross-compiling toolchain does not contain OpenSSL, you'll also have to build
+it prior to building this project. See [Cross Compiling with CMake](https://github.com/my-devices/sdk/wiki/Cross-Compiling-with-CMake)
+for instructions.
+
 Note: The resulting executables may contain debug information, which significantly
 increases their size.
 You should run `xxx-yyy-linux-strip` on the resulting executables to reduce their
