@@ -345,7 +345,7 @@ bool RemotePortForwarder::openChannel(Poco::UInt16 channel, Poco::UInt16 port)
 {
 	if (_ports.find(port) == _ports.end())
 	{
-		_logger.warning("Open channel request for invalid port: %hu (channel %hu).0"s, port, channel);
+		_logger.warning("Open channel request for invalid port: %hu (channel %hu)."s, port, channel);
 
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_NOT_FORWARDED);
 		return false;
