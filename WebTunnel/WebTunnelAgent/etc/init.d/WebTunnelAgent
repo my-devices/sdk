@@ -6,36 +6,31 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
-# Short-Description: Start/stop macchina.io REMOTE WebTunnelAgent
+# Short-Description: Start/stop macchina.io REMOTE device agent
 ### END INIT INFO
 
 . /lib/lsb/init-functions
 
 SERVICE=WebTunnelAgent
 PIDFILE=/var/run/${SERVICE}.pid
-EXEC=/usr/local/sbin/$SERVICE
+DAEMON=/usr/local/sbin/$SERVICE
 CONFIG=/etc/${SERVICE}.properties
 
-if [ ! -x $EXEC ] ; then
-	echo "No $EXEC executable found"
+if [ ! -x $DAEMON ] ; then
+	echo "No $DAEMON executable found"
 	exit 0
 fi
 
 start() {
 	log_daemon_msg "Starting $SERVICE: "
-	$EXEC --pidfile=$PIDFILE --daemon --config=$CONFIG
-	log_end_msg 0
+	start-stop-daemon -S -p $PIDFILE -x "$DAEMON" -- --config=$CONFIG --pidfile=$PIDFILE --daemon
+	log_end_msg $?
 }
 
 stop() {
 	log_daemon_msg "Stopping $SERVICE: "
-	if [ -f $PIDFILE ] ; then
-		pid=`cat $PIDFILE`
-		kill $pid
-		log_end_msg 0
-	else
-		log_end_msg 1
-	fi
+	start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+	log_end_msg $?
 }
 
 case "$1" in
