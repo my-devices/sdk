@@ -276,7 +276,7 @@ unsigned short WebTunnelClient_API webtunnel_local_port(webtunnel wt)
 }
 
 
-const char* WebTunnelClient_API webtunnel_last_error_text(void)
+const char WebTunnelClient_API* webtunnel_last_error_text(void)
 {
 	if (!lastError.empty())
 		return lastError.c_str();
