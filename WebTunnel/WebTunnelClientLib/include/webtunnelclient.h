@@ -108,7 +108,7 @@ void WebTunnelClient_API webtunnel_cleanup(void);
 // local_timeout specifies the timeout of the local socket connection.
 // If no data has been received for this period, the connection will be closed.
 */
-int webtunnel_configure_timeouts(int connect_timeout, int remote_timeout, int local_timeout);
+int WebTunnelClient_API webtunnel_configure_timeouts(int connect_timeout, int remote_timeout, int local_timeout);
 
 
 /*

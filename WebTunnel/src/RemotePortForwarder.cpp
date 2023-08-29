@@ -508,7 +508,7 @@ void RemotePortForwarder::updateProperties(const std::map<std::string, std::stri
 	Poco::CountingOutputStream counterStream;
 	Poco::BinaryWriter counterWriter(counterStream, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
 	writeProperties(counterWriter, props);
-	std::size_t payloadSize = counterStream.chars();
+	std::size_t payloadSize = static_cast<std::size_t>(counterStream.chars());
 
 	Poco::Buffer<char> buffer(payloadSize + Protocol::WT_FRAME_HEADER_SIZE);
 	std::size_t offset = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_PROP_UPDATE, 0, 0);
