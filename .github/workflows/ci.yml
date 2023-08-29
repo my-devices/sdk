@@ -8,6 +8,12 @@ jobs:
       - run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
       - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
 
+  raspberrypi-gcc-cmake:
+    runs-on: raspberrypi
+    steps:
+      - uses: actions/checkout@v3
+      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
+
   macos-clang-cmake:
     runs-on: macos-12
     steps:
