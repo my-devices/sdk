@@ -28,4 +28,4 @@ jobs:
         run: |
           echo ${{ secrets.SIGNING_CERT }} >CodeSigningCert.b64
           certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
-          "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe" sign /f CodeSigningCertificate.pfx /p "${{ secrets.SIGNING_PASS }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\Release\\*.exe
+          & 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe' sign /f CodeSigningCertificate.pfx /p '${{ secrets.SIGNING_PASS }}'' /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
