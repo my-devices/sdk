@@ -13,7 +13,7 @@ if(MSVC AND BUILD_SHARED_LIBS)
 endif()
 
 if(WEBTUNNELCLIENTLIB_MODULE)
-  set(WEBTUNNELCLIENTLIB_TYPE MODULE)
+	set(WEBTUNNELCLIENTLIB_TYPE MODULE)
 	set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Set Debug library postfix" FORCE)
 	set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Set Release library postfix" FORCE)
 	set(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Set MinSizeRel library postfix" FORCE)
@@ -31,25 +31,26 @@ else()
 endif()
 
 add_library(WebTunnelClientLib ${WEBTUNNELCLIENTLIB_TYPE} ${SRCS})
+
+if(NOT ${WEBTUNNELCLIENTLIB_TYPE} STREQUAL "STATIC")
+	target_compile_definitions(WebTunnelClientLib PUBLIC WebTunnelClient_DLL)
+endif()
+
 set_target_properties(WebTunnelClientLib
   PROPERTIES
   OUTPUT_NAME WebTunnelClient
   DEFINE_SYMBOL WebTunnelClient_EXPORTS
 )
 
-if (MSVC AND BUILD_SHARED_LIBS)
-	target_compile_definitions(WebTunnelClientLib PRIVATE WebTunnelClient_EXPORTS)
-endif()
-
 if(ENABLE_NETSSL_WIN)
-	target_compile_definitions(WebTunnelClientLib PUBLIC WEBTUNNEL_ENABLE_TLS=1)
+	target_compile_definitions(WebTunnelClientLib PRIVATE WEBTUNNEL_ENABLE_TLS=1)
 	target_link_libraries(WebTunnelClientLib Poco::NetSSLWin)
 else()
 	find_package(OpenSSL)
 	if(OPENSSL_FOUND)
 		if(ENABLE_NETSSL)
 			target_include_directories(WebTunnelClientLib PUBLIC "${OPENSSL_INCLUDE_DIR}")
-			target_compile_definitions(WebTunnelClientLib PUBLIC WEBTUNNEL_ENABLE_TLS=1)
+			target_compile_definitions(WebTunnelClientLib PRIVATE WEBTUNNEL_ENABLE_TLS=1)
 			target_link_libraries(WebTunnelClientLib Poco::NetSSL Poco::Crypto ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 		endif()
 	endif()

@@ -22,7 +22,7 @@
 // WebTunnel_API functions as being imported from a DLL, wheras this DLL sees symbols
 // defined with this macro as being exported.
 */
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(WebTunnelClient_DLL)
 	#if defined(WebTunnelClient_EXPORTS)
 		#define WebTunnelClient_API __declspec(dllexport)
 	#else
@@ -39,7 +39,7 @@
 /*
 // Automatically link WebTunnelClientCAPI library.
 */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(WebTunnelClient_DLL)
 	#if !defined(WebTunnelClient_EXPORTS)
 		#if defined(_DEBUG)
 			#pragma comment(lib, "WebTunnelClientd.lib")
