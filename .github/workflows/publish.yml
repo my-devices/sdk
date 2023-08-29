@@ -39,7 +39,7 @@ jobs:
           echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
           echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
       -
-        name: Copy to web server
+        name: Copy to Web Server
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/windows/10/AMD64/
-          scp cmake-build\bin\Release\*.exe cmake-build\bin\Release\*.zip ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/windows/10/AMD64/
