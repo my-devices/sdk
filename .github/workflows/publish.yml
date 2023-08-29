@@ -1,0 +1,31 @@
+name: Publish Release
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release Channel'
+        required: true
+        default: 'releases'
+        type: choice
+        options:
+          - releases
+          - releases-staging
+
+jobs:
+  release_win64:
+    runs-on: windows-2022
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Build
+        run: |
+          cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build
+          cmake --build cmake-build --config Release
+      -
+        name: Sign
+        run: |
+          echo ${{ secrets.SIGNING_CERT }} >CodeSigningCert.b64
+          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
+          signtool sign /f CodeSigningCertificate.pfx /p "${{ secrets.SIGNING_PASS }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\Release\*.exe
