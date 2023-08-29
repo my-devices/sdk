@@ -21,7 +21,13 @@ endif()
 
 target_link_libraries(${APP_NAME} Poco::WebTunnel Poco::Util Poco::Net Poco::Foundation)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(BINDIR "sbin")
+else()
+	set(BINDIR "bin")
+endif()
+
 install(
 	TARGETS "${APP_NAME}" EXPORT "${APP_NAME}Targets"
-	RUNTIME DESTINATION bin
+	RUNTIME DESTINATION $BINDIR
 )
