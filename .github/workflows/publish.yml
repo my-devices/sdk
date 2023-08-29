@@ -26,9 +26,20 @@ jobs:
       -
         name: Sign
         run: |
-          echo ${{ secrets.SIGNING_CERT }} >CodeSigningCert.b64
+          echo '${{ secrets.SIGNING_CERT }}'' >CodeSigningCert.b64
           certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
           & 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe' sign /f CodeSigningCert.pfx /p '${{ secrets.SIGNING_PASS }}' /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
       -
         name: Zip
         run: 7z a -tzip remote-clients.zip cmake-build\bin\Release\*.exe
+      -
+        name: Install SSH Key
+        run: |
+          mkdir ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+      -
+        name: Copy to web server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe cmake-build\bin\Release\*.zip ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/windows/10/AMD64/
