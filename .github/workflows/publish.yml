@@ -140,5 +140,5 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/macos/monterey/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/macos/monterey/x86_64
