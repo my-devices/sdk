@@ -109,7 +109,30 @@ jobs:
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
-        
+  
+  release_raspberrypi:
+    runs-on: raspberrypi
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/raspberrypi/bullseye/armv7l
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/raspberrypi/bullseye/armv7l
+
   release_macos12:
     runs-on: macos-12
     steps:
@@ -142,3 +165,4 @@ jobs:
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/macos/monterey/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/macos/monterey/x86_64
+
