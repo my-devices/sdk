@@ -67,7 +67,7 @@ jobs:
       -
         name: Install SSH Key
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
           echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
           chmod go-rwx ~/.ssh/id_rsa
@@ -75,7 +75,7 @@ jobs:
         name: Copy to Web Server
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/20.04/x86_64
-          scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/20.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/20.04/x86_64
 
   release_ubuntu2204:
     runs-on: ubuntu-20.04
@@ -100,7 +100,7 @@ jobs:
       -
         name: Install SSH Key
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
           echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
           chmod go-rwx ~/.ssh/id_rsa
@@ -108,7 +108,7 @@ jobs:
         name: Copy to Web Server
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
-          scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
         
   release_macos12:
     runs-on: macos-12
@@ -133,7 +133,7 @@ jobs:
       -
         name: Install SSH Key
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
           echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
           chmod go-rwx ~/.ssh/id_rsa
@@ -141,4 +141,4 @@ jobs:
         name: Copy to Web Server
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
-          scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
