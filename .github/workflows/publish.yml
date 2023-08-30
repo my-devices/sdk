@@ -76,3 +76,69 @@ jobs:
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/20.04/x86_64
           scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/20.04/x86_64
+
+  release_ubuntu2204:
+    runs-on: ubuntu-20.04
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Install Packages
+        run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
+      - 
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
+          scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
+        
+  release_macos12:
+    runs-on: macos-12
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Install Packages
+        run: brew install openssl@3 ninja
+      - 
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@3 -DOPENSSL_USE_STATIC_LIBS=TRUE && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
+          scp cmake-build\bin\*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
