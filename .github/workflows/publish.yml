@@ -45,8 +45,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/windows/10/AMD64/
-          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/windows/10/AMD64/
+          ssh ${{ secrets.MACCHINA_USER }}@${STAGING_HOST} mkdir -p ${STAGING_DIR}/${GITHUB_SHA}/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@${STAGING_HOST}:${STAGING_DIR}/${GITHUB_SHA}/windows/10/AMD64/
 
   release_ubuntu2004:
     runs-on: ubuntu-20.04
@@ -199,6 +199,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
       - 
         name: Archive
         run: |
@@ -207,8 +209,8 @@ jobs:
           ls -l
           mkdir -p $RUNNER_TEMP/archives
           version=`git describe --match 'v[0-9]*' | cut -b 2- -`
-          git archive --format=tar.gz --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz main
-          git archive --format=zip --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip main
+          git archive --format=tar.gz --prefix=macchina-remote-sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz ${GITHUB_REF_NAME}
+          git archive --format=zip --prefix=macchina-remote-sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip ${GITHUB_REF_NAME}
       -
         name: Install SSH Key
         run: |
@@ -224,7 +226,7 @@ jobs:
 
   sign_and_publish:
     runs-on: ubuntu-22.04
-    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_raspberrypi", "release_macos12_x86_64", "release_macos12_arm64"]
+    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_raspberrypi", "release_macos12_x86_64", "release_macos12_arm64", "release_source"]
     steps:
       -
         name: Checkout
