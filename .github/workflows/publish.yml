@@ -46,8 +46,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$env:STAGING_HOST mkdir -p $env:STAGING_DIR/$env:GITHUB_SHA/windows/10/AMD64/
-          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@$env:STAGING_HOST:$env:STAGING_DIR/$env:GITHUB_SHA/windows/10/AMD64/
+          ssh ${{ secrets.MACCHINA_USER }}@${env:STAGING_HOST} mkdir -p ${env:STAGING_DIR}/${env:GITHUB_SHA}/bin/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@${env:STAGING_HOST}:${env:STAGING_DIR}/${env:GITHUB_SHA}/bin/windows/10/AMD64/
 
   release_ubuntu2004:
     runs-on: ubuntu-20.04
@@ -79,8 +79,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/ubuntu/20.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/ubuntu/20.04/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/20.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/20.04/x86_64
 
   release_ubuntu2204:
     runs-on: ubuntu-20.04
@@ -112,8 +112,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/ubuntu/22.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/ubuntu/22.04/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
   
   release_raspberrypi:
     runs-on: raspberrypi
@@ -135,8 +135,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/raspberrypi/bullseye/armv7l
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/raspberrypi/bullseye/armv7l
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
 
   release_macos12_x86_64:
     runs-on: macos-12
@@ -168,8 +168,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/macos/monterey/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/macos/monterey/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
 
   release_macos12_arm64:
     runs-on: macos-12-arm64
@@ -191,8 +191,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/macos/monterey/arm64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/macos/monterey/arm64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/arm64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/arm64
 
   release_source:
     runs-on: ubuntu-22.04
@@ -219,8 +219,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/source
-          scp $RUNNER_TEMP/archives/* ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/source
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/src
+          scp $RUNNER_TEMP/archives/* ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/src
 
   sign_and_publish:
     runs-on: ubuntu-22.04
