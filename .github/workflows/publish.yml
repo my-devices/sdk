@@ -8,8 +8,12 @@ on:
         default: 'releases'
         type: choice
         options:
-          - releases
-          - releases-staging
+          - downloads
+          - downloads-staging
+
+env:
+  STAGING_DIR: staging/my-devices/sdk
+  STAGING_HOST: web.macchina.io
 
 jobs:
   release_win64:
@@ -41,8 +45,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/windows/10/AMD64/
-          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/windows/10/AMD64/
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/windows/10/AMD64/
 
   release_ubuntu2004:
     runs-on: ubuntu-20.04
@@ -74,8 +78,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/20.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/20.04/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/ubuntu/20.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/ubuntu/20.04/x86_64
 
   release_ubuntu2204:
     runs-on: ubuntu-20.04
@@ -107,8 +111,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/ubuntu/22.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/ubuntu/22.04/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/ubuntu/22.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/ubuntu/22.04/x86_64
   
   release_raspberrypi:
     runs-on: raspberrypi
@@ -130,8 +134,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/raspberrypi/bullseye/armv7l
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/raspberrypi/bullseye/armv7l
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/raspberrypi/bullseye/armv7l
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/raspberrypi/bullseye/armv7l
 
   release_macos12_x86_64:
     runs-on: macos-12
@@ -163,8 +167,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/macos/monterey/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/macos/monterey/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/macos/monterey/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/macos/monterey/x86_64
 
   release_macos12_arm64:
     runs-on: macos-12-arm64
@@ -186,5 +190,51 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@web.macchina.io mkdir -p releases/sdk/macos/monterey/arm64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@web.macchina.io:releases/sdk/macos/monterey/arm64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/macos/monterey/arm64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/macos/monterey/arm64
+
+  release_source:
+    runs-on: ubuntu-22.04
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Archive
+        run: |
+          mkdir -p $RUNNER_TEMP/archives
+          version=`git describe --match 'v[0-9]*' | cut -b 2- -`
+          git archive --format=tar.gz --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz
+          git archive --format=zip --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip
+      -
+        name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/source
+          scp $RUNNER_TEMP/archives/* ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/source
+
+  sign_and_publish:
+    runs-on: ubuntu-22.04
+    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_raspberrypi", "release_macos12_x86_64", "release_macos12_arm64"]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Sign and publish
+        run: |
+          version=`git describe --match 'v[0-9]*' | cut -b 2- -`
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST ./sign_and_publish.sh $version ${{ inputs.channel }}
