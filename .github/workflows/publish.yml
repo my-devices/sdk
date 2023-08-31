@@ -202,10 +202,13 @@ jobs:
       - 
         name: Archive
         run: |
+          env
+          pwd
+          ls -l
           mkdir -p $RUNNER_TEMP/archives
           version=`git describe --match 'v[0-9]*' | cut -b 2- -`
-          git archive --format=tar.gz --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz
-          git archive --format=zip --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip
+          git archive --format=tar.gz --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz main
+          git archive --format=zip --prefix=sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip main
       -
         name: Install SSH Key
         run: |
