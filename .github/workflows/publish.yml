@@ -14,6 +14,7 @@ on:
 env:
   STAGING_DIR: staging/my-devices/sdk
   STAGING_HOST: web.macchina.io
+  ARCHIVE_PREFIX: macchina-remote-sdk
 
 jobs:
   release_win64:
@@ -45,8 +46,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@${STAGING_HOST} mkdir -p ${STAGING_DIR}/${GITHUB_SHA}/windows/10/AMD64/
-          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@${STAGING_HOST}:${STAGING_DIR}/${GITHUB_SHA}/windows/10/AMD64/
+          ssh ${{ secrets.MACCHINA_USER }}@$env:STAGING_HOST mkdir -p $env:STAGING_DIR/$env:GITHUB_SHA/windows/10/AMD64/
+          scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@$env:STAGING_HOST:$env:STAGING_DIR/$env:GITHUB_SHA/windows/10/AMD64/
 
   release_ubuntu2004:
     runs-on: ubuntu-20.04
@@ -204,13 +205,10 @@ jobs:
       - 
         name: Archive
         run: |
-          env
-          pwd
-          ls -l
           mkdir -p $RUNNER_TEMP/archives
           version=`git describe --match 'v[0-9]*' | cut -b 2- -`
-          git archive --format=tar.gz --prefix=macchina-remote-sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.tar.gz ${GITHUB_REF_NAME}
-          git archive --format=zip --prefix=macchina-remote-sdk/ --output=$RUNNER_TEMP/archives/sdk_$version.zip ${GITHUB_REF_NAME}
+          git archive --format=tar.gz --prefix=${ARCHIVE_PREFIX}/ --output=$RUNNER_TEMP/archives/${ARCHIVE_PREFIX}_$version.tar.gz ${GITHUB_REF_NAME}
+          git archive --format=zip --prefix=${ARCHIVE_PREFIX}/ --output=$RUNNER_TEMP/archives/${ARCHIVE_PREFIX}_$version.zip ${GITHUB_REF_NAME}
       -
         name: Install SSH Key
         run: |
@@ -231,6 +229,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+        with: 
+          fetch-depth: 0
       -
         name: Install SSH key
         run: |
@@ -242,4 +242,4 @@ jobs:
         name: Sign and publish
         run: |
           version=`git describe --match 'v[0-9]*' | cut -b 2- -`
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST ./sign_and_publish.sh $version ${{ inputs.channel }}
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST ./sign_and_publish.sh $version $STAGING_DIR/$GITHUB_SHA ${{ inputs.channel }}
