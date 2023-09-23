@@ -75,7 +75,7 @@ sudo /etc/init.d/WebTunnelAgent start
 
 A *systemd* service file is available in 
 [etc/systemd/system/WebTunnelAgent.service](etc/systemd/system/WebTunnelAgent.service).
-The file must be copied to the target system to `/etc/systemd/system/WebTunnelAgent.properties`.
+The file must be copied to the target system to `/etc/systemd/system/WebTunnelAgent.service`.
 Like the `init.d` script, it expects the `WebTunnelAgent` executable to be located in
 `/usr/local/sbin/WebTunnelAgent` and the configuration file in `/etc/WebTunnelAgent.properties`.
 
