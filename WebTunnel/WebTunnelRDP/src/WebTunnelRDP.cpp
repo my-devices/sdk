@@ -30,6 +30,7 @@
 #include "Poco/TemporaryFile.h"
 #include "Poco/FileStream.h"
 #include "Poco/Process.h"
+#include "Poco/Environment.h"
 #include "Poco/Format.h"
 #include "Poco/String.h"
 #include <iostream>
@@ -367,7 +368,7 @@ protected:
 			rdpExecutable = "open";
 			const std::string rdpPath(Poco::TemporaryFile::tempName() + ".rdp");
 			Poco::FileOutputStream rdpFile(rdpPath);
-			rdpFile 
+			rdpFile
 				<< "full address:s:localhost:" << forwarder.localPort() << "\n"
 				<< "autoreconnection enabled:i:1\n"
 				<< "disable menu anims:i:1\n"
@@ -392,7 +393,7 @@ protected:
 			if (_remoteUsername.empty())
 			{
 				std::cout << "Windows Username: " << std::flush;
-				std::getline(std::cin, _remoteUsername);				
+				std::getline(std::cin, _remoteUsername);
 			}
 			rdpArgs.push_back("/u:"s + _remoteUsername);
 #else
@@ -419,8 +420,8 @@ private:
 	bool _fullScreen = false;
 	Poco::UInt16 _localPort = 0;
 	Poco::UInt16 _remotePort = 3389;
-	std::string _username;
-	std::string _password;
+	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
+	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
 	std::string _remoteUsername;
 	SSLInitializer _sslInitializer;
 };

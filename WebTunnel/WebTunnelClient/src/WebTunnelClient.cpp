@@ -28,6 +28,7 @@
 #include "Poco/Util/IntValidator.h"
 #include "Poco/NumberParser.h"
 #include "Poco/Process.h"
+#include "Poco/Environment.h"
 #include <iostream>
 #if defined(POCO_OS_FAMILY_WINDOWS)
 #include <windows.h>
@@ -95,7 +96,9 @@ public:
 		_helpRequested(false),
 		_localPort(0),
 		_remotePort(0),
-		_bindAddress("localhost"s)
+		_bindAddress("localhost"s),
+		_username(Poco::Environment::get("REMOTE_USERNAME"s, ""s)),
+		_password(Poco::Environment::get("REMOTE_PASSWORD"s, ""s))
 	{
 	}
 

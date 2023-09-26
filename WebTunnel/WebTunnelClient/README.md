@@ -59,6 +59,9 @@ remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io /r
 `remote-client` will prompt for your macchina.io REMOTE username and password.
 When no longer needed, the tunnel can be terminated by typing `CTRL-C`.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 You can now start your SSH client and connect it to port 2222 on your local machine
 in order to open an SSH session to your device:
 

@@ -49,6 +49,9 @@ or `/ssh-client` command-line argument), an error message is printed and
 then launch the SSH client with correct parameters for host, port number and
 remote SSH login name.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 ### Disabling Host Fingerprint Checking and Authenticity Warning
 
 When connecting via SSH to a remote host with `remote-ssh`, the `ssh` client will

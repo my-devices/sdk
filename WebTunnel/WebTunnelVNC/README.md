@@ -31,6 +31,9 @@ remote-vnc https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 then launch the VNC client with correct parameters for host, port number and
 remote user name.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 On macOS, `remote-vnc` will launch the built-in macOS Screen Sharing client.
 On other platforms, `remote-vnc` will attempt to launch an executable
 named `vncviewer`, which must be in the executable search path.

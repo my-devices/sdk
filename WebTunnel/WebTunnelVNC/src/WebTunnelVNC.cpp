@@ -28,6 +28,7 @@
 #include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Process.h"
+#include "Poco/Environment.h"
 #include "Poco/Format.h"
 #include "Poco/String.h"
 #include <iostream>
@@ -70,7 +71,9 @@ public:
 	WebTunnelVNC():
 		_helpRequested(false),
 		_localPort(0),
-		_remotePort(5900)
+		_remotePort(5900),
+		_username(Poco::Environment::get("REMOTE_USERNAME"s, ""s)),
+		_password(Poco::Environment::get("REMOTE_PASSWORD"s, ""s))
 	{
 	}
 

@@ -48,6 +48,9 @@ or `/sftp-client` command-line argument), an error message is printed and
 then launch the SFTP client with correct parameters for host, port number and
 remote user name.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 ### Passing Options to the SFTP Client
 
 `remote-sftp` can pass command-line options to the SFTP client. SFTP command-line arguments

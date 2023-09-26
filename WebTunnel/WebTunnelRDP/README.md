@@ -26,6 +26,9 @@ remote-rdp https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 `remote-rdp` will prompt for your macchina.io REMOTE username and password and
 then launch the Remote Desktop client with correct parameters for host and port number.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 The following RDP clients are used:
 
   - `mstsc.exe` on Windows

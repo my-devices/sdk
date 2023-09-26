@@ -37,6 +37,9 @@ remote-scp file.txt pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:
 the tunnel connection and then launch the `scp` client program with correct parameters
 for host, port number and remote user name.
 
+The macchina.io REMOTE username and password can also be supplied via environment
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+
 ### Passing Options to the SCP Client
 
 `remote-scp` can pass command-line options to the SCP client. SCP command-line arguments

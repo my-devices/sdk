@@ -72,7 +72,9 @@ public:
 	WebTunnelSSH():
 		_helpRequested(false),
 		_localPort(0),
-		_remotePort(22)
+		_remotePort(22),
+		_username(Poco::Environment::get("REMOTE_USERNAME"s, ""s)),
+		_password(Poco::Environment::get("REMOTE_PASSWORD"s, ""s))
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
 		_sshClient = findExecutable("ssh.exe"s);
