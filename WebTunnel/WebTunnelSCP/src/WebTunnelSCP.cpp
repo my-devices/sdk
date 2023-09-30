@@ -162,6 +162,13 @@ protected:
 				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handlePassword)));
 
 		options.addOption(
+			Option("identity-file"s, "i"s, "Specify SSH identity file. This is passed on to the SCP client (-i)."s)
+				.required(false)
+				.repeatable(false)
+				.argument("path"s)
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleIdentity)));
+
+		options.addOption(
 			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
@@ -202,6 +209,11 @@ protected:
 	void handlePassword(const std::string& name, const std::string& value)
 	{
 		_password = value;
+	}
+
+	void handleIdentity(const std::string& name, const std::string& value)
+	{
+		_identity = value;
 	}
 
 	void handleDefine(const std::string& name, const std::string& value)
@@ -369,6 +381,11 @@ protected:
 
 			std::string remoteHost;
 			Poco::Process::Args scpArgs;
+			if (!_identity.empty())
+			{
+				scpArgs.push_back("-i");
+				scpArgs.push_back(_identity);
+			}
 			for (const auto& arg: args)
 			{
 				auto minPos = arg.find('-');
@@ -437,6 +454,7 @@ private:
 	std::string _password;
 	std::string _scpClient;
 	std::string _protocol;
+	std::string _identity;
 	SSLInitializer _sslInitializer;
 };
 

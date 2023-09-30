@@ -169,6 +169,13 @@ protected:
 				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleLogin)));
 
 		options.addOption(
+			Option("identity-file"s, "i"s, "Specify SSH identity file. This is passed on to the SFTP client (-i)."s)
+				.required(false)
+				.repeatable(false)
+				.argument("path"s)
+				.callback(OptionCallback<WebTunnelSFTP>(this, &WebTunnelSFTP::handleIdentity)));
+
+		options.addOption(
 			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
@@ -214,6 +221,11 @@ protected:
 	void handleLogin(const std::string& name, const std::string& value)
 	{
 		_login = value;
+	}
+
+	void handleIdentity(const std::string& name, const std::string& value)
+	{
+		_identity = value;
 	}
 
 	void handleDefine(const std::string& name, const std::string& value)
@@ -424,6 +436,11 @@ protected:
 			sftpURI += Poco::format("localhost:%hu"s, localPort);
 
 			Poco::Process::Args sftpArgs;
+			if (!_identity.empty())
+			{
+				sftpArgs.push_back("-i");
+				sftpArgs.push_back(_identity);
+			}
 			std::vector<std::string>::const_iterator itArgs = ++args.begin();
 			sftpArgs.insert(sftpArgs.end(), itArgs, args.end());
 			sftpArgs.push_back(sftpURI);
@@ -443,6 +460,7 @@ private:
 	std::string _username;
 	std::string _password;
 	std::string _login;
+	std::string _identity;
 	std::string _sftpClient;
 	SSLInitializer _sslInitializer;
 };

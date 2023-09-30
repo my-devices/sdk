@@ -179,6 +179,13 @@ protected:
 				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleLogin)));
 
 		options.addOption(
+			Option("identity-file"s, "i"s, "Specify SSH identity file. This is passed on to the SSH client (-i)."s)
+				.required(false)
+				.repeatable(false)
+				.argument("path"s)
+				.callback(OptionCallback<WebTunnelSSH>(this, &WebTunnelSSH::handleIdentity)));
+
+		options.addOption(
 			Option("command"s, "m"s, "Specify remote (SSH) command. This is passed as second argument to the SSH client."s)
 				.required(false)
 				.repeatable(false)
@@ -236,6 +243,11 @@ protected:
 	void handleLogin(const std::string& name, const std::string& value)
 	{
 		_login = value;
+	}
+
+	void handleIdentity(const std::string& name, const std::string& value)
+	{
+		_identity = value;
 	}
 
 	void handleCommand(const std::string& name, const std::string& value)
@@ -450,6 +462,11 @@ protected:
 				sshArgs.push_back("-l"s);
 				sshArgs.push_back(_login);
 			}
+			if (!_identity.empty())
+			{
+				sshArgs.push_back("-i");
+				sshArgs.push_back(_identity);
+			}
 			sshArgs.insert(sshArgs.end(), itArgs, args.end());
 			if (Poco::icompare(_sshClient, 0, 3, "scp") != 0)
 			{
@@ -476,6 +493,7 @@ private:
 	std::string _username;
 	std::string _password;
 	std::string _login;
+	std::string _identity;
 	std::string _sshClient;
 	std::string _command;
 	SSLInitializer _sslInitializer;
