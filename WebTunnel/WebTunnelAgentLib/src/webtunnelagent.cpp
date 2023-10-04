@@ -420,6 +420,7 @@ void WebTunnelAgent_API webtunnel_agent_destroy(webtunnel_agent wt)
 		try
 		{
 			pHolder->signature = 0xDEADBEEF;
+			pHolder->pTunnel->stop();
 			delete pHolder;
 		}
 		catch (...)

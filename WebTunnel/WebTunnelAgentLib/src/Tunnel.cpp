@@ -189,7 +189,7 @@ void Tunnel::startPropertiesUpdateTask()
 {
 	_logger.debug("Starting PropertiesUpdateTask..."s);
 	_pPropertiesUpdateTask = new PropertiesUpdateTask(Ptr(this, true));
-	_pTimer->scheduleAtFixedRate(_pPropertiesUpdateTask, _propertiesUpdateInterval.totalMilliseconds(), _propertiesUpdateInterval.totalMilliseconds());
+	_pTimer->scheduleAtFixedRate(_pPropertiesUpdateTask, static_cast<long>(_propertiesUpdateInterval.totalMilliseconds()), static_cast<long>(_propertiesUpdateInterval.totalMilliseconds()));
 }
 
 

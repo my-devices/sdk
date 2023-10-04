@@ -21,8 +21,8 @@
       "intelliSenseMode": "clang-x64",
       "includePath": [
           "${pocoIncludePath}",
-          "/usr/local/opt/openssl@3",
-          "/opt/homebrew/opt/openssl@3"
+          "/usr/local/opt/openssl@3/include",
+          "/opt/homebrew/opt/openssl@3/include"
       ],
       "macFrameworkPath": ["/System/Library/Frameworks"],
       "defines": [

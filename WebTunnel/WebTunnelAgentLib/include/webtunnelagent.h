@@ -68,6 +68,15 @@ typedef enum webtunnel_agent_result
 } webtunnel_agent_result;
 
 
+typedef enum webtunnel_agent_status
+{
+	webtunnel_agent_status_disconnected = 0,
+	webtunnel_agent_status_connected = 1,
+	webtunnel_agent_status_error = 2,
+	webtunnel_agent_status_unknown = 3
+} webtunnel_agent_status;
+
+
 typedef enum webtunnel_agent_port_type
 {
 	webtunnel_port_http = 0,
@@ -78,15 +87,6 @@ typedef enum webtunnel_agent_port_type
 	webtunnel_port_app = 5,
 	webtunnel_port_other = 6
 } webtunnel_agent_port_type;
-
-
-typedef enum webtunnel_agent_status
-{
-	webtunnel_agent_status_disconnected = 0,
-	webtunnel_agent_status_connected = 1,
-	webtunnel_agent_status_error = 2,
-	webtunnel_agent_status_unknown = 3
-} webtunnel_agent_status;
 
 
 typedef struct webtunnel_agent_port_spec
