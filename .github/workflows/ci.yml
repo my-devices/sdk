@@ -6,31 +6,31 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
-      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
+      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON -DENABLE_WEBTUNNELAGENTLIB=ON && cmake --build cmake-build --target all
 
   raspberrypi-gcc-cmake:
     runs-on: raspberrypi
     steps:
       - uses: actions/checkout@v3
-      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
+      - run: cmake -H. -Bcmake-build -GNinja -DENABLE_WEBTUNNELCLIENTLIB=ON -DENABLE_WEBTUNNELAGENTLIB=ON && cmake --build cmake-build --target all
 
   macos-clang-cmake:
     runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
       - run: brew install openssl@3 ninja
-      - run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@3 -DENABLE_WEBTUNNELCLIENTLIB=ON && cmake --build cmake-build --target all
+      - run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@3 -DENABLE_WEBTUNNELCLIENTLIB=ON -DENABLE_WEBTUNNELAGENTLIB=ON && cmake --build cmake-build --target all
 
   windows-msvc22x64-cmake:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
-      - run: cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build -DENABLE_WEBTUNNELCLIENTLIB=ON 
+      - run: cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build -DENABLE_WEBTUNNELCLIENTLIB=ON -DENABLE_WEBTUNNELAGENTLIB=ON
       - run: cmake --build cmake-build --config Release
 
   windows-msvc22x86-cmake:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
-      - run: cmake -G "Visual Studio 17 2022" -A Win32 -S. -Bcmake-build -DENABLE_WEBTUNNELCLIENTLIB=ON 
+      - run: cmake -G "Visual Studio 17 2022" -A Win32 -S. -Bcmake-build -DENABLE_WEBTUNNELCLIENTLIB=ON -DENABLE_WEBTUNNELAGENTLIB=ON
       - run: cmake --build cmake-build --config Release
