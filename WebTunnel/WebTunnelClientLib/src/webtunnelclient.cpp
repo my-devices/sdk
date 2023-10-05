@@ -75,7 +75,7 @@ namespace
 }
 
 
-int WebTunnelClient_API webtunnel_init(void)
+int WebTunnelClient_API webtunnel_client_init(void)
 {
 	try
 	{
@@ -86,16 +86,16 @@ int WebTunnelClient_API webtunnel_init(void)
 		Poco::Net::HTTPSSessionInstantiator::registerInstantiator();
 #endif
 
-		return webtunnel_ok;
+		return webtunnel_client_ok;
 	}
 	catch (...)
 	{
-		return webtunnel_error;
+		return webtunnel_client_error;
 	}
 }
 
 
-void WebTunnelClient_API webtunnel_cleanup(void)
+void WebTunnelClient_API webtunnel_client_cleanup(void)
 {
 	try
 	{
@@ -112,7 +112,7 @@ void WebTunnelClient_API webtunnel_cleanup(void)
 }
 
 
-int WebTunnelClient_API webtunnel_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location)
+int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location)
 {
 #if defined(WEBTUNNEL_ENABLE_TLS)
 	try
@@ -140,25 +140,25 @@ int WebTunnelClient_API webtunnel_configure_tls(bool accept_unknown_cert, bool e
 		Poco::Net::SSLManager::instance().initializeClient(nullptr, pCertificateHandler, pContext);
 
 		lastError.clear();
-		return webtunnel_ok;
+		return webtunnel_client_ok;
 	}
 	catch (Poco::Exception& exc)
 	{
 		lastError = exc.displayText();
-		return webtunnel_error;
+		return webtunnel_client_error;
 	}
 #else
-	return webtunnel_not_supported;
+	return webtunnel_client_not_supported;
 #endif
 }
 
 
-int WebTunnelClient_API webtunnel_configure_proxy(bool enable_proxy, const char* proxy_host, unsigned short proxy_port, const char* proxy_username, const char* proxy_password)
+int WebTunnelClient_API webtunnel_client_configure_proxy(bool enable_proxy, const char* proxy_host, unsigned short proxy_port, const char* proxy_username, const char* proxy_password)
 {
 	Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
 	if (enable_proxy)
 	{
-		if (!proxy_host) return webtunnel_error;
+		if (!proxy_host) return webtunnel_client_error;
 		proxyConfig.host = proxy_host;
 		proxyConfig.port = proxy_port;
 		if (proxy_username) proxyConfig.username = proxy_username;
@@ -168,24 +168,24 @@ int WebTunnelClient_API webtunnel_configure_proxy(bool enable_proxy, const char*
 	Poco::Net::HTTPSessionFactory::defaultFactory().setProxy(proxyConfig.host, proxyConfig.port);
 	Poco::Net::HTTPSessionFactory::defaultFactory().setProxyCredentials(proxyConfig.username, proxyConfig.password);
 
-	return webtunnel_ok;
+	return webtunnel_client_ok;
 }
 
 
-int WebTunnelClient_API webtunnel_configure_timeouts(int connect_timeout, int remote_timeout, int local_timeout)
+int WebTunnelClient_API webtunnel_client_configure_timeouts(int connect_timeout, int remote_timeout, int local_timeout)
 {
 	if (connect_timeout >= 0 && remote_timeout >= 0 && local_timeout >= 0)
 	{
 		connectTimeout = Poco::Timespan(connect_timeout, 0);
 		remoteTimeout  = Poco::Timespan(remote_timeout, 0);
 		localTimeout   = Poco::Timespan(local_timeout, 0);
-		return webtunnel_ok;
+		return webtunnel_client_ok;
 	}
-	else return webtunnel_error;
+	else return webtunnel_client_error;
 }
 
 
-webtunnel WebTunnelClient_API webtunnel_create(const char* local_addr, unsigned short local_port, unsigned short remote_port, const char* remote_uri, const char* username, const char* password)
+webtunnel_client WebTunnelClient_API webtunnel_client_create(const char* local_addr, unsigned short local_port, unsigned short remote_port, const char* remote_uri, const char* username, const char* password)
 {
 	try
 	{
@@ -218,7 +218,7 @@ webtunnel WebTunnelClient_API webtunnel_create(const char* local_addr, unsigned 
 }
 
 
-webtunnel WebTunnelClient_API webtunnel_create_jwt(const char* local_addr, unsigned short local_port, unsigned short remote_port, const char* remote_uri, const char* jwt)
+webtunnel_client WebTunnelClient_API webtunnel_client_create_jwt(const char* local_addr, unsigned short local_port, unsigned short remote_port, const char* remote_uri, const char* jwt)
 {
 	try
 	{
@@ -248,7 +248,7 @@ webtunnel WebTunnelClient_API webtunnel_create_jwt(const char* local_addr, unsig
 }
 
 
-void WebTunnelClient_API webtunnel_destroy(webtunnel wt)
+void WebTunnelClient_API webtunnel_client_destroy(webtunnel_client wt)
 {
 	Holder* pHolder = reinterpret_cast<Holder*>(wt);
 	if (pHolder && pHolder->signature == Holder::SIGNATURE)
@@ -265,7 +265,7 @@ void WebTunnelClient_API webtunnel_destroy(webtunnel wt)
 }
 
 
-unsigned short WebTunnelClient_API webtunnel_local_port(webtunnel wt)
+unsigned short WebTunnelClient_API webtunnel_client_local_port(webtunnel_client wt)
 {
 	Holder* pHolder = reinterpret_cast<Holder*>(wt);
 	if (pHolder && pHolder->signature == Holder::SIGNATURE)
@@ -276,7 +276,7 @@ unsigned short WebTunnelClient_API webtunnel_local_port(webtunnel wt)
 }
 
 
-const char WebTunnelClient_API* webtunnel_last_error_text(void)
+const char WebTunnelClient_API* webtunnel_client_last_error_text(void)
 {
 	if (!lastError.empty())
 		return lastError.c_str();

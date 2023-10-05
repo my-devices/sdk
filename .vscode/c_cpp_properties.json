@@ -10,14 +10,20 @@
 			"${POCO_BASE}/Net/include",
 			"${POCO_BASE}/Crypto/include",
 			"${POCO_BASE}/NetSSL_OpenSSL/include",
-			"${POCO_BASE}/WebTunnel/include"
+			"${POCO_BASE}/WebTunnel/include",
+			"${POCO_BASE}/WebTunnel/WebTunnelAgentLib/include",
+			"${POCO_BASE}/WebTunnel/WebTunnelClientLib/include"
 		]
   },
   "configurations": [
     {
       "name": "Mac",
       "intelliSenseMode": "clang-x64",
-      "includePath": ["${pocoIncludePath}"],
+      "includePath": [
+          "${pocoIncludePath}",
+          "/usr/local/opt/openssl@3/include",
+          "/opt/homebrew/opt/openssl@3/include"
+      ],
       "macFrameworkPath": ["/System/Library/Frameworks"],
       "defines": [
         "WEBTUNNEL_ENABLE_TLS=1"
