@@ -2,7 +2,7 @@
 
 `libWebTunnelClient` provides a C API for creating a tunnel connection from
 a local TCP port to a port on a remote device connected to macchina.io REMOTE.
-This is what the [`remote-client`](../WebTunnelClient/README.md) is doing,
+This is what the [`remote-client`](../WebTunnelClient/README.md) does,
 but provided as a library for easy inclusion into applications (not written in C++).
 C++ applications can also use the `Poco::WebTunnel::LocalPortForwarder` class
 in the `WebTunnel` library.

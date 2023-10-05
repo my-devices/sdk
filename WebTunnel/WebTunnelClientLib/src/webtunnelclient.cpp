@@ -1,7 +1,7 @@
 //
 // webtunnelclient.cpp
 //
-// Copyright (c) 2013-2020, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2020-2023, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -22,6 +22,9 @@
 #include "Poco/Net/RejectCertificateHandler.h"
 #include "Poco/Net/SSLManager.h"
 #endif
+
+
+using namespace std::string_literals;
 
 
 namespace
@@ -63,7 +66,7 @@ namespace
 			pSession->setTimeout(_timeout);
 			if (!_jwt.empty())
 			{
-				request.set(Poco::Net::HTTPRequest::AUTHORIZATION, Poco::format("bearer %s", _jwt));
+				request.set(Poco::Net::HTTPRequest::AUTHORIZATION, Poco::format("bearer %s"s, _jwt));
 			}
 			return new Poco::Net::WebSocket(*pSession, request, response);
 		}
@@ -72,6 +75,23 @@ namespace
 		std::string _jwt;
 		Poco::Timespan _timeout;
 	};
+
+	int error(const std::string& error)
+	{
+		lastError = error;
+		return webtunnel_client_result_error;
+	}
+
+	int error(const Poco::Exception& exc)
+	{
+		return error(exc.displayText());
+	}
+
+	int success()
+	{
+		lastError.clear();
+		return webtunnel_client_result_ok;
+	}
 }
 
 
@@ -86,11 +106,11 @@ int WebTunnelClient_API webtunnel_client_init(void)
 		Poco::Net::HTTPSSessionInstantiator::registerInstantiator();
 #endif
 
-		return webtunnel_client_ok;
+		return success();
 	}
-	catch (...)
+	catch (Poco::Exception& exc)
 	{
-		return webtunnel_client_error;
+		return error(exc);
 	}
 }
 
@@ -112,7 +132,7 @@ void WebTunnelClient_API webtunnel_client_cleanup(void)
 }
 
 
-int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location)
+int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location, int minimum_protocol)
 {
 #if defined(WEBTUNNEL_ENABLE_TLS)
 	try
@@ -132,20 +152,35 @@ int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert,
 			pCertificateHandler = new Poco::Net::RejectCertificateHandler(false);
 
 #if defined(POCO_NETSSL_WIN)
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", Poco::Net::Context::VERIFY_RELAXED);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
 #else
-		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLSV1_CLIENT_USE, "", "", caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
+		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
 #endif	
+
+		switch (minimum_protocol)
+		{
+		case webtunnel_client_tls_1_0:
+			pContext->requireMinimumProtocol(Poco::Net::Context::PROTO_TLSV1);
+			break;
+		case webtunnel_client_tls_1_1:
+			pContext->requireMinimumProtocol(Poco::Net::Context::PROTO_TLSV1_1);
+			break;
+		case webtunnel_client_tls_1_2:
+			pContext->requireMinimumProtocol(Poco::Net::Context::PROTO_TLSV1_2);
+			break;
+		case webtunnel_client_tls_1_3:
+			pContext->requireMinimumProtocol(Poco::Net::Context::PROTO_TLSV1_3);
+			break;
+		}
+
 		pContext->enableExtendedCertificateVerification(extended_verification);
 		Poco::Net::SSLManager::instance().initializeClient(nullptr, pCertificateHandler, pContext);
 
-		lastError.clear();
-		return webtunnel_client_ok;
+		return success();
 	}
 	catch (Poco::Exception& exc)
 	{
-		lastError = exc.displayText();
-		return webtunnel_client_error;
+		return error(exc);
 	}
 #else
 	return webtunnel_client_not_supported;
@@ -155,20 +190,26 @@ int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert,
 
 int WebTunnelClient_API webtunnel_client_configure_proxy(bool enable_proxy, const char* proxy_host, unsigned short proxy_port, const char* proxy_username, const char* proxy_password)
 {
-	Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
-	if (enable_proxy)
+	try
 	{
-		if (!proxy_host) return webtunnel_client_error;
-		proxyConfig.host = proxy_host;
-		proxyConfig.port = proxy_port;
-		if (proxy_username) proxyConfig.username = proxy_username;
-		if (proxy_password) proxyConfig.password = proxy_password;
+		Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
+		if (enable_proxy)
+		{
+			if (!proxy_host) return webtunnel_client_result_error;
+			proxyConfig.host = proxy_host;
+			proxyConfig.port = proxy_port;
+			if (proxy_username) proxyConfig.username = proxy_username;
+			if (proxy_password) proxyConfig.password = proxy_password;
+		}
+		Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
+		Poco::Net::HTTPSessionFactory::defaultFactory().setProxy(proxyConfig.host, proxyConfig.port);
+		Poco::Net::HTTPSessionFactory::defaultFactory().setProxyCredentials(proxyConfig.username, proxyConfig.password);
+		return success();
 	}
-	Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
-	Poco::Net::HTTPSessionFactory::defaultFactory().setProxy(proxyConfig.host, proxyConfig.port);
-	Poco::Net::HTTPSessionFactory::defaultFactory().setProxyCredentials(proxyConfig.username, proxyConfig.password);
-
-	return webtunnel_client_ok;
+	catch (Poco::Exception& exc)
+	{
+		return error(exc);
+	}
 }
 
 
@@ -179,9 +220,9 @@ int WebTunnelClient_API webtunnel_client_configure_timeouts(int connect_timeout,
 		connectTimeout = Poco::Timespan(connect_timeout, 0);
 		remoteTimeout  = Poco::Timespan(remote_timeout, 0);
 		localTimeout   = Poco::Timespan(local_timeout, 0);
-		return webtunnel_client_ok;
+		return success();
 	}
-	else return webtunnel_client_error;
+	else return error("bad parameters"s);
 }
 
 
@@ -207,12 +248,12 @@ webtunnel_client WebTunnelClient_API webtunnel_client_create(const char* local_a
 		if (localTimeout > 0)
 			pLPF->setLocalTimeout(localTimeout);
 
-		lastError.clear();
+		(void) success();
 		return new Holder(std::move(pLPF));
 	}
 	catch (Poco::Exception& exc)
 	{
-		lastError = exc.displayText();
+		(void) error(exc);
 		return NULL;
 	}
 }
@@ -237,12 +278,12 @@ webtunnel_client WebTunnelClient_API webtunnel_client_create_jwt(const char* loc
 		if (localTimeout > 0)
 			pLPF->setLocalTimeout(localTimeout);
 
-		lastError.clear();
+		(void) success();
 		return new Holder(std::move(pLPF));
 	}
 	catch (Poco::Exception& exc)
 	{
-		lastError = exc.displayText();
+		error(exc);
 		return NULL;
 	}
 }
@@ -265,7 +306,7 @@ void WebTunnelClient_API webtunnel_client_destroy(webtunnel_client wt)
 }
 
 
-unsigned short WebTunnelClient_API webtunnel_client_local_port(webtunnel_client wt)
+unsigned short WebTunnelClient_API webtunnel_client_get_local_port(webtunnel_client wt)
 {
 	Holder* pHolder = reinterpret_cast<Holder*>(wt);
 	if (pHolder && pHolder->signature == Holder::SIGNATURE)
@@ -276,7 +317,7 @@ unsigned short WebTunnelClient_API webtunnel_client_local_port(webtunnel_client 
 }
 
 
-const char WebTunnelClient_API* webtunnel_client_last_error_text(void)
+const char WebTunnelClient_API* webtunnel_client_get_last_error_text(void)
 {
 	if (!lastError.empty())
 		return lastError.c_str();

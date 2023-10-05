@@ -3,7 +3,7 @@
 //
 // The WebTunnel Client C API
 //
-// Copyright (c) 2013-2023, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2020-2023, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -53,12 +53,21 @@
 /*
 // Client API
 */
-enum WebTunnelResult
+typedef enum webtunnel_client_result
 {
-	webtunnel_client_ok = 0,
-	webtunnel_client_error = 1,
-	webtunnel_client_not_supported = 2
-};
+	webtunnel_client_result_ok = 0,
+	webtunnel_client_result_error = 1,
+	webtunnel_client_result_not_supported = 2
+} webtunnel_client_result;
+
+
+typedef enum webtunnel_client_tls_version
+{
+	webtunnel_client_tls_1_0 = 0,
+	webtunnel_client_tls_1_1 = 1,
+	webtunnel_client_tls_1_2 = 2,
+	webtunnel_client_tls_1_3 = 3
+} webtunnel_client_tls_version;
 
 
 typedef void* webtunnel_client;
@@ -73,9 +82,10 @@ extern "C" {
 // webtunnel_client_init
 //
 // Initialize webtunnel client library.
+//
 // Must be called before any other functions.
-// Returns webunnel_client_ok if successful, or
-// webtunnel_client_error otherwise.
+// Returns webunnel_client_result_ok if successful, or
+// webtunnel_client_result_error otherwise.
 */
 int WebTunnelClient_API webtunnel_client_init(void);
 
@@ -84,8 +94,9 @@ int WebTunnelClient_API webtunnel_client_init(void);
 // webtunnel_client_cleanup
 //
 // Cleanup webtunnel client library.
+//
 // Should be called when the library is no longer being used
-// to cleanup internal state.
+// to cleanup internal state and resources.
 */
 void WebTunnelClient_API webtunnel_client_cleanup(void);
 
@@ -107,6 +118,8 @@ void WebTunnelClient_API webtunnel_client_cleanup(void);
 //
 // local_timeout specifies the timeout of the local socket connection.
 // If no data has been received for this period, the connection will be closed.
+//
+// returns webtunnel_client_result_ok if all went well, otherwise webtunnel_client_result_error.
 */
 int WebTunnelClient_API webtunnel_client_configure_timeouts(int connect_timeout, int remote_timeout, int local_timeout);
 
@@ -132,10 +145,12 @@ int WebTunnelClient_API webtunnel_client_configure_timeouts(int connect_timeout,
 // the CA/root certificates. Can be NULL to use the built-in root
 // certificates.
 //
-// Returns webtunnel_client_ok if successful, or webtunnel_client_error if an error
-// occured, or webtunnel_client_not_supported if no SSL/TLS support is available.
+// minimum_protocol specifies the minimum TLS protocol version (see webtunnel_client_tls_version).
+//
+// Returns webtunnel_client_result_ok if successful, or webtunnel_client_result_error if an error
+// occured, or webtunnel_client_result_not_supported if no SSL/TLS support is available.
 */
-int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location);
+int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert, bool extended_verification, const char* ciphers, const char* ca_location, int minimum_protocol);
 
 
 /*
@@ -156,7 +171,7 @@ int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert,
 // proxy_password contains the password for authenticating against the
 // proxy server. If NULL, no authentication will be performed.
 //
-// Returns webtunnel_client_ok if successful, or webtunnel_client_error if an error
+// Returns webtunnel_client_result_ok if successful, or webtunnel_client_result_error if an error
 // occured.
 */
 int WebTunnelClient_API webtunnel_client_configure_proxy(bool enable_proxy, const char* proxy_host, unsigned short proxy_port, const char* proxy_username, const char* proxy_password);
@@ -167,12 +182,13 @@ int WebTunnelClient_API webtunnel_client_configure_proxy(bool enable_proxy, cons
 //
 // Creates a tunnel connection from the given local_port to remote_port on
 // the remote machine, using the reflector server as intermediary.
+//
 // If local_port is 0, a suitable port number will be chosen automatically.
 // The port number can be obtained by calling webtunnel_client_local_port().
 //
 // remote_uri contains the URI of the remote machine, using the http
 // or https URI scheme.
-// Example: " https://0a72da53-9de5-44c8-9adf-f3d916304be6.my-devices.net"
+// Example: "https://0a72da53-9de5-44c8-9adf-f3d916304be6.my-devices.net"
 //
 // username and password are used for authentication against the reflector
 // server.
@@ -190,6 +206,7 @@ webtunnel_client WebTunnelClient_API webtunnel_client_create(const char* local_a
 //
 // Creates a tunnel connection from the given local_port to remote_port on
 // the remote machine, using the reflector server as intermediary.
+//
 // If local_port is 0, a suitable port number will be chosen automatically.
 // The port number can be obtained by calling webtunnel_client_local_port().
 //
@@ -197,7 +214,7 @@ webtunnel_client WebTunnelClient_API webtunnel_client_create(const char* local_a
 // or https URI scheme.
 // Example: " https://0a72da53-9de5-44c8-9adf-f3d916304be6.my-devices.net"
 //
-// A JSON Web Token is used for authentication against the reflector
+// A JSON Web Token (JWT) is used for authentication against the reflector
 // server.
 //
 // Returns NULL in case of an error.
@@ -214,21 +231,21 @@ void WebTunnelClient_API webtunnel_client_destroy(webtunnel_client wt);
 
 
 /*
-// webtunnel_client_local_port
+// webtunnel_client_get_local_port
 //
 // Returns the local port number for forwarding
 // connections.
 */
-unsigned short WebTunnelClient_API webtunnel_client_local_port(webtunnel_client wt);
+unsigned short WebTunnelClient_API webtunnel_client_get_local_port(webtunnel_client wt);
 
 
 /*
-// webtunnel_client_last_error_text
+// webtunnel_client_get_last_error_text
 //
 // Returns a text describing the last encountered error.
 // Can be NULL if no descriptive text is available.
 */
-const char WebTunnelClient_API * webtunnel_client_last_error_text(void);
+const char WebTunnelClient_API * webtunnel_client_get_last_error_text(void);
 
 
 #ifdef __cplusplus
