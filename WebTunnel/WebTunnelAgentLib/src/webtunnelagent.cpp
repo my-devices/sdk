@@ -150,7 +150,7 @@ logging.channels.console.pattern = %Y-%m-%d %H:%M:%S.%i [%p] %s<%I>: %t
 			throw Poco::InvalidArgumentException(prefix + ".verification", vModeStr);
 
 		Poco::Net::Context::Protocols minProto = Poco::Net::Context::PROTO_TLSV1_2;
-		if (tlsMinVersion == "tlsv1" or tlsMinVersion == "tlsv1_0")
+		if (tlsMinVersion == "tlsv1" || tlsMinVersion == "tlsv1_0")
 			minProto = Poco::Net::Context::PROTO_TLSV1;
 		else if (tlsMinVersion == "tlsv1_1")
 			minProto = Poco::Net::Context::PROTO_TLSV1_1;
