@@ -12,10 +12,14 @@ for your machine to get the `remote-scp` program.
 
 ## Running remote-scp
 
-`remote-scp` does not need a configuration file, all parameters can be passed
-via command-line arguments. Some settings can also be set using a configuration file
-(see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md) for more
-information on configuration files), but in most cases no configuration file is needed.
+`remote-scp` usually does not need a configuration file, most parameters can be passed
+via command-line arguments. Some settings can be set using a configuration file
+(see the `remote-client` [documentation](../WebTunnelClient/README.md) for more
+information on configuration files). 
+
+At startup, `remote-scp` will look for a configuration file named 
+`.remote-scp.properties` or `.remote-client.properties`
+in the current user's home directory, and read it if it's present. 
 
 To run `remote-scp`, you'll need to specify the macchina.io REMOTE fully-qualified
 host name of the remote device to connect to (e.g. 8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io),
@@ -38,7 +42,11 @@ the tunnel connection and then launch the `scp` client program with correct para
 for host, port number and remote user name.
 
 The macchina.io REMOTE username and password can also be supplied via environment
-variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via a configuration file.
+
+Like [`remote-client`](../WebTunnelClient/README.md), `remote-scp` can also connect through a 
+[proxy server](../WebTunnelClient/READMD.md#connecting-trough-a-http-proxy).
+
 
 ### Passing Options to the SCP Client
 

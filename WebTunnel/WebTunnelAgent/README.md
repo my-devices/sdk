@@ -432,6 +432,24 @@ The domain name or IP address of the HTTP proxy server to use.
 
 The port number of the HTTP proxy server to use.
 
+#### http.proxy.url
+
+An alternative form to specify a HTTP proxy, taking a URL, e.g.:
+
+```
+http.proxy.url = http://proxy.nowhere.com:8080
+```
+
+Note that `http.proxy.host` and `http.proxy.port` will take precedence, 
+if specified.
+
+This can be used if the proxy address is provided via an environment variable,
+like `https_proxy` on Linux:
+
+```
+http.proxy.url = ${system.env.https_proxy}
+```
+
 #### http.proxy.username
 
 The username for authenticating against the HTTP proxy server. Can be left empty
@@ -462,7 +480,7 @@ This setting is used to specify the minimum TLS version required by `WebTunnelAg
 when connecting to the macchina.io REMOTE server. The following values can be
 specified:
 
-  * `tlsv1` (TLS version 1.0)
+  * `tlsv1` or `tlsv1_0` (TLS version 1.0)
   * `tlsv1_1` (TLS version 1.1)
   * `tlsv1_2` (TLS version 1.2, default)
   * `tlsv1_3` (TLS version 1.3)
@@ -515,7 +533,7 @@ This setting is used to specify the minimum TLS version required by `WebTunnelAg
 when connecting to the device web server via HTTPS. The following values can be
 specified:
 
-  * `tlsv1` (TLS version 1.0)
+  * `tlsv1` or `tlsv1_0` (TLS version 1.0)
   * `tlsv1_1` (TLS version 1.1)
   * `tlsv1_2` (TLS version 1.2, default)
   * `tlsv1_3` (TLS version 1.3)

@@ -354,6 +354,7 @@ protected:
 		_pHTTPClientSession->setTimeout(_httpTimeout);
 		if (_useProxy && !_proxyHost.empty())
 		{
+			logger().debug("Connecting via proxy %s:%hu"s, _proxyHost, _proxyPort);
 			_pHTTPClientSession->setProxy(_proxyHost, _proxyPort);
 			if (!_proxyUsername.empty())
 			{
@@ -388,7 +389,7 @@ protected:
 
 			logger().debug("Creating WebSocket..."s);
 			Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket = new Poco::Net::WebSocket(*_pHTTPClientSession, request, response);
-			if (response.get(SEC_WEBSOCKET_PROTOCOL, "") == WEBTUNNEL_PROTOCOL)
+			if (response.get(SEC_WEBSOCKET_PROTOCOL, ""s) == WEBTUNNEL_PROTOCOL)
 			{
 				logger().debug("WebSocket established. Creating RemotePortForwarder..."s);
 				pWebSocket->setNoDelay(true);
@@ -489,7 +490,7 @@ protected:
 			}
 		}
 		statusChanged(STATUS_DISCONNECTED);
-		logger().debug("Disconnected.");
+		logger().debug("Disconnected."s);
 	}
 
 	void onClose(const int& reason)
@@ -742,7 +743,7 @@ protected:
 			throw Poco::InvalidArgumentException(prefix + ".verification", vModeStr);
 
 		Poco::Net::Context::Protocols minProto = Poco::Net::Context::PROTO_TLSV1_2;
-		if (tlsMinVersion == "tlsv1")
+		if (tlsMinVersion == "tlsv1" || tlsMinVersion == "tlsv1_0")
 			minProto = Poco::Net::Context::PROTO_TLSV1;
 		else if (tlsMinVersion == "tlsv1_1")
 			minProto = Poco::Net::Context::PROTO_TLSV1_1;
@@ -788,7 +789,7 @@ protected:
 					_host = Poco::Net::DNS::resolveOne(host);
 				}
 				std::string ports = config().getString("webtunnel.ports"s, ""s);
-				Poco::StringTokenizer tok(ports, ";,", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+				Poco::StringTokenizer tok(ports, ";,"s, Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
 				for (Poco::StringTokenizer::Iterator it = tok.begin(); it != tok.end(); ++it)
 				{
 					int port = Poco::NumberParser::parse(*it);
@@ -814,19 +815,32 @@ protected:
 				_remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
 				_threads = config().getInt("webtunnel.threads"s, 8);
 				_httpPath = config().getString("webtunnel.httpPath"s, ""s);
-				_httpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.httpPort"s, 0));
+				_httpPort = config().getUInt16("webtunnel.httpPort"s, 0);
 				_httpsRequired = config().getBool("webtunnel.https.enable"s, false);
-				_sshPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.sshPort"s, 0));
-				_vncPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.vncPort"s, 0));
-				_rdpPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.rdpPort"s, 0));
-				_appPort = static_cast<Poco::UInt16>(config().getInt("webtunnel.appPort"s, 0));
+				_sshPort = config().getUInt16("webtunnel.sshPort"s, 0);
+				_vncPort = config().getUInt16("webtunnel.vncPort"s, 0);
+				_rdpPort = config().getUInt16("webtunnel.rdpPort"s, 0);
+				_appPort = config().getUInt16("webtunnel.appPort"s, 0);
 				_userAgent = config().getString("webtunnel.userAgent"s, ""s);
 				_httpTimeout = Poco::Timespan(config().getInt("http.timeout"s, 30), 0);
 				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval"s, 0), 0);
 
 				_useProxy = config().getBool("http.proxy.enable"s, false);
 				_proxyHost = config().getString("http.proxy.host"s, ""s);
-				_proxyPort = static_cast<Poco::UInt16>(config().getInt("http.proxy.port"s, 80));
+				_proxyPort = config().getUInt16("http.proxy.port"s, 80);
+
+				std::string proxyURL = config().getString("http.proxy.url"s, ""s);
+				if (!proxyURL.empty() && _proxyHost.empty())
+				{
+					Poco::URI proxyURI(proxyURL);
+					if (proxyURI.getScheme() != "http")
+					{
+						logger().warning("Proxy URL specified, but scheme is not \"http\"."s);
+					}
+					_proxyHost = proxyURI.getHost();
+					_proxyPort = proxyURI.getPort();
+				}
+
 				_proxyUsername = config().getString("http.proxy.username"s, ""s);
 				_proxyPassword = config().getString("http.proxy.password"s, ""s);
 
@@ -964,7 +978,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.16.0");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.17.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

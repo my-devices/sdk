@@ -11,10 +11,14 @@ for your machine to get the `remote-ssh` program.
 
 ## Running remote-ssh
 
-`remote-ssh` does not need a configuration file, all parameters can be passed
-via command-line arguments. Some settings can also be set using a configuration file
-(see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md) for more
-information on configuration files), but in most cases no configuration file is needed.
+`remote-ssh` usually does not need a configuration file, most parameters can be passed
+via command-line arguments. Some settings can be set using a configuration file
+(see the `remote-client` [documentation](../WebTunnelClient/README.md) for more
+information on configuration files). 
+
+At startup, `remote-ssh` will look for a configuration file named 
+`.remote-ssh.properties` or `.remote-client.properties`
+in the current user's home directory, and read it if it's present. 
 
 To run `remote-ssh`, you'll need to specify the URL of the remote device to connect
 to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io), as well as the
@@ -50,7 +54,10 @@ then launch the SSH client with correct parameters for host, port number and
 remote SSH login name.
 
 The macchina.io REMOTE username and password can also be supplied via environment
-variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via a configuration file.
+
+Like [`remote-client`](../WebTunnelClient/README.md), `remote-ssh` can also connect through a 
+[proxy server](../WebTunnelClient/READMD.md#connecting-trough-a-http-proxy).
 
 ### Disabling Host Fingerprint Checking and Authenticity Warning
 

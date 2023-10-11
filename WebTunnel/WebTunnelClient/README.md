@@ -32,10 +32,13 @@ programs for specific protocols:
 
 ## Running remote-client
 
-`remote-client` does not need a configuration file, all parameters can be passed
-via command-line arguments. Some settings can also be set using a configuration file
+`remote-client` usually does not need a configuration file, most parameters can be passed
+via command-line arguments. Some settings can be set using a configuration file
 (see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md) for more
-information on configuration files), but in most cases no configuration file is needed.
+information on configuration files). Also, see the Configuration section below. 
+
+At startup, `remote-client` will look for a configuration file `.remote-client.properties` 
+in the current user's home directory, and read it if it's present.
 
 To run `remote-client`, you'll need to specify the URL of the remote device to connect
 to (e.g. https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io), as well as
@@ -60,7 +63,7 @@ remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io /r
 When no longer needed, the tunnel can be terminated by typing `CTRL-C`.
 
 The macchina.io REMOTE username and password can also be supplied via environment
-variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via the configuration file.
 
 You can now start your SSH client and connect it to port 2222 on your local machine
 in order to open an SSH session to your device:
@@ -93,3 +96,56 @@ Please see the [`WebTunnelAgent` documentation](../WebTunnelAgent/README.md) for
 
 You can also run `remote-client` without command-line options (or with `--help`
 or `/help` on Windows) to see a help screen with available command-line options.
+
+## Connecting Trough a HTTP Proxy
+
+In some environments it may be required to connect to the macchina.io REMOTE server
+via a HTTP proxy. This can be done by providing the address of the proxy server
+on the command-line (`--proxy`, `-P` for short, or `/proxy` on Windows), or by providing the
+proxy server and optionally credentials for the proxy server in a configuration file 
+(see below).
+
+Below is an example for specifying a proxy server on the command-line:
+
+```
+remote-client https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io -R 22 -L 2222 -P http://proxy.nowhere.com:8080
+```
+
+## Configuration
+
+`remote-client` can optionally read settings from a configuration file. A configuration file
+can be specified on the command-line with the `--config-file` (or `/config-file` on Windows) option.
+Also, specific configuration options can also be set with the `--define` (or `/define`) option.
+
+At startup, `remote-client` will also look for a configuration file named `.remote-client.properties`
+in the user's home directory and read it if it is present. If that file is not present,
+`remote-client` will attempt to read a configuration file named `remote-client.properties` located
+in the same directory as the `remote-client` executable, or a parent directory.
+
+Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#configuration-file-format)
+documentation for the configuration file format.
+
+The following settings can be provided via a configuration file:
+
+### Credentials
+
+  - `remote.username`: The username for the macchina.io REMOTE server.
+  - `remote.password`: The password for the macchina.io REMOTE server.
+  - `remote.token`: A token (JSON Web Token) for authenticating against the macchina.io REMOTE server.
+    If a token is given, username and password are not required. NOTE: A token is supported
+    by `remote-client` only, not any of the other client programs like `remote-ssh`.
+
+### SSL/TLS Configuration
+
+Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#ssltls-configuration)
+documentation for SSL/TLS configuration settings.
+
+### HTTP Proxy Configuration
+
+Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#http-configuration)
+documentation for configuring a HTTP proxy, including proxy credentials.
+
+### Logging
+
+Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#ssltls-configuration)
+documentation for configuring logging.

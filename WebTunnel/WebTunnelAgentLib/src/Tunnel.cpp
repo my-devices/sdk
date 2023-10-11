@@ -498,7 +498,18 @@ void Tunnel::init()
 	_httpTimeout = Poco::Timespan(_pConfig->getInt("http.timeout"s, 30), 0);
 	_useProxy = _pConfig->getBool("http.proxy.enable"s, false);
 	_proxyHost = _pConfig->getString("http.proxy.host"s, ""s);
-	_proxyPort = static_cast<Poco::UInt16>(_pConfig->getInt("http.proxy.port"s, 80));
+	_proxyPort = _pConfig->getUInt16("http.proxy.port"s, 80);
+	std::string proxyURL = _pConfig->getString("http.proxy.url"s, ""s);
+	if (!proxyURL.empty() && _proxyHost.empty())
+	{
+		Poco::URI proxyURI(proxyURL);
+		if (proxyURI.getScheme() != "http")
+		{
+			_logger.warning("Proxy URL specified, but scheme is not \"http\"."s);
+		}
+		_proxyHost = proxyURI.getHost();
+		_proxyPort = proxyURI.getPort();
+	}
 	_proxyUsername = _pConfig->getString("http.proxy.username"s, ""s);
 	_proxyPassword = _pConfig->getString("http.proxy.password"s, ""s);
 
@@ -531,7 +542,7 @@ Poco::UInt16 Tunnel::loadPort(const std::string& proto) const
 {
 	if (_pConfig->getBool(Poco::format("webtunnel.%sPort.enable"s, proto), true))
 	{
-		return static_cast<Poco::UInt16>(_pConfig->getUInt(Poco::format("webtunnel.%sPort"s, proto), 0));
+		return _pConfig->getUInt16(Poco::format("webtunnel.%sPort"s, proto), 0);
 	}
 	else return 0;
 }

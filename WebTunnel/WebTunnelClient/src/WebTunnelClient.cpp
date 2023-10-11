@@ -29,6 +29,9 @@
 #include "Poco/NumberParser.h"
 #include "Poco/Process.h"
 #include "Poco/Environment.h"
+#include "Poco/Path.h"
+#include "Poco/File.h"
+#include "Poco/Format.h"
 #include <iostream>
 #if defined(POCO_OS_FAMILY_WINDOWS)
 #include <windows.h>
@@ -109,7 +112,10 @@ public:
 protected:
 	void initialize(Poco::Util::Application& self)
 	{
-		loadConfiguration(); // load default configuration files, if present
+		if (!loadUserConfiguration("remote-client"s))
+		{
+			loadConfiguration(); // load default configuration files, if present
+		}
 		Poco::Util::ServerApplication::initialize(self);
 		Poco::Net::HTTPSessionInstantiator::registerInstantiator();
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -124,6 +130,19 @@ protected:
 		Poco::Net::HTTPSSessionInstantiator::unregisterInstantiator();
 #endif
 		Poco::Util::ServerApplication::uninitialize();
+	}
+
+	bool loadUserConfiguration(const std::string& baseName)
+	{
+		Poco::Path p(Poco::Path::home());
+		p.setFileName(Poco::format(".%s.properties"s, baseName));
+		Poco::File f(p.toString());
+		if (f.exists())
+		{
+			loadConfiguration(f.path());
+			return true;
+		}
+		else return false;
 	}
 
 	void defineOptions(OptionSet& options)
@@ -188,6 +207,13 @@ protected:
 				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleToken)));
 
 		options.addOption(
+			Option("proxy"s, "P"s, "Specify a HTTP proxy server to connect through, e.g. \"http://proxy.nowhere.com:8080\"."s)
+				.required(false)
+				.repeatable(false)
+				.argument("url"s)
+				.callback(OptionCallback<WebTunnelClient>(this, &WebTunnelClient::handleProxy)));
+
+		options.addOption(
 			Option("command"s, "C"s, "Specify a command to run (instead of waiting)."s)
 				.required(false)
 				.repeatable(false)
@@ -240,6 +266,13 @@ protected:
 	void handleToken(const std::string& name, const std::string& value)
 	{
 		_token = value;
+	}
+
+	void handleProxy(const std::string& name, const std::string& value)
+	{
+		config().setBool("http.proxy.enable"s, true);
+		config().setString("http.proxy.url"s, value);
+		config().setString("http.proxy.host"s, ""s);
 	}
 
 	void handleCommand(const std::string& name, const std::string& value)
@@ -342,6 +375,19 @@ protected:
 			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
 			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
 
+			if (_username.empty())
+			{
+				_username = config().getString("remote.username"s, ""s);
+			}
+			if (_password.empty())
+			{
+				_password = config().getString("remote.password"s, ""s);
+			}
+			if (_token.empty())
+			{
+				_token = config().getString("remote.token"s, ""s);
+			}
+
 #if defined(WEBTUNNEL_ENABLE_TLS)
 			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
 			std::string cipherList = config().getString("tls.ciphers"s, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"s);
@@ -361,7 +407,7 @@ protected:
 				throw Poco::InvalidArgumentException("tls.verification", vModeStr);
 
 			Poco::Net::Context::Protocols minProto = Poco::Net::Context::PROTO_TLSV1_2;
-			if (tlsMinVersion == "tlsv1")
+			if (tlsMinVersion == "tlsv1" || tlsMinVersion == "tlsv1_0")
 				minProto = Poco::Net::Context::PROTO_TLSV1;
 			else if (tlsMinVersion == "tlsv1_1")
 				minProto = Poco::Net::Context::PROTO_TLSV1_1;
@@ -390,10 +436,20 @@ protected:
 
 			if (config().getBool("http.proxy.enable"s, false))
 			{
-				logger().information("Proxy enable"s);
 				Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
 				proxyConfig.host = config().getString("http.proxy.host"s, ""s);
-				proxyConfig.port = static_cast<Poco::UInt16>(config().getInt("http.proxy.port"s, 80));
+				proxyConfig.port = config().getUInt16("http.proxy.port"s, 80);
+				std::string proxyURL = config().getString("http.proxy.url"s, ""s);
+				if (!proxyURL.empty() && proxyConfig.host.empty())
+				{
+					Poco::URI proxyURI(proxyURL);
+					if (proxyURI.getScheme() != "http")
+					{
+						logger().warning("Proxy URL specified, but scheme is not \"http\"."s);
+					}
+					proxyConfig.host = proxyURI.getHost();
+					proxyConfig.port = proxyURI.getPort();
+				}
 				proxyConfig.username = config().getString("http.proxy.username"s, ""s);
 				proxyConfig.password = config().getString("http.proxy.password"s, ""s);
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
