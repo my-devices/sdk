@@ -34,8 +34,8 @@ programs for specific protocols:
 
 `remote-client` usually does not need a configuration file, most parameters can be passed
 via command-line arguments. Some settings can be set using a configuration file
-(see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md) for more
-information on configuration files). Also, see the Configuration section below. 
+(see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md#configuration-file-format) for more
+information on configuration files). Also, see the [Configuration](#configuration) section below. 
 
 At startup, `remote-client` will look for a configuration file `.remote-client.properties` 
 in the current user's home directory, and read it if it's present.
