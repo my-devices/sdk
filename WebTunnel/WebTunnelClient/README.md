@@ -135,6 +135,13 @@ The following settings can be provided via a configuration file:
     If a token is given, username and password are not required. NOTE: A token is supported
     by `remote-client` only, not any of the other client programs like `remote-ssh`.
 
+Credentials specified in command-line arguments or via environment variables 
+(`REMOTE_USERNAME`, `REMOTE_PASSWORD`) will override those in a configuration file.
+
+When storing credentials in the configuration file, make sure to keep your configuration
+file secure. From a security perspective it's recommended to not store the credentials
+in a file in clear-text.
+
 ### SSL/TLS Configuration
 
 Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#ssltls-configuration)
