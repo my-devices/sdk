@@ -27,6 +27,15 @@ Note that on Windows the command-line parameters must be given Windows-style:
 WebTunnelAgent /config=c:\\path\to\WebTunnelAgent.properties
 ```
 
+### Connecting Trough a HTTP Proxy
+
+In some environments it may be required to connect to the macchina.io REMOTE server
+via a HTTP proxy. This can be done by providing the address of the proxy server
+on in the configuration file, using the `http.proxy.host` and `http.proxy.port`
+settings, or alternatively combining both in `http.proxy.url`.
+Proxy credentials can be specified with `http.proxy.username` and `http.proxy.password`.
+See the [configuration section](#configuring-webtunnelagent) for more information.
+
 ### Running WebTunnelAgent as Daemon
 
 On Linux and macOS systems, `WebTunnelAgent` can be run as a daemon.
