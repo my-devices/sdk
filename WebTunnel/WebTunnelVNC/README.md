@@ -39,7 +39,7 @@ The macchina.io REMOTE username and password can also be supplied via environmen
 variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via a configuration file.
 
 Like [`remote-client`](../WebTunnelClient/README.md), `remote-vnc` can also connect through a 
-[proxy server](../WebTunnelClient/READMD.md#connecting-trough-a-http-proxy).
+[proxy server](../WebTunnelClient/README.md#connecting-trough-a-http-proxy).
 
 On macOS, `remote-vnc` will launch the built-in macOS Screen Sharing client.
 On other platforms, `remote-vnc` will attempt to launch an executable

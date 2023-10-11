@@ -45,7 +45,7 @@ The macchina.io REMOTE username and password can also be supplied via environmen
 variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via a configuration file.
 
 Like [`remote-client`](../WebTunnelClient/README.md), `remote-scp` can also connect through a 
-[proxy server](../WebTunnelClient/READMD.md#connecting-trough-a-http-proxy).
+[proxy server](../WebTunnelClient/README.md#connecting-trough-a-http-proxy).
 
 
 ### Passing Options to the SCP Client

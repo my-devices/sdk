@@ -40,7 +40,7 @@ The following RDP clients are used:
   - [`xfreerdp`](https://www.freerdp.com) on Linux and other Unix platforms
 
 Like [`remote-client`](../WebTunnelClient/README.md), `remote-rdp` can also connect through a 
-[proxy server](../WebTunnelClient/READMD.md#connecting-trough-a-http-proxy).
+[proxy server](../WebTunnelClient/README.md#connecting-trough-a-http-proxy).
 
 ### Command-Line Arguments Help
 
