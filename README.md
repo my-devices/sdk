@@ -309,9 +309,9 @@ A few notes on the arguments:
   * `--cflags=-DPOCO_UTIL_NO_XMLCONFIGURATION` instructs the build system to omit support
     for XML configuration files. The result is that the PocoXML library does not
     need to be linked into the application, saving a few 100Ks of executable size.
-  * `--no-tests and --no-samples` instruct the build system not to build the
+  * `--no-tests` and `--no-samples` instruct the build system not to build the
     POCO sample applications and the testsuites.
-  * `--static instructs` the build system to build static libraries.
+  * `--static` instructs the build system to build static libraries.
   * `DEFAULT_TARGET=static_release` instructs the build system to only build
     the release configuration.
   * `DEFAULT_TARGET=shared_release` (in the second call to GNU make for building the
