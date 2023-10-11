@@ -60,10 +60,12 @@ Furthermore, the following executables are included:
     (which must have the remote desktop feature enabled), then launches a Microsoft Remote Desktop (RDP)
     client using that tunnel connection.
 
-There is also [`WebTunnelClientLib`](WebTunnel/WebTunnelClientLib/README.md), which provides the
-functionality of `remote-client` in a C API, suitable for integration into applications (not written in C++).
+There are also [`WebTunnelAgentLib`](WebTunnel/WebTunnelAgentLib/README.md) and 
+[`WebTunnelClientLib`](WebTunnel/WebTunnelClientLib/README.md), which provide the functionality of 
+`WebTunnelAgent` and `remote-client`, respetively, in a C API, suitable for integration into applications (not written in C++).
 
-The macchina.io REMOTE SDK is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
+The macchina.io REMOTE SDK, like the [POCO C++ Libraries](https://github.com/pocoproject/poco) the SDK is based on, 
+is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
 ## Pre-Built Executables
