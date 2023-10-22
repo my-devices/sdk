@@ -203,6 +203,9 @@ There are a number of system settings that can be used as well:
 Settings not recognized by `WebTunnelAgent` will be ignored. However, it is still
 possible to reference these setting’s values in other settings.
 This can be used to introduce "macro" settings which are referenced in multiple settings.
+It is also possible to specify a default value when referencing a different setting. This
+will be used if the referenced value is not defined. The format is `${key:-<default>}`,
+where `<default>` is the default value.
 
 
 ### Primary Settings
