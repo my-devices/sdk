@@ -1,7 +1,7 @@
 //
 // WebTunnelRDP.cpp
 //
-// Copyright (c) 2015-2023, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2024, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -247,7 +247,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- RDP-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE RDP Client.\n"
-			"Copyright (c) 2019-2023 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2019-2024 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a Remote Desktop connection to a remote\n"
 			"host via the macchina.io REMOTE server.\n\n"

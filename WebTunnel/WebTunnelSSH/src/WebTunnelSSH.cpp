@@ -1,7 +1,7 @@
 //
 // WebTunnelSSH.cpp
 //
-// Copyright (c) 2014-2023, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2014-2024, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -298,7 +298,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE SSH Client.\n"
-			"Copyright (c) 2014-2023 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2014-2024 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SSH connection to a remote\n"
 			"host via the macchina.io REMOTE server.\n\n"
