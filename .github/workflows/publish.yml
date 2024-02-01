@@ -139,7 +139,7 @@ jobs:
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
 
   release_macos12_x86_64:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       -
         name: Checkout
@@ -172,7 +172,7 @@ jobs:
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
 
   release_macos12_arm64:
-    runs-on: macos-12-arm64
+    runs-on: macos-13-arm64
     steps:
       -
         name: Checkout
