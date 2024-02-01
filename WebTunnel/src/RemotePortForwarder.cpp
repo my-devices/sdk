@@ -219,6 +219,7 @@ bool RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 	int n = 0;
 	try
 	{
+		Poco::FastMutex::ScopedLock lock(_webSocketMutex);
 		n = _pWebSocket->receiveFrame(buffer.begin(), static_cast<int>(buffer.size()), wsFlags);
 	}
 	catch (Poco::Exception& exc)

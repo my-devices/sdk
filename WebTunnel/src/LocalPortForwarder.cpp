@@ -141,9 +141,10 @@ Poco::Net::WebSocket* DefaultWebSocketFactory::createWebSocket(const Poco::URI& 
 class BasicSocketForwarder: public SocketDispatcher::SocketHandler
 {
 public:
-	BasicSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher):
+	BasicSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::FastMutex& webSocketMutex):
 		_pDispatcher(pDispatcher),
-		_buffer(Protocol::WT_FRAME_MAX_SIZE)
+		_buffer(Protocol::WT_FRAME_MAX_SIZE),
+		_webSocketMutex(webSocketMutex)
 	{
 	}
 
@@ -154,7 +155,7 @@ public:
 		{
 			_pDispatcher->removeSocket(socket1);
 			_pDispatcher->removeSocket(socket2);
-			_pDispatcher = 0;
+			_pDispatcher.reset();
 		}
 	}
 
@@ -162,6 +163,7 @@ public:
 	{
 		try
 		{
+			Poco::FastMutex::ScopedLock lock(_webSocketMutex);
 			webSocket.shutdown(statusCode);
 			webSocket.shutdownSend();
 		}
@@ -171,10 +173,16 @@ public:
 		}
 	}
 
+	Poco::FastMutex& webSocketMutex() const
+	{
+		return _webSocketMutex;
+	}
+
 protected:
 	Poco::FastMutex _dispatcherMutex;
 	Poco::SharedPtr<SocketDispatcher> _pDispatcher;
 	Poco::Buffer<char> _buffer;
+	Poco::FastMutex& _webSocketMutex;
 };
 
 
@@ -186,8 +194,8 @@ protected:
 class StreamSocketToWebSocketForwarder: public BasicSocketForwarder
 {
 public:
-	StreamSocketToWebSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket):
-		BasicSocketForwarder(pDispatcher),
+	StreamSocketToWebSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket, Poco::FastMutex& webSocketMutex):
+		BasicSocketForwarder(pDispatcher, webSocketMutex),
 		_pWebSocket(pWebSocket),
 		_logger(Poco::Logger::get("WebTunnel.StreamSocketToWebSocketForwarder"s))
 	{
@@ -218,6 +226,7 @@ public:
 		{
 			try
 			{
+				Poco::FastMutex::ScopedLock lock(webSocketMutex());
 				_pWebSocket->sendFrame(_buffer.begin(), n, Poco::Net::WebSocket::FRAME_BINARY);
 				return true;
 			}
@@ -262,8 +271,8 @@ private:
 class WebSocketToStreamSocketForwarder: public BasicSocketForwarder
 {
 public:
-	WebSocketToStreamSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::Net::StreamSocket streamSocket):
-		BasicSocketForwarder(pDispatcher),
+	WebSocketToStreamSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::Net::StreamSocket streamSocket, Poco::FastMutex& webSocketMutex):
+		BasicSocketForwarder(pDispatcher, webSocketMutex),
 		_streamSocket(streamSocket),
 		_timeoutCount(0),
 		_logger(Poco::Logger::get("WebTunnel.WebSocketToStreamSocketForwarder"s))
@@ -277,6 +286,7 @@ public:
 		int n = 0;
 		try
 		{
+			Poco::FastMutex::ScopedLock lock(webSocketMutex());
 			n = webSocket.receiveFrame(_buffer.begin(), static_cast<int>(_buffer.size()), flags);
 		}
 		catch (Poco::Net::ConnectionResetException& exc)
@@ -332,7 +342,7 @@ public:
 
 	void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 	{
-		_logger.debug("Timeout reading from WebSocket"s);
+		_logger.debug("Timeout reading from WebSocket (timeoutCount = %d)"s, _timeoutCount.load());
 		if (_timeoutCount == 0)
 		{
 			_timeoutCount = 1;
@@ -340,22 +350,25 @@ public:
 			{
 				_logger.debug("Sending PING"s);
 				Poco::Net::WebSocket webSocket(socket);
+				Poco::FastMutex::ScopedLock lock(webSocketMutex());
 				webSocket.sendFrame(0, 0, Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_PING);
 			}
-			catch (Poco::Exception&)
+			catch (Poco::Exception& exc)
 			{
+				_logger.error("Error sending PING: %s", exc.displayText());
 				cleanupDispatcher(socket, _streamSocket);
 			}
 		}
 		else
 		{
+			_logger.debug("Cleaning up dispatcher"s);
 			cleanupDispatcher(socket, _streamSocket);
 		}
 	}
 
 private:
 	Poco::Net::StreamSocket _streamSocket;
-	int _timeoutCount;
+	std::atomic<int> _timeoutCount;
 	Poco::Logger& _logger;
 };
 
@@ -458,8 +471,8 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 		socket.setNoDelay(true);
 		pWebSocket->setNoDelay(true);
 
-		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(_pDispatcher, pWebSocket), _localTimeout);
-		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(_pDispatcher, socket), _remoteTimeout);
+		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(_pDispatcher, pWebSocket, _webSocketMutex), _localTimeout);
+		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(_pDispatcher, socket, _webSocketMutex), _remoteTimeout);
 	}
 	catch (Poco::Exception& exc)
 	{

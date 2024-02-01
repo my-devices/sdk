@@ -28,6 +28,7 @@
 #include "Poco/Net/WebSocket.h"
 #include "Poco/URI.h"
 #include "Poco/SharedPtr.h"
+#include "Poco/Mutex.h"
 #include "Poco/Logger.h"
 
 
@@ -159,6 +160,7 @@ private:
 	Poco::Net::ServerSocket _serverSocket;
 	Poco::Net::TCPServer _tcpServer;
 	Poco::SharedPtr<SocketDispatcher> _pDispatcher;
+	Poco::FastMutex _webSocketMutex;
 	Poco::Logger& _logger;
 
 	LocalPortForwarder();
