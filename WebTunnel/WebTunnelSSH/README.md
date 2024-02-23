@@ -31,7 +31,7 @@ remote-ssh -l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 If running on Windows, the parameters must be passed Windows-style:
 
 ```
-remote-ssh /l pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
+remote-ssh /login pi https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 It is also possible to specify remote username and remote device address in one argument:
