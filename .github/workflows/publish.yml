@@ -20,7 +20,7 @@ jobs:
   release_win64:
     runs-on: windows-2022
     steps:
-      - 
+      -
         name: Checkout
         uses: actions/checkout@v3
       -
@@ -55,10 +55,10 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - 
+      -
         name: Install Packages
         run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
-      - 
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
       -
@@ -83,15 +83,15 @@ jobs:
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/20.04/x86_64
 
   release_ubuntu2204:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - 
+      -
         name: Install Packages
         run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
-      - 
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
       -
@@ -114,14 +114,47 @@ jobs:
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
-  
+
+  release_ubuntu2404:
+    runs-on: ubuntu-24.04
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install Packages
+        run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
+      -
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/x86_64
+
   release_raspberrypi:
     runs-on: raspberrypi
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - 
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
       -
@@ -138,16 +171,16 @@ jobs:
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
 
-  release_macos12_x86_64:
+  release_macos13_x86_64:
     runs-on: macos-13
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - 
+      -
         name: Install Packages
         run: brew install openssl@3 ninja
-      - 
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@3 -DOPENSSL_USE_STATIC_LIBS=TRUE && cmake --build cmake-build --target all
       -
@@ -171,13 +204,13 @@ jobs:
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
 
-  release_macos12_arm64:
-    runs-on: macos-13-arm64
+  release_macos14_arm64:
+    runs-on: macos-14
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - 
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 -DOPENSSL_USE_STATIC_LIBS=TRUE && cmake --build cmake-build --target all
       -
@@ -200,9 +233,9 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-        with: 
+        with:
           fetch-depth: 0
-      - 
+      -
         name: Archive
         run: |
           mkdir -p $RUNNER_TEMP/archives
@@ -224,12 +257,12 @@ jobs:
 
   sign_and_publish:
     runs-on: ubuntu-22.04
-    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_raspberrypi", "release_macos12_x86_64", "release_macos12_arm64", "release_source"]
+    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos13_x86_64", "release_macos14_arm64", "release_source"]
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
-        with: 
+        with:
           fetch-depth: 0
       -
         name: Install SSH key
