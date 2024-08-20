@@ -28,12 +28,12 @@ jobs:
         run: |
           cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build
           cmake --build cmake-build --config Release
-      -
-        name: Sign
-        run: |
-          echo '${{ secrets.SIGNING_CERT }}' >CodeSigningCert.b64
-          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
-          & 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe' sign /f CodeSigningCert.pfx /p '${{ secrets.SIGNING_PASS }}' /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
+#      -
+#        name: Sign
+#        run: |
+#          echo '${{ secrets.SIGNING_CERT }}' >CodeSigningCert.b64
+#          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
+#          & 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe' sign /f CodeSigningCert.pfx /p '${{ secrets.SIGNING_PASS }}' /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
       -
         name: Zip
         run: 7z a -tzip remote-clients.zip cmake-build\bin\Release\*.exe
@@ -211,6 +211,9 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
       -
+        name: Install Packages
+        run: brew install openssl@3 ninja
+      -
         name: Build
         run: cmake -H. -Bcmake-build -GNinja -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@3 -DOPENSSL_USE_STATIC_LIBS=TRUE && cmake --build cmake-build --target all
       -
@@ -221,6 +224,13 @@ jobs:
         run: |
           (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
           gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
       -
         name: Copy to Web Server
         run: |
