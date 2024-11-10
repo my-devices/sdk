@@ -36,7 +36,6 @@ WebSocketImpl::WebSocketImpl(StreamSocketImpl* pStreamSocketImpl, HTTPSession& s
 	_maxPayloadSize(std::numeric_limits<int>::max()),
 	_buffer(0),
 	_bufferOffset(0),
-	_frameFlags(0),
 	_mustMaskPayload(mustMaskPayload)
 {
 	poco_check_ptr(pStreamSocketImpl);
@@ -93,85 +92,111 @@ int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 		const Poco::UInt32 mask = _rnd.next();
 		const char* m = reinterpret_cast<const char*>(&mask);
 		const char* b = reinterpret_cast<const char*>(buffer);
-		writer.writeRaw(m, 4);
+		writer.writeRaw(m, MASK_LENGTH);
 		char* p = frame.begin() + ostr.charsWritten();
 		for (int i = 0; i < length; i++)
 		{
-			p[i] = b[i] ^ m[i % 4];
+			p[i] = b[i] ^ m[i % MASK_LENGTH];
 		}
 	}
 	else
 	{
 		std::memcpy(frame.begin() + ostr.charsWritten(), buffer, length);
 	}
-	_pStreamSocketImpl->sendBytes(frame.begin(), length + static_cast<int>(ostr.charsWritten()));
-	return length;
+	if (_pStreamSocketImpl->sendBytes(frame.begin(), length + static_cast<int>(ostr.charsWritten())) >= 0)
+		return length;
+	else
+		return -1;
 }
 
 
-int WebSocketImpl::receiveHeader(char mask[4], bool& useMask)
+int WebSocketImpl::peekHeader(ReceiveState& receiveState)
 {
 	char header[MAX_HEADER_LENGTH];
-	int n = receiveNBytes(header, 2);
-	if (n <= 0)
-	{
-		_frameFlags = 0;
-		return n;
-	}
-	poco_assert (n == 2);
+	
+	receiveState.frameFlags = 0;
+	receiveState.useMask = false;
+	receiveState.headerLength = 0;
+	receiveState.payloadLength = 0;
+	receiveState.remainingPayloadLength = 0;
+
+	int n = peekSomeBytes(header, MAX_HEADER_LENGTH);
+	if (n == 0)
+		return 0;
+	else if (n < 2)
+		return -1;
+
 	Poco::UInt8 flags = static_cast<Poco::UInt8>(header[0]);
-	_frameFlags = flags;
+	receiveState.frameFlags = flags;
 	Poco::UInt8 lengthByte = static_cast<Poco::UInt8>(header[1]);
-	useMask = ((lengthByte & FRAME_FLAG_MASK) != 0);
-	int payloadLength;
+	receiveState.useMask = ((lengthByte & FRAME_FLAG_MASK) != 0);
+	int maskOffset = 0;
 	lengthByte &= 0x7f;
 	if (lengthByte == 127)
 	{
-		n = receiveNBytes(header + 2, 8);
-		if (n <= 0)
+		if (n < 10)
 		{
-			_frameFlags = 0;
-			return n;
+			receiveState.frameFlags = 0;
+			return -1;
 		}
 		Poco::MemoryInputStream istr(header + 2, 8);
 		Poco::BinaryReader reader(istr, Poco::BinaryReader::NETWORK_BYTE_ORDER);
 		Poco::UInt64 l;
 		reader >> l;
 		if (l > _maxPayloadSize) throw WebSocketException("Payload too big", WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
-		payloadLength = static_cast<int>(l);
+		receiveState.payloadLength = static_cast<int>(l);
+		maskOffset = 10;
 	}
 	else if (lengthByte == 126)
 	{
-		n = receiveNBytes(header + 2, 2);
-		if (n <= 0)
+		if (n < 4)
 		{
-			_frameFlags = 0;
-			return n;
+			receiveState.frameFlags = 0;
+			return -1;
 		}
 		Poco::MemoryInputStream istr(header + 2, 2);
 		Poco::BinaryReader reader(istr, Poco::BinaryReader::NETWORK_BYTE_ORDER);
 		Poco::UInt16 l;
 		reader >> l;
 		if (l > _maxPayloadSize) throw WebSocketException("Payload too big", WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
-		payloadLength = static_cast<int>(l);
+		receiveState.payloadLength = static_cast<int>(l);
+		maskOffset = 4;
 	}
 	else
 	{
 		if (lengthByte > _maxPayloadSize) throw WebSocketException("Payload too big", WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
-		payloadLength = lengthByte;
+		receiveState.payloadLength = lengthByte;
+		maskOffset = 2;
 	}
 
-	if (useMask)
+	if (receiveState.useMask)
 	{
-		n = receiveNBytes(mask, 4);
-		if (n <= 0)
+		if (n < maskOffset + MASK_LENGTH)
 		{
-			_frameFlags = 0;
-			return n;
+			receiveState.frameFlags = 0;
+			return -1;
 		}
+		std::memcpy(receiveState.mask, header + maskOffset, MASK_LENGTH);
+		receiveState.headerLength = maskOffset + MASK_LENGTH;
+	}
+	else
+	{
+		receiveState.headerLength = maskOffset;
 	}
 
-	return payloadLength;
+	receiveState.remainingPayloadLength = receiveState.payloadLength;
+
+	return receiveState.payloadLength;
+}
+
+
+void WebSocketImpl::skipHeader(int headerLength)
+{
+	poco_assert_dbg (headerLength <= MAX_HEADER_LENGTH);
+
+	char header[MAX_HEADER_LENGTH];
+	int n = receiveNBytes(header, headerLength);
+	poco_assert_dbg (n == headerLength);
 }
 
 
@@ -183,16 +208,14 @@ void WebSocketImpl::setMaxPayloadSize(int maxPayloadSize)
 }
 
 
-int WebSocketImpl::receivePayload(char *buffer, int payloadLength, char mask[4], bool useMask)
+int WebSocketImpl::receivePayload(char *buffer, int payloadLength, char mask[MASK_LENGTH], bool useMask)
 {
 	int received = receiveNBytes(reinterpret_cast<char*>(buffer), payloadLength);
-	if (received <= 0) throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
-
-	if (useMask)
+	if (received > 0 && useMask)
 	{
 		for (int i = 0; i < received; i++)
 		{
-			buffer[i] ^= mask[i % 4];
+			buffer[i] ^= mask[i % MASK_LENGTH];
 		}
 	}
 	return received;
@@ -201,63 +224,186 @@ int WebSocketImpl::receivePayload(char *buffer, int payloadLength, char mask[4],
 
 int WebSocketImpl::receiveBytes(void* buffer, int length, int)
 {
-	char mask[4];
-	bool useMask;
-	_frameFlags = 0;
-	int payloadLength = receiveHeader(mask, useMask);
-	if (payloadLength <= 0)
+	if (getBlocking())
+	{
+		int payloadLength = -1;
+		while (payloadLength < 0)
+		{
+			payloadLength = peekHeader(_receiveState);
+		}
+		if (payloadLength <= 0)
+			return payloadLength;
+		else if (payloadLength > length)
+			throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
+
+		skipHeader(_receiveState.headerLength);
+
+		if (receivePayload(reinterpret_cast<char*>(buffer), payloadLength, _receiveState.mask, _receiveState.useMask) != payloadLength)
+			throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
+
 		return payloadLength;
-	if (payloadLength > length)
-		throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
-	return receivePayload(reinterpret_cast<char*>(buffer), payloadLength, mask, useMask);
+	}
+	else
+	{
+		if (_receiveState.remainingPayloadLength == 0)
+		{
+			int payloadLength = peekHeader(_receiveState);
+			if (payloadLength <= 0)
+				return payloadLength;
+			else if (payloadLength > length)
+				throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
+
+			skipHeader(_receiveState.headerLength);
+
+			_receiveState.payload.resize(payloadLength, false);
+		}
+		else if (_receiveState.payloadLength > length)
+		{
+			throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", _receiveState.payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
+		}
+		int payloadOffset = _receiveState.payloadLength - _receiveState.remainingPayloadLength;
+		int n = receivePayload(_receiveState.payload.begin() + payloadOffset, _receiveState.remainingPayloadLength, _receiveState.mask, _receiveState.useMask);
+		if (n > 0)
+		{
+			_receiveState.remainingPayloadLength -= n;
+			if (_receiveState.remainingPayloadLength == 0)
+			{
+				std::memcpy(buffer, _receiveState.payload.begin(), _receiveState.payloadLength);
+				return _receiveState.payloadLength;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		else if (n == 0)
+		{
+			throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
+		}
+		else
+		{
+			return -1;
+		}
+	}
 }
 
 
 int WebSocketImpl::receiveBytes(Poco::Buffer<char>& buffer, int, const Poco::Timespan&)
 {
-	char mask[4];
-	bool useMask;
-	_frameFlags = 0;
-	int payloadLength = receiveHeader(mask, useMask);
-	if (payloadLength <= 0)
+	if (getBlocking())
+	{
+		int payloadLength = -1;
+		while (payloadLength < 0)
+		{
+			payloadLength = peekHeader(_receiveState);
+		}
+		if (payloadLength <= 0)
+			return payloadLength;
+
+		skipHeader(_receiveState.headerLength);
+
+		std::size_t oldSize = buffer.size();
+		buffer.resize(oldSize + payloadLength);
+
+		if (receivePayload(buffer.begin() + oldSize, payloadLength, _receiveState.mask, _receiveState.useMask) != payloadLength)
+			throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
+
 		return payloadLength;
-	std::size_t oldSize = buffer.size();
-	buffer.resize(oldSize + payloadLength);
-	return receivePayload(buffer.begin() + oldSize, payloadLength, mask, useMask);
+	}
+	else
+	{
+		if (_receiveState.remainingPayloadLength == 0)
+		{
+			int payloadLength = peekHeader(_receiveState);
+			if (payloadLength <= 0)
+				return payloadLength;
+
+			skipHeader(_receiveState.headerLength);
+
+			_receiveState.payload.resize(payloadLength, false);
+		}
+		int payloadOffset = _receiveState.payloadLength - _receiveState.remainingPayloadLength;
+		int n = receivePayload(_receiveState.payload.begin() + payloadOffset, _receiveState.remainingPayloadLength, _receiveState.mask, _receiveState.useMask);
+		if (n > 0)
+		{
+			_receiveState.remainingPayloadLength -= n;
+			if (_receiveState.remainingPayloadLength == 0)
+			{
+				std::size_t oldSize = buffer.size();
+				buffer.resize(oldSize + _receiveState.payloadLength);
+
+				std::memcpy(buffer.begin() + oldSize, _receiveState.payload.begin(), _receiveState.payloadLength);
+				return _receiveState.payloadLength;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		else if (n == 0)
+		{
+			throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
+		}
+		else
+		{
+			return -1;
+		}
+	}
 }
 
 
-int WebSocketImpl::receiveNBytes(void* buffer, int bytes)
+int WebSocketImpl::receiveNBytes(void* buffer, int length)
 {
-	int received = receiveSomeBytes(reinterpret_cast<char*>(buffer), bytes);
+	int received = receiveSomeBytes(reinterpret_cast<char*>(buffer), length);
 	if (received > 0)
 	{
-		while (received < bytes)
+		while (received < length)
 		{
-			int n = receiveSomeBytes(reinterpret_cast<char*>(buffer) + received, bytes - received);
+			int n = receiveSomeBytes(reinterpret_cast<char*>(buffer) + received, length - received);
 			if (n > 0)
 				received += n;
-			else
-				throw WebSocketException("Incomplete frame received", WebSocket::WS_ERR_INCOMPLETE_FRAME);
+			else 
+				break;
 		}
 	}
 	return received;
 }
 
 
-int WebSocketImpl::receiveSomeBytes(char* buffer, int bytes)
+int WebSocketImpl::receiveSomeBytes(char* buffer, int length)
 {
 	int n = static_cast<int>(_buffer.size()) - _bufferOffset;
 	if (n > 0)
 	{
-		if (bytes < n) n = bytes;
+		if (length < n) n = length;
 		std::memcpy(buffer, _buffer.begin() + _bufferOffset, n);
-		_bufferOffset += n;
+		_bufferOffset += length;
 		return n;
 	}
 	else
 	{
-		return _pStreamSocketImpl->receiveBytes(buffer, bytes);
+		return _pStreamSocketImpl->receiveBytes(buffer, length);
+	}
+}
+
+
+int WebSocketImpl::peekSomeBytes(char* buffer, int length)
+{
+	int n = static_cast<int>(_buffer.size()) - _bufferOffset;
+	if (n > 0)
+	{
+		if (length < n) n = length;
+		std::memcpy(buffer, _buffer.begin() + _bufferOffset, n);
+		if (length > n)
+		{
+			int rc = _pStreamSocketImpl->receiveBytes(buffer + n, length - n, MSG_PEEK);
+			if (rc > 0) n += rc;
+		}
+		return n;
+	}
+	else
+	{
+		return _pStreamSocketImpl->receiveBytes(buffer, length, MSG_PEEK);
 	}
 }
 
@@ -365,6 +511,30 @@ bool WebSocketImpl::secure() const
 }
 
 
+void WebSocketImpl::setSendBufferSize(int size)
+{
+	_pStreamSocketImpl->setSendBufferSize(size);
+}
+
+
+int WebSocketImpl::getSendBufferSize()
+{
+	return _pStreamSocketImpl->getSendBufferSize();
+}
+
+
+void WebSocketImpl::setReceiveBufferSize(int size)
+{
+	_pStreamSocketImpl->setReceiveBufferSize(size);
+}
+
+
+int WebSocketImpl::getReceiveBufferSize()
+{
+	return _pStreamSocketImpl->getReceiveBufferSize();
+}
+
+
 void WebSocketImpl::setSendTimeout(const Poco::Timespan& timeout)
 {
 	_pStreamSocketImpl->setSendTimeout(timeout);
@@ -386,6 +556,18 @@ void WebSocketImpl::setReceiveTimeout(const Poco::Timespan& timeout)
 Poco::Timespan WebSocketImpl::getReceiveTimeout()
 {
 	return _pStreamSocketImpl->getReceiveTimeout();
+}
+
+
+void WebSocketImpl::setBlocking(bool flag)
+{
+	_pStreamSocketImpl->setBlocking(flag);
+}
+
+
+bool WebSocketImpl::getBlocking() const
+{
+	return _pStreamSocketImpl->getBlocking();
 }
 
 

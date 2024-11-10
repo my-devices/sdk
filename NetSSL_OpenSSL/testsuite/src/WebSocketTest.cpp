@@ -212,6 +212,73 @@ void WebSocketTest::testWebSocketLarge()
 }
 
 
+void WebSocketTest::testWebSocketNB()
+{
+	Poco::Net::SecureServerSocket ss(0);
+	Poco::Net::HTTPServer server(new WebSocketRequestHandlerFactory(256*1024), ss, new Poco::Net::HTTPServerParams);
+	server.start();
+	
+	Poco::Thread::sleep(200);
+	
+	HTTPSClientSession cs("127.0.0.1", ss.address().port());
+	HTTPRequest request(HTTPRequest::HTTP_GET, "/ws", HTTPRequest::HTTP_1_1);
+	HTTPResponse response;
+	WebSocket ws(cs, request, response);
+	ws.setBlocking(false);
+
+	int flags;
+	char buffer[256*1024] = {};
+	int n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+	assertTrue (n < 0);
+
+	std::string payload("x");
+	n = ws.sendFrame(payload.data(), (int) payload.size());
+	assertTrue (n > 0);
+	if (ws.poll(1000000, Poco::Net::Socket::SELECT_READ))
+	{
+		n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+		while (n < 0)
+		{
+			n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+		}
+	}
+	assertTrue (n == payload.size());
+	assertTrue (payload.compare(0, payload.size(), buffer, n) == 0);
+	assertTrue (flags == WebSocket::FRAME_TEXT);
+
+	ws.setSendBufferSize(256*1024);
+	ws.setReceiveBufferSize(256*1024);
+
+	payload.assign(256000, 'z');
+	n = ws.sendFrame(payload.data(), (int) payload.size());
+	assertTrue (n > 0);
+	if (ws.poll(1000000, Poco::Net::Socket::SELECT_READ))
+	{
+		n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+		while (n < 0)
+		{
+			n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+		}
+	}
+	assertTrue (n == payload.size());
+	assertTrue (payload.compare(0, payload.size(), buffer, n) == 0);
+	assertTrue (flags == WebSocket::FRAME_TEXT);
+	
+	n = ws.shutdown();
+	assertTrue (n > 0);
+
+	n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+	while (n < 0)
+	{
+		n = ws.receiveFrame(buffer, sizeof(buffer), flags);
+	}
+	assertTrue (n == 2);
+	assertTrue ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE);
+	
+	server.stop();
+}
+
+
 void WebSocketTest::setUp()
 {
 }
@@ -228,6 +295,7 @@ CppUnit::Test* WebSocketTest::suite()
 
 	CppUnit_addTest(pSuite, WebSocketTest, testWebSocket);
 	CppUnit_addTest(pSuite, WebSocketTest, testWebSocketLarge);
+	CppUnit_addTest(pSuite, WebSocketTest, testWebSocketNB);
 
 	return pSuite;
 }

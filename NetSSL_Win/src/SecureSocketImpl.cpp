@@ -454,14 +454,20 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 		{
 			rc = length;
 			std::memcpy(buffer, _overflowBuffer.begin(), rc);
-			std::memmove(_overflowBuffer.begin(), _overflowBuffer.begin() + rc, overflowSize - rc);
-			_overflowBuffer.resize(overflowSize - rc);
+			if ((flags & MSG_PEEK) == 0)
+			{
+				std::memmove(_overflowBuffer.begin(), _overflowBuffer.begin() + rc, overflowSize - rc);
+				_overflowBuffer.resize(overflowSize - rc);
+			}
 		}
 		else
 		{
 			rc = static_cast<int>(overflowSize);
 			std::memcpy(buffer, _overflowBuffer.begin(), rc);
-			_overflowBuffer.resize(0);
+			if ((flags & MSG_PEEK) == 0)
+			{
+				_overflowBuffer.resize(0);
+			}
 		}
 	}
 	else
@@ -512,6 +518,16 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 				rc = bytesDecoded;
 				if (rc > length)
 					rc = length;
+
+				if (flags & MSG_PEEK)
+				{
+					// prepend returned data to overflow buffer
+					std::size_t oldSize = _overflowBuffer.size();
+					_overflowBuffer.resize(oldSize + rc);
+					std::memmove(_overflowBuffer.begin() + rc, _overflowBuffer.begin(), oldSize);
+					std::memcpy(_overflowBuffer.begin(), buffer, rc);
+				}
+
 				return rc;
 			}
 

@@ -24,6 +24,8 @@ public:
 	TCPServerTest(const std::string& name);
 	~TCPServerTest();
 
+	void testSendReceive();
+	void testPeek();
 	void testOneConnection();
 	void testTwoConnections();
 	void testMultiConnections();

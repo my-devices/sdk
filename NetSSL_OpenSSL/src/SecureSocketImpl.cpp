@@ -323,7 +323,14 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 	}
 	do
 	{
-		rc = SSL_read(_pSSL, buffer, length);
+		if (flags & MSG_PEEK)
+		{
+			rc = SSL_peek(_pSSL, buffer, length);
+		}
+		else
+		{
+			rc = SSL_read(_pSSL, buffer, length);
+		}
 	}
 	while (mustRetry(rc));
 	if (rc <= 0)

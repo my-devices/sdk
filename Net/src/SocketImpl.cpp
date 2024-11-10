@@ -327,8 +327,10 @@ void SocketImpl::checkBrokenTimeout(SelectMode mode)
 
 int SocketImpl::sendBytes(const void* buffer, int length, int flags)
 {
-	checkBrokenTimeout(SELECT_WRITE);
-
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_WRITE);
+	}
 	int rc;
 	do
 	{
@@ -336,15 +338,26 @@ int SocketImpl::sendBytes(const void* buffer, int length, int flags)
 		rc = ::send(_sockfd, reinterpret_cast<const char*>(buffer), length, flags);
 	}
 	while (_blocking && rc < 0 && lastError() == POCO_EINTR);
-	if (rc < 0) error();
+	if (rc < 0)
+	{
+		int err = lastError();
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
+			;
+		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
+			throw TimeoutException(err);
+		else
+			error(err);
+	}
 	return rc;
 }
 
 
 int SocketImpl::sendBytes(const SocketBufVec& buffers, int flags)
 {
-	checkBrokenTimeout(SELECT_WRITE);
-
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_WRITE);
+	}
 	int rc = 0;
 	do
 	{
@@ -361,15 +374,26 @@ int SocketImpl::sendBytes(const SocketBufVec& buffers, int flags)
 #endif
 	}
 	while (_blocking && rc < 0 && lastError() == POCO_EINTR);
-	if (rc < 0) error();
+	if (rc < 0)
+	{
+		int err = lastError();
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
+			;
+		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
+			throw TimeoutException(err);
+		else
+			error(err);
+	}
 	return rc;
 }
 
 
 int SocketImpl::receiveBytes(void* buffer, int length, int flags)
 {
-	checkBrokenTimeout(SELECT_READ);
-
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_READ);
+	}
 	int rc;
 	do
 	{
@@ -380,7 +404,7 @@ int SocketImpl::receiveBytes(void* buffer, int length, int flags)
 	if (rc < 0)
 	{
 		int err = lastError();
-		if (err == POCO_EAGAIN && !_blocking)
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
 			;
 		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
 			throw TimeoutException(err);
@@ -393,8 +417,10 @@ int SocketImpl::receiveBytes(void* buffer, int length, int flags)
 
 int SocketImpl::receiveBytes(SocketBufVec& buffers, int flags)
 {
-	checkBrokenTimeout(SELECT_READ);
-
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_READ);
+	}
 	int rc = 0;
 	do
 	{
@@ -414,7 +440,7 @@ int SocketImpl::receiveBytes(SocketBufVec& buffers, int flags)
 	if (rc < 0)
 	{
 		int err = lastError();
-		if (err == POCO_EAGAIN && !_blocking)
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
 			;
 		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
 			throw TimeoutException(err);
@@ -442,7 +468,7 @@ int SocketImpl::receiveBytes(Poco::Buffer<char>& buffer, int flags, const Poco::
 		if (rc < 0)
 		{
 			int err = lastError();
-			if (err == POCO_EAGAIN && !_blocking)
+			if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
 				;
 			else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
 				throw TimeoutException(err);
@@ -468,7 +494,16 @@ int SocketImpl::sendTo(const void* buffer, int length, const SocketAddress& addr
 #endif
 	}
 	while (_blocking && rc < 0 && lastError() == POCO_EINTR);
-	if (rc < 0) error();
+	if (rc < 0)
+	{
+		int err = lastError();
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
+			;
+		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
+			throw TimeoutException(err);
+		else
+			error(err);
+	}
 	return rc;
 }
 
@@ -500,7 +535,16 @@ int SocketImpl::sendTo(const SocketBufVec& buffers, const SocketAddress& address
 #endif
 	}
 	while (_blocking && rc < 0 && lastError() == POCO_EINTR);
-	if (rc < 0) error();
+	if (rc < 0)
+	{
+		int err = lastError();
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
+			;
+		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
+			throw TimeoutException(err);
+		else
+			error(err);
+	}
 	return rc;
 }
 
@@ -522,7 +566,10 @@ int SocketImpl::receiveFrom(void* buffer, int length, SocketAddress& address, in
 
 int SocketImpl::receiveFrom(void* buffer, int length, struct sockaddr** ppSA, poco_socklen_t** ppSALen, int flags)
 {
-	checkBrokenTimeout(SELECT_READ);
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_READ);
+	}
 	int rc;
 	do
 	{
@@ -533,7 +580,7 @@ int SocketImpl::receiveFrom(void* buffer, int length, struct sockaddr** ppSA, po
 	if (rc < 0)
 	{
 		int err = lastError();
-		if (err == POCO_EAGAIN && !_blocking)
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
 			;
 		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
 			throw TimeoutException(err);
@@ -561,7 +608,10 @@ int SocketImpl::receiveFrom(SocketBufVec& buffers, SocketAddress& address, int f
 
 int SocketImpl::receiveFrom(SocketBufVec& buffers, struct sockaddr** pSA, poco_socklen_t** ppSALen, int flags)
 {
-	checkBrokenTimeout(SELECT_READ);
+	if (_blocking)
+	{
+		checkBrokenTimeout(SELECT_READ);
+	}
 	int rc = 0;
 	do
 	{
@@ -590,7 +640,7 @@ int SocketImpl::receiveFrom(SocketBufVec& buffers, struct sockaddr** pSA, poco_s
 	if (rc < 0)
 	{
 		int err = lastError();
-		if (err == POCO_EAGAIN && !_blocking)
+		if (!_blocking && (err == POCO_EAGAIN || err == POCO_EWOULDBLOCK))
 			;
 		else if (err == POCO_EAGAIN || err == POCO_ETIMEDOUT)
 			throw TimeoutException(err);

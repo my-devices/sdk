@@ -207,6 +207,9 @@ public:
 	int available() const;
 		/// Returns the number of bytes available in the buffer.
 
+	SocketImpl* socket();
+	const SocketImpl* socket() const;
+
 protected:
 	enum
 	{
@@ -316,6 +319,18 @@ private:
 //
 // inlines
 //
+inline SocketImpl* SecureSocketImpl::socket()
+{
+	return _pSocket.get();
+}
+
+
+inline const SocketImpl* SecureSocketImpl::socket() const
+{
+	return _pSocket.get();
+}
+
+
 inline poco_socket_t SecureSocketImpl::sockfd()
 {
 	return _pSocket->sockfd();

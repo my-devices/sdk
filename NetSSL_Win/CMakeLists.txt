@@ -35,6 +35,6 @@ POCO_GENERATE_PACKAGE(NetSSLWin)
 if(ENABLE_TESTS)
 	#TODO: Looks like the samples use crypto somehow?
 	#add_subdirectory(samples)
-	#add_subdirectory(testsuite)
+	add_subdirectory(testsuite)
 endif()
 

@@ -229,6 +229,9 @@ public:
 	bool sessionWasReused();
 		/// Returns true iff a reused session was negotiated during
 		/// the handshake.
+	
+	SocketImpl* socket();
+	const SocketImpl* socket() const;
 
 protected:
 	void acceptSSL();
@@ -289,6 +292,18 @@ private:
 //
 // inlines
 //
+inline SocketImpl* SecureSocketImpl::socket()
+{
+	return _pSocket.get();
+}
+
+
+inline const SocketImpl* SecureSocketImpl::socket() const
+{
+	return _pSocket.get();
+}
+
+
 inline poco_socket_t SecureSocketImpl::sockfd()
 {
 	return _pSocket->sockfd();

@@ -105,6 +105,44 @@ TCPServerTest::~TCPServerTest()
 }
 
 
+void TCPServerTest::testSendReceive()
+{
+	SecureServerSocket svs(0);
+	TCPServer srv(new TCPServerConnectionFactoryImpl<EchoConnection>(), svs);
+	srv.start();
+
+	SocketAddress sa("127.0.0.1", svs.address().port());
+	SecureStreamSocket ss1(sa);
+	std::string data("hello, world");
+	ss1.sendBytes(data.data(), (int) data.size());
+	char buffer[256];
+	int n = ss1.receiveBytes(buffer, sizeof(buffer));
+	assertTrue (n > 0);
+	assertTrue (std::string(buffer, n) == data);
+
+	ss1.close();
+}
+
+
+void TCPServerTest::testPeek()
+{
+	SecureServerSocket svs(0);
+	TCPServer srv(new TCPServerConnectionFactoryImpl<EchoConnection>(), svs);
+	srv.start();
+
+	SocketAddress sa("127.0.0.1", svs.address().port());
+	SecureStreamSocket ss1(sa);
+	std::string data("hello, world");
+	ss1.sendBytes(data.data(), (int) data.size());
+	char buffer[256];
+	int n = ss1.receiveBytes(buffer, sizeof(buffer));
+	assertTrue (n > 0);
+	assertTrue (std::string(buffer, n) == data);
+
+	ss1.close();
+}
+
+
 void TCPServerTest::testOneConnection()
 {
 	SecureServerSocket svs(0);
@@ -461,6 +499,8 @@ CppUnit::Test* TCPServerTest::suite()
 {
 	CppUnit::TestSuite* pSuite = new CppUnit::TestSuite("TCPServerTest");
 
+	CppUnit_addTest(pSuite, TCPServerTest, testSendReceive);
+	CppUnit_addTest(pSuite, TCPServerTest, testPeek);
 	CppUnit_addTest(pSuite, TCPServerTest, testOneConnection);
 	CppUnit_addTest(pSuite, TCPServerTest, testTwoConnections);
 	CppUnit_addTest(pSuite, TCPServerTest, testMultiConnections);

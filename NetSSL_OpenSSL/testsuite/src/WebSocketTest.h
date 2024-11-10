@@ -26,6 +26,7 @@ public:
 
 	void testWebSocket();
 	void testWebSocketLarge();
+	void testWebSocketNB();
 
 	void setUp();
 	void tearDown();
