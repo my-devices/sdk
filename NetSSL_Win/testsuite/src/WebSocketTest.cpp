@@ -49,17 +49,15 @@ namespace
 			try
 			{
 				WebSocket ws(request, response);
-				std::unique_ptr<char[]> pBuffer(new char[_bufSize]);
+				Poco::Buffer<char> buffer(_bufSize);
 				int flags;
 				int n;
 				do
 				{
-					n = ws.receiveFrame(pBuffer.get(), static_cast<int>(_bufSize), flags);
-					if (n == 0)
-						break;
-					ws.sendFrame(pBuffer.get(), n, flags);
+					n = ws.receiveFrame(buffer.begin(), static_cast<int>(buffer.size()), flags);
+					if (n > 0) ws.sendFrame(buffer.begin(), n, flags);
 				}
-				while ((flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_CLOSE);
+				while (n > 0 && (flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_CLOSE);
 			}
 			catch (WebSocketException& exc)
 			{
@@ -82,7 +80,7 @@ namespace
 	private:
 		std::size_t _bufSize;
 	};
-
+	
 	class WebSocketRequestHandlerFactory: public Poco::Net::HTTPRequestHandlerFactory
 	{
 	public:
