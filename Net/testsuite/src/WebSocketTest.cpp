@@ -58,7 +58,7 @@ namespace
 					n = ws.receiveFrame(buffer.begin(), static_cast<int>(buffer.size()), flags);
 					if (n > 0) ws.sendFrame(buffer.begin(), n, flags);
 				}
-				while (n > 0 || (flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_CLOSE);
+				while (n > 0 && (flags & WebSocket::FRAME_OP_BITMASK) != WebSocket::FRAME_OP_CLOSE);
 			}
 			catch (WebSocketException& exc)
 			{
@@ -187,6 +187,7 @@ void WebSocketTest::testWebSocket()
 	assertTrue (n == 2);
 	assertTrue ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE);
 	
+	ws.close();
 	server.stop();
 }
 
@@ -222,6 +223,9 @@ void WebSocketTest::testWebSocketLarge()
 
 	assertTrue (n == payload.size());
 	assertTrue (payload.compare(0, payload.size(), buffer, n) == 0);
+
+	ws.close();
+	server.stop();
 }
 
 
@@ -258,6 +262,9 @@ void WebSocketTest::testOneLargeFrame(int msgSize)
 	n = ws.receiveFrame(pocobuffer, flags);
 	assertTrue (n == payload.size());
 	assertTrue (payload.compare(0, payload.size(), pocobuffer.begin(), n) == 0);
+
+	ws.close();
+	server.stop();
 }
 
 
@@ -331,6 +338,7 @@ void WebSocketTest::testWebSocketNB()
 	assertTrue (n == 2);
 	assertTrue ((flags & WebSocket::FRAME_OP_BITMASK) == WebSocket::FRAME_OP_CLOSE);
 	
+	ws.close();
 	server.stop();
 }
 
