@@ -94,11 +94,32 @@ void SecureStreamSocketTest::testSendReceive()
 	SocketAddress sa("127.0.0.1", svs.address().port());
 	SecureStreamSocket ss1(sa);
 	std::string data("hello, world");
-	ss1.sendBytes(data.data(), (int) data.size());
-	char buffer[256];
+	ss1.sendBytes(data.data(), static_cast<int>(data.size()));
+	char buffer[8192];
 	int n = ss1.receiveBytes(buffer, sizeof(buffer));
 	assertTrue (n > 0);
 	assertTrue (std::string(buffer, n) == data);
+
+	const std::vector<std::size_t> sizes = {67, 467, 7883, 19937};
+	for (const auto n: sizes)
+	{
+		data.assign(n, 'X');
+		ss1.sendBytes(data.data(), static_cast<int>(data.size()));
+		std::string received;
+		while (received.size() < n)
+		{
+			int rc = ss1.receiveBytes(buffer, sizeof(buffer));
+			if (rc > 0)
+			{
+				received.append(buffer, rc);
+			}
+			else if (n == 0)
+			{
+				break;
+			}
+		}
+		assertTrue (received == data);
+	}
 
 	ss1.close();
 }
@@ -132,6 +153,53 @@ void SecureStreamSocketTest::testPeek()
 }
 
 
+void SecureStreamSocketTest::testNB()
+{
+	SecureServerSocket svs(0);
+	TCPServer srv(new TCPServerConnectionFactoryImpl<EchoConnection>(), svs);
+	srv.start();
+
+	SocketAddress sa("127.0.0.1", svs.address().port());
+	SecureStreamSocket ss1(sa);
+	ss1.setBlocking(false);
+	ss1.setSendBufferSize(32000);
+
+	char buffer[8192];
+	const std::vector<std::size_t> sizes = {67, 467, 7883, 19937};
+	for (const auto n: sizes)
+	{
+		std::string data(n, 'X');
+		int rc = ss1.sendBytes(data.data(), static_cast<int>(data.size()));
+		assertTrue (rc == n);
+
+		rc = -1;
+		while (rc < 0)
+		{
+			rc = ss1.receiveBytes(buffer, sizeof(buffer), MSG_PEEK);
+		}
+		assertTrue (rc > 0 && rc <= n);
+		assertTrue (data.compare(0, rc, buffer, rc) == 0);
+
+		std::string received;
+		while (received.size() < n)
+		{
+			int rc = ss1.receiveBytes(buffer, sizeof(buffer));
+			if (rc > 0)
+			{
+				received.append(buffer, rc);
+			}
+			else if (n == 0)
+			{
+				break;
+			}
+		}
+		assertTrue (received == data);
+	}
+
+	ss1.close();
+}
+
+
 void SecureStreamSocketTest::setUp()
 {
 }
@@ -148,6 +216,7 @@ CppUnit::Test* SecureStreamSocketTest::suite()
 
 	CppUnit_addTest(pSuite, SecureStreamSocketTest, testSendReceive);
 	CppUnit_addTest(pSuite, SecureStreamSocketTest, testPeek);
+	CppUnit_addTest(pSuite, SecureStreamSocketTest, testNB);
 
 	return pSuite;
 }
