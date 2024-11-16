@@ -381,6 +381,7 @@ protected:
 			std::string password = config().getString("webtunnel.password"s, ""s);
 			if (!username.empty())
 			{
+				logger().debug("Authenticating as %s."s, username);
 				Poco::Net::HTTPBasicCredentials creds(username, password);
 				creds.authenticate(request);
 			}
@@ -977,7 +978,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/1.17.2");
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/2.0.0");
 
 
 POCO_SERVER_MAIN(WebTunnelAgent)

@@ -26,67 +26,10 @@ namespace Poco {
 namespace WebTunnel {
 
 
-class AutoSetEvent
+class AddSocketNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	AutoSetEvent(Poco::Event& event):
-		_event(event)
-	{
-	}
-
-	~AutoSetEvent()
-	{
-		try
-		{
-			_event.set();
-		}
-		catch (...)
-		{
-			poco_unexpected();
-		}
-	}
-
-private:
-	Poco::Event& _event;
-};
-
-
-class TaskNotification: public Poco::Notification
-{
-public:
-	typedef Poco::AutoPtr<TaskNotification> Ptr;
-
-	enum
-	{
-		TASK_WAIT_TIMEOUT = 30000
-	};
-
-	TaskNotification(SocketDispatcher& dispatcher):
-		_dispatcher(dispatcher)
-	{
-	}
-
-	~TaskNotification()
-	{
-	}
-
-	void wait()
-	{
-		_done.wait(TASK_WAIT_TIMEOUT);
-	}
-
-	virtual void execute() = 0;
-
-protected:
-	SocketDispatcher& _dispatcher;
-	Poco::Event _done;
-};
-
-
-class AddSocketNotification: public TaskNotification
-{
-public:
-	typedef Poco::AutoPtr<AddSocketNotification> Ptr;
+	using Ptr = Poco::AutoPtr<AddSocketNotification>;
 
 	AddSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketHandler::Ptr& pHandler, int mode, Poco::Timespan timeout):
 		TaskNotification(dispatcher),
@@ -112,10 +55,10 @@ private:
 };
 
 
-class UpdateSocketNotification: public TaskNotification
+class UpdateSocketNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<UpdateSocketNotification> Ptr;
+	using Ptr = Poco::AutoPtr<UpdateSocketNotification>;
 
 	UpdateSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout):
 		TaskNotification(dispatcher),
@@ -139,10 +82,10 @@ private:
 };
 
 
-class RemoveSocketNotification: public TaskNotification
+class RemoveSocketNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<RemoveSocketNotification> Ptr;
+	using Ptr = Poco::AutoPtr<RemoveSocketNotification>;
 
 	RemoveSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket):
 		TaskNotification(dispatcher),
@@ -162,10 +105,10 @@ private:
 };
 
 
-class CloseSocketNotification: public TaskNotification
+class CloseSocketNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<CloseSocketNotification> Ptr;
+	using Ptr = Poco::AutoPtr<CloseSocketNotification>;
 
 	CloseSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket):
 		TaskNotification(dispatcher),
@@ -185,10 +128,10 @@ private:
 };
 
 
-class ResetNotification: public TaskNotification
+class ResetNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<ResetNotification> Ptr;
+	using Ptr = Poco::AutoPtr<ResetNotification>;
 
 	ResetNotification(SocketDispatcher& dispatcher):
 		TaskNotification(dispatcher)
@@ -204,10 +147,10 @@ public:
 };
 
 
-class SendBytesNotification: public TaskNotification
+class SendBytesNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<SendBytesNotification> Ptr;
+	using Ptr = Poco::AutoPtr<SendBytesNotification>;
 
 	SendBytesNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const void* pBuffer, std::size_t length, int options):
 		TaskNotification(dispatcher),
@@ -231,10 +174,10 @@ private:
 };
 
 
-class ShutdownSendNotification: public TaskNotification
+class ShutdownSendNotification: public SocketDispatcher::TaskNotification
 {
 public:
-	typedef Poco::AutoPtr<ShutdownSendNotification> Ptr;
+	using Ptr = Poco::AutoPtr<ShutdownSendNotification>;
 
 	ShutdownSendNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket):
 		TaskNotification(dispatcher),
@@ -303,7 +246,6 @@ void SocketDispatcher::reset()
 
 void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
 {
-	poco_assert (!socket.getBlocking());
 	AddSocketNotification::Ptr pNf = new AddSocketNotification(*this, socket, pHandler, mode, timeout);
 	_queue.enqueueNotification(pNf);
 	_pollSet.wakeUp();

@@ -38,6 +38,31 @@ namespace Poco {
 namespace WebTunnel {
 
 
+class AutoSetEvent
+{
+public:
+	AutoSetEvent(Poco::Event& event):
+		_event(event)
+	{
+	}
+
+	~AutoSetEvent()
+	{
+		try
+		{
+			_event.set();
+		}
+		catch (...)
+		{
+			poco_unexpected();
+		}
+	}
+
+private:
+	Poco::Event& _event;
+};
+
+
 class WebTunnel_API SocketDispatcher: public Poco::Runnable
 	/// SocketDispatcher implements a multi-threaded variant of the
 	/// Reactor pattern, optimized for forwarding data from one
@@ -101,6 +126,72 @@ public:
 	void shutdownSend(Poco::Net::StreamSocket& socket);
 		/// Shuts down the sending direction of the socket, but only after
 		/// all pending sends has been sent.
+
+	class WebTunnel_API TaskNotification: public Poco::Notification
+	{
+	public:
+		using Ptr = Poco::AutoPtr<TaskNotification>;
+
+		enum
+		{
+			TASK_WAIT_TIMEOUT = 30000
+		};
+
+		TaskNotification(SocketDispatcher& dispatcher):
+			_dispatcher(dispatcher)
+		{
+		}
+
+		~TaskNotification() = default;
+
+		void wait()
+		{
+			_done.wait(TASK_WAIT_TIMEOUT);
+		}
+
+		virtual void execute() = 0;
+
+	protected:
+		SocketDispatcher& _dispatcher;
+		Poco::Event _done;
+	};
+
+	template <class Fn>
+	class FunctorTaskNotification: public TaskNotification
+	{
+	public:
+		using Ptr = Poco::AutoPtr<FunctorTaskNotification>;
+	
+		FunctorTaskNotification(SocketDispatcher& dispatcher, Fn&& fn):
+			TaskNotification(dispatcher),
+			_fn(std::move(fn))
+		{
+		}
+
+		void execute()
+		{
+			AutoSetEvent ase(_done);
+	
+			_fn(_dispatcher);
+		}
+
+	private:
+		Fn _fn;
+	};
+
+	template <class Fn>
+	void queueTask(Fn&& fn)
+		/// Enqueues a task for execution in the dispatcher thread.
+		/// The task is given as a lambda expression or functor.
+	{
+		typename FunctorTaskNotification<Fn>::Ptr pTask = new FunctorTaskNotification<Fn>(*this, std::move(fn));
+		_queue.enqueueNotification(pTask);
+		_pollSet.wakeUp();
+		if (!inDispatcherThread())
+		{
+			pTask->wait();
+		}
+	}
 
 protected:
 	struct PendingSend

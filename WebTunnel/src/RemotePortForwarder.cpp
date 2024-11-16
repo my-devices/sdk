@@ -89,10 +89,12 @@ RemotePortForwarder::~RemotePortForwarder()
 
 void RemotePortForwarder::stop()
 {
-	if (_pWebSocket)
-	{
-		closeWebSocket(RPF_CLOSE_GRACEFUL, true);
-	}
+	_dispatcher.queueTask(
+		[pSelf=this](SocketDispatcher& dispatcher)
+		{
+			pSelf->closeWebSocket(RPF_CLOSE_GRACEFUL, true);
+		}
+	);
 }
 
 
@@ -530,45 +532,41 @@ void RemotePortForwarder::sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode,
 
 void RemotePortForwarder::closeWebSocket(CloseReason reason, bool active)
 {
+	if (_webSocketFlags & CF_CLOSED_LOCAL) return;
+
+	if (_logger.debug())
 	{
-		if (!_pWebSocket || !_pWebSocket->impl()->initialized()) return;
-
-		if (_webSocketFlags & CF_CLOSED_LOCAL) return;
-
-		if (_logger.debug())
+		_logger.debug("Closing WebSocket, reason: %d, active: %b"s, static_cast<int>(reason), active);
+	}
+	try
+	{
+		if (reason == RPF_CLOSE_GRACEFUL)
 		{
-			_logger.debug("Closing WebSocket, reason: %d, active: %b"s, static_cast<int>(reason), active);
-		}
-		try
-		{
-			if (reason == RPF_CLOSE_GRACEFUL)
+			try
 			{
-				try
+				if (active)
 				{
-					if (active)
-					{
-						char buffer[2];
-						Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-						Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
-						writer << static_cast<Poco::UInt16>(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
-						_dispatcher.sendBytes(*_pWebSocket, buffer, sizeof(buffer), Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_CLOSE);
-					}
-				}
-				catch (Poco::Exception&)
-				{
+					char buffer[2];
+					Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+					Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
+					writer << static_cast<Poco::UInt16>(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
+					_dispatcher.sendBytes(*_pWebSocket, buffer, sizeof(buffer), Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_CLOSE);
 				}
 			}
-			for (ChannelMap::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
+			catch (Poco::Exception&)
 			{
-				_dispatcher.removeSocket(it->second.socket);
 			}
-			_channelMap.clear();
-			_dispatcher.shutdownSend(*_pWebSocket);
 		}
-		catch (Poco::Exception& exc)
+		for (ChannelMap::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
 		{
-			_logger.log(exc);
+			_dispatcher.removeSocket(it->second.socket);
 		}
+		_channelMap.clear();
+		_dispatcher.shutdownSend(*_pWebSocket);
+	}
+	catch (Poco::Exception& exc)
+	{
+		_logger.log(exc);
 	}
 
 	_dispatcher.updateSocket(*_pWebSocket, Poco::Net::PollSet::POLL_READ, _closeTimeout);
