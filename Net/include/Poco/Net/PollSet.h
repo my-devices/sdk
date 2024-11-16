@@ -69,6 +69,9 @@ public:
 	bool empty() const;
 		/// Returns true if no socket is registered for polling.
 
+	std::size_t size() const;
+		/// Returns the number of sockets registered for polling.
+
 	void clear();
 		/// Removes all sockets from the PollSet.
 
@@ -77,6 +80,9 @@ public:
 		/// changes accordingly to its mode, or the timeout expires.
 		/// Returns a PollMap containing the sockets that have had
 		/// their state changed.
+	
+	void wakeUp();
+		/// Causes a blocked call to poll() to return early.
 
 private:
 	PollSetImpl* _pImpl;
