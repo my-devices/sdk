@@ -297,6 +297,8 @@ private:
 
 	Poco::Buffer<BYTE> _overflowBuffer;
 	Poco::Buffer<BYTE> _sendBuffer;
+	DWORD _sendBufferOffset;
+	DWORD _sendBufferPending;
 	Poco::Buffer<BYTE> _recvBuffer;
 	DWORD _recvBufferOffset;
 	DWORD _ioBufferSize;
