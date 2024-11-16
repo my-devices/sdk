@@ -31,6 +31,7 @@
 
 #if defined(POCO_HAVE_FD_EPOLL)
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 #elif defined(POCO_HAVE_FD_POLL)
 #ifndef _WIN32
 #include <poll.h>
@@ -53,7 +54,7 @@ class PollSetImpl
 public:
 	PollSetImpl():
 		_epollfd(-1),
-		_eventfd(0, 0),
+		_eventfd(eventfd(0, 0)),
 		_events(1024)
 	{
 		_epollfd = epoll_create(1);
