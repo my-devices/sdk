@@ -177,7 +177,7 @@ public:
 		/// otherwise a Poco::InvalidArgumentException will be thrown.
 
 	virtual ~WebSocket();
-		/// Destroys the StreamSocket.
+		/// Destroys the WebSocket.
 
 	WebSocket& operator = (const Socket& socket);
 		/// Assignment operator.

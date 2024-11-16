@@ -23,7 +23,7 @@
 #include "Poco/Net/SecureServerSocket.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/Thread.h"
-#include <iostream>
+
 
 using Poco::Net::HTTPSClientSession;
 using Poco::Net::HTTPRequest;
@@ -130,7 +130,7 @@ void WebSocketTest::testWebSocket()
 	assertTrue (n == payload.size());
 	assertTrue (payload.compare(0, payload.size(), buffer, 0, n) == 0);
 	assertTrue (flags == WebSocket::FRAME_TEXT);
-/*** 
+
 	for (int i = 2; i < 20; i++)
 	{
 		payload.assign(i, 'x');
@@ -164,7 +164,7 @@ void WebSocketTest::testWebSocket()
 	assertTrue (n == payload.size());
 	assertTrue (payload.compare(0, payload.size(), buffer, 0, n) == 0);
 	assertTrue (flags == WebSocket::FRAME_BINARY);
-*/
+
 	ws.shutdown();
 	n = ws.receiveFrame(buffer, sizeof(buffer), flags);
 	assertTrue (n == 2);

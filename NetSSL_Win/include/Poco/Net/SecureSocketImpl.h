@@ -208,7 +208,10 @@ public:
 		/// Returns the number of bytes available in the buffer.
 
 	SocketImpl* socket();
+		/// Returns the underlying SocketImpl.
+		
 	const SocketImpl* socket() const;
+		/// Returns the underlying SocketImpl.
 
 protected:
 	enum

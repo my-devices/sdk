@@ -231,7 +231,10 @@ public:
 		/// the handshake.
 	
 	SocketImpl* socket();
+		/// Returns the underlying SocketImpl.
+		
 	const SocketImpl* socket() const;
+		/// Returns the underlying SocketImpl.
 
 protected:
 	void acceptSSL();
