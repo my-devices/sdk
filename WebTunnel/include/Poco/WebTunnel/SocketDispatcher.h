@@ -166,7 +166,7 @@ protected:
 	void removeSocketImpl(const Poco::Net::StreamSocket& socket);
 	void closeSocketImpl(Poco::Net::StreamSocket& socket);
 	void resetImpl();
-	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, int flags);
+	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int flags);
 	void shutdownSendImpl(Poco::Net::StreamSocket& socket);
 	bool stopped();
 	bool inDispatcherThread() const;

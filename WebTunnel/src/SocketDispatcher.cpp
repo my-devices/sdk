@@ -221,7 +221,7 @@ public:
 	{
 		AutoSetEvent ase(_done);
 
-		_dispatcher.sendBytesImpl(_socket, _buffer, _options);
+		_dispatcher.sendBytesImpl(_socket, std::move(_buffer), _options);
 	}
 
 private:
@@ -635,7 +635,7 @@ void SocketDispatcher::resetImpl()
 }
 
 
-void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, int options)
+void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int options)
 {
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
