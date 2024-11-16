@@ -60,7 +60,34 @@ WebSocketImpl::~WebSocketImpl()
 
 int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 {
-	Poco::Buffer<char> frame(length + MAX_HEADER_LENGTH);
+	if (_sendState.remainingPayloadLength > 0)
+	{
+		if (length != _sendState.length)
+		{
+			throw InvalidArgumentException("Pending send buffer length mismatch");
+		}
+		int sent = _pStreamSocketImpl->sendBytes(_sendState.payload.begin() + _sendState.remainingPayloadOffset, _sendState.remainingPayloadLength);
+		if (sent >= 0)
+		{
+			if (sent < _sendState.remainingPayloadLength)
+			{
+				_sendState.remainingPayloadOffset += sent;
+				_sendState.remainingPayloadLength -= sent;
+				return -1;
+			}
+			else 
+			{
+				_sendState.length = 0;
+				_sendState.remainingPayloadOffset = 0;
+				_sendState.remainingPayloadLength = 0;
+				return length;
+			}
+		}
+		else return -1;
+	}
+
+	Poco::Buffer<char>& frame(_sendState.payload);
+	frame.resize(length + MAX_HEADER_LENGTH, false);
 	Poco::MemoryOutputStream ostr(frame.begin(), frame.size());
 	Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
 
@@ -103,10 +130,33 @@ int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 	{
 		std::memcpy(frame.begin() + ostr.charsWritten(), buffer, length);
 	}
-	if (_pStreamSocketImpl->sendBytes(frame.begin(), length + static_cast<int>(ostr.charsWritten())) >= 0)
-		return length;
+
+	int frameLength = length + static_cast<int>(ostr.charsWritten());
+	int sent = _pStreamSocketImpl->sendBytes(frame.begin(), frameLength);
+	if (sent >= 0)
+	{
+		if (sent < frameLength)
+		{
+			_sendState.length = length;
+			_sendState.remainingPayloadOffset = sent;
+			_sendState.remainingPayloadLength = frameLength - sent;
+			return -1;
+		}
+		else 
+		{
+			_sendState.length = 0;
+			_sendState.remainingPayloadOffset = 0;
+			_sendState.remainingPayloadLength = 0;
+			return length;
+		}
+	}
 	else
+	{
+		_sendState.length = length;
+		_sendState.remainingPayloadOffset = 0;
+		_sendState.remainingPayloadLength = frameLength;
 		return -1;
+	}	
 }
 
 
@@ -194,9 +244,12 @@ void WebSocketImpl::skipHeader(int headerLength)
 {
 	poco_assert_dbg (headerLength <= MAX_HEADER_LENGTH);
 
-	char header[MAX_HEADER_LENGTH];
-	int n = receiveNBytes(header, headerLength);
-	poco_assert_dbg (n == headerLength);
+	if (headerLength > 0)
+	{
+		char header[MAX_HEADER_LENGTH];
+		int n = receiveNBytes(header, headerLength);
+		poco_assert_dbg (n == headerLength);
+	}
 }
 
 
@@ -232,9 +285,14 @@ int WebSocketImpl::receiveBytes(void* buffer, int length, int)
 			payloadLength = peekHeader(_receiveState);
 		}
 		if (payloadLength <= 0)
+		{
+			skipHeader(_receiveState.headerLength);
 			return payloadLength;
+		}
 		else if (payloadLength > length)
+		{
 			throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
+		}
 
 		skipHeader(_receiveState.headerLength);
 
@@ -249,9 +307,14 @@ int WebSocketImpl::receiveBytes(void* buffer, int length, int)
 		{
 			int payloadLength = peekHeader(_receiveState);
 			if (payloadLength <= 0)
+			{
+				skipHeader(_receiveState.headerLength);
 				return payloadLength;
+			}
 			else if (payloadLength > length)
+			{
 				throw WebSocketException(Poco::format("Insufficient buffer for payload size %d", payloadLength), WebSocket::WS_ERR_PAYLOAD_TOO_BIG);
+			}
 
 			skipHeader(_receiveState.headerLength);
 

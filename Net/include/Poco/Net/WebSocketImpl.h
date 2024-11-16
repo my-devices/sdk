@@ -114,6 +114,14 @@ protected:
 		Poco::Buffer<char> payload{0};
 	};
 
+	struct SendState
+	{
+		int length = 0;
+		int remainingPayloadOffset = 0;
+		int remainingPayloadLength = 0;
+		Poco::Buffer<char> payload{0};
+	};
+
 	int peekHeader(ReceiveState& receiveState);
 	void skipHeader(int headerLength);
 	int receivePayload(char *buffer, int payloadLength, char mask[MASK_LENGTH], bool useMask);
@@ -131,6 +139,7 @@ private:
 	int _bufferOffset;
 	bool _mustMaskPayload;
 	ReceiveState _receiveState;
+	SendState _sendState;
 	Poco::Random _rnd;
 };
 
