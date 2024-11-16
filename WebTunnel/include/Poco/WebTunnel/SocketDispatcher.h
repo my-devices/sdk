@@ -23,20 +23,22 @@
 #include "Poco/Net/PollSet.h"
 #include "Poco/NotificationQueue.h"
 #include "Poco/Thread.h"
-#include "Poco/RunnableAdapter.h"
+#include "Poco/Runnable.h"
 #include "Poco/RefCountedObject.h"
 #include "Poco/AutoPtr.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/Clock.h"
 #include "Poco/Logger.h"
+#include <atomic>
 #include <map>
+#include <deque>
 
 
 namespace Poco {
 namespace WebTunnel {
 
 
-class WebTunnel_API SocketDispatcher
+class WebTunnel_API SocketDispatcher: public Poco::Runnable
 	/// SocketDispatcher implements a multi-threaded variant of the
 	/// Reactor pattern, optimized for forwarding data from one
 	/// socket to another.
@@ -53,12 +55,13 @@ public:
 	public:
 		using Ptr = Poco::AutoPtr<SocketHandler>;
 
-		virtual bool readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
+		virtual void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
+		virtual void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 	};
 
-	SocketDispatcher(int threadCount, Poco::Timespan timeout = Poco::Timespan(5000), int maxReadsPerWorker = 10);
+	SocketDispatcher(int threadCount, Poco::Timespan timeout = Poco::Timespan(5000));
 		/// Creates the SocketDispatcher, using the given number of worker threads.
 		///
 		/// The given timeout is used for the main select loop, as well as
@@ -68,8 +71,11 @@ public:
 	~SocketDispatcher();
 		/// Destroys the SocketDispatcher.
 
-	void addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout = 0);
+	void addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout = 0);
 		/// Adds a socket and its handler to the SocketDispatcher.
+
+	void updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout = 0);
+		/// Updates the socket's poll mode.
 
 	void removeSocket(const Poco::Net::StreamSocket& socket);
 		/// Removes a socket and its associated handler from the SocketDispatcher.
@@ -83,72 +89,107 @@ public:
 	void reset();
 		/// Removes all sockets but does not stop the SocketDispatcher.
 
+	void sendBytes(Poco::Net::StreamSocket& socket, const void* buffer, std::size_t length, int options);
+		/// Attempts to write the given buffer's contents to the socket.
+		/// If the write fails due to EWOULDBLOCK, the contents of the buffer are
+		/// stored and written the next time the socket becomes writable again.
+		/// While at least one write is pending, that socket will not accept new data.
+	
+	bool hasPendingSends(const Poco::Net::StreamSocket& socket) const;
+		/// Returns true if there are pending sends for the given socket.
+
+	void shutdownSend(Poco::Net::StreamSocket& socket);
+		/// Shuts down the sending direction of the socket, but only after
+		/// all pending sends has been sent.
+
 protected:
+	struct PendingSend
+	{
+		enum
+		{
+			OPT_SHUTDOWN = 0x0FFFA01
+		};
+
+		PendingSend(Poco::Buffer<char>&& buf, int opt):
+			buffer(std::move(buf)),
+			options(opt)
+		{
+		}
+
+		PendingSend(const char* buf, std::size_t len, int opt):
+			buffer(buf, len),
+			options(opt)
+		{
+		}
+
+		explicit PendingSend(int opt):
+			options(opt)
+		{
+		}
+
+		Poco::Buffer<char> buffer{0};
+		int options{0};
+	};
+
 	struct SocketInfo: public Poco::RefCountedObject
 	{
 		using Ptr = Poco::AutoPtr<SocketInfo>;
 
-		SocketInfo(SocketHandler::Ptr pHnd, Poco::Timespan tmo):
+		SocketInfo(SocketHandler::Ptr pHnd, int m, Poco::Timespan tmo):
 			pHandler(pHnd),
-			timeout(tmo),
-			wantRead(true),
-			polling(true)
+			mode(m),
+			timeout(tmo)
 		{
 		}
 
 		SocketHandler::Ptr pHandler;
+		int mode;
 		Poco::Timespan timeout;
 		Poco::Clock activity;
-		bool wantRead;
-		bool polling;
+		std::deque<PendingSend> pendingSends;
 	};
 
 	using SocketMap = std::map<Poco::Net::Socket, SocketInfo::Ptr>;
-	using ThreadPtr = Poco::SharedPtr<Poco::Thread>;
-	using ThreadVec = std::vector<ThreadPtr>;
 
 	enum
 	{
-		MAIN_QUEUE_TIMEOUT = 1000,
-		WORKER_QUEUE_TIMEOUT = 2500
+		MAIN_QUEUE_TIMEOUT = 1000
 	};
 
-	void runMain();
-	void runWorker();
-	void readable(const Poco::Net::StreamSocket& socket, const SocketInfo::Ptr& pInfo);
-	void exception(const Poco::Net::StreamSocket& socket, const SocketInfo::Ptr& pInfo);
-	void timeout(const Poco::Net::StreamSocket& socket, const SocketInfo::Ptr& pInfo);
-	void readableImpl(Poco::Net::StreamSocket& socket, SocketInfo::Ptr pInfo);
-	void exceptionImpl(Poco::Net::StreamSocket& socket, SocketInfo::Ptr pInfo);
-	void timeoutImpl(Poco::Net::StreamSocket& socket, SocketInfo::Ptr pInfo);
-	void addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout);
+	void run();
+	void readable(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
+	void writable(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
+	void exception(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
+	void timeout(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
+	void addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout);
+	void updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout);
 	void removeSocketImpl(const Poco::Net::StreamSocket& socket);
 	void closeSocketImpl(Poco::Net::StreamSocket& socket);
 	void resetImpl();
+	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, int flags);
+	void shutdownSendImpl(Poco::Net::StreamSocket& socket);
 	bool stopped();
+	bool inDispatcherThread() const;
 
 private:
 	Poco::Timespan _timeout;
-	int _maxReadsPerWorker;
 	SocketMap _socketMap;
 	Poco::Net::PollSet _pollSet;
-	Poco::Thread _mainThread;
-	ThreadVec _workerThreads;
-	Poco::RunnableAdapter<SocketDispatcher> _mainRunnable;
-	Poco::RunnableAdapter<SocketDispatcher> _workerRunnable;
-	Poco::NotificationQueue _mainQueue;
-	Poco::NotificationQueue _workerQueue;
-	bool _stopped;
-	Poco::FastMutex _stoppedMtx;
+	Poco::Thread _thread;
+	Poco::NotificationQueue _queue;
+	std::atomic<bool> _stopped;
 	Poco::Logger& _logger;
 
 	friend class ReadableNotification;
 	friend class ExceptionNotification;
 	friend class TimeoutNotification;
 	friend class AddSocketNotification;
+	friend class UpdateSocketNotification;
 	friend class RemoveSocketNotification;
 	friend class CloseSocketNotification;
 	friend class ResetNotification;
+	friend class SendBytesNotification;
+	friend class ShutdownSendNotification;
 };
 
 
@@ -157,9 +198,13 @@ private:
 //
 inline bool SocketDispatcher::stopped()
 {
-	Poco::FastMutex::ScopedLock lock(_stoppedMtx);
-
 	return _stopped;
+}
+
+
+inline bool SocketDispatcher::inDispatcherThread() const
+{
+	return Poco::Thread::current() == &_thread;
 }
 
 

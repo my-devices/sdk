@@ -95,20 +95,18 @@ public:
 	{
 	}
 
-	Poco::Net::StreamSocket createSocket(const Poco::Net::SocketAddress& addr, Poco::Timespan timeout)
+	Poco::Net::StreamSocket createSocket(const Poco::Net::SocketAddress& addr)
 	{
 		if (addr.port() == _tlsPort)
 		{
 			Poco::Net::SecureStreamSocket streamSocket(_pContext);
-			streamSocket.connect(addr, timeout);
-			streamSocket.setNoDelay(true);
+			streamSocket.connectNB(addr);
 			return streamSocket;
 		}
 		else
 		{
 			Poco::Net::StreamSocket streamSocket;
-			streamSocket.connect(addr, timeout);
-			streamSocket.setNoDelay(true);
+			streamSocket.connectNB(addr);
 			return streamSocket;
 		}
 	}
@@ -475,9 +473,10 @@ protected:
 
 			_pForwarder->webSocketClosed -= Poco::delegate(this, &WebTunnelAgent::onClose);
 			_pForwarder->stop();
+			Poco::Thread::sleep(100);
 			_pDispatcher->reset();
-			_pForwarder = 0;
-			_pDispatcher = 0;
+			_pForwarder.reset();
+			_pDispatcher.reset();
 		}
 		if (_pHTTPClientSession)
 		{

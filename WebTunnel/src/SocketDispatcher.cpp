@@ -83,90 +83,16 @@ protected:
 };
 
 
-class ReadableNotification: public TaskNotification
-{
-public:
-	typedef Poco::AutoPtr<ReadableNotification> Ptr;
-
-	ReadableNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo):
-		TaskNotification(dispatcher),
-		_socket(socket),
-		_pInfo(pInfo)
-	{
-	}
-
-	void execute()
-	{
-		AutoSetEvent ase(_done);
-
-		_dispatcher.readableImpl(_socket, _pInfo);
-	}
-
-private:
-	Poco::Net::StreamSocket _socket;
-	SocketDispatcher::SocketInfo::Ptr _pInfo;
-};
-
-
-class ExceptionNotification: public TaskNotification
-{
-public:
-	typedef Poco::AutoPtr<ExceptionNotification> Ptr;
-
-	ExceptionNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo):
-		TaskNotification(dispatcher),
-		_socket(socket),
-		_pInfo(pInfo)
-	{
-	}
-
-	void execute()
-	{
-		AutoSetEvent ase(_done);
-
-		_dispatcher.exceptionImpl(_socket, _pInfo);
-	}
-
-private:
-	Poco::Net::StreamSocket _socket;
-	SocketDispatcher::SocketInfo::Ptr _pInfo;
-};
-
-
-class TimeoutNotification: public TaskNotification
-{
-public:
-	typedef Poco::AutoPtr<TimeoutNotification> Ptr;
-
-	TimeoutNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo):
-		TaskNotification(dispatcher),
-		_socket(socket),
-		_pInfo(pInfo)
-	{
-	}
-
-	void execute()
-	{
-		AutoSetEvent ase(_done);
-
-		_dispatcher.timeoutImpl(_socket, _pInfo);
-	}
-
-private:
-	Poco::Net::StreamSocket _socket;
-	SocketDispatcher::SocketInfo::Ptr _pInfo;
-};
-
-
 class AddSocketNotification: public TaskNotification
 {
 public:
 	typedef Poco::AutoPtr<AddSocketNotification> Ptr;
 
-	AddSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketHandler::Ptr& pHandler, Poco::Timespan timeout):
+	AddSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketHandler::Ptr& pHandler, int mode, Poco::Timespan timeout):
 		TaskNotification(dispatcher),
 		_socket(socket),
 		_pHandler(pHandler),
+		_mode(mode),
 		_timeout(timeout)
 	{
 	}
@@ -175,12 +101,40 @@ public:
 	{
 		AutoSetEvent ase(_done);
 
-		_dispatcher.addSocketImpl(_socket, _pHandler, _timeout);
+		_dispatcher.addSocketImpl(_socket, _pHandler, _mode, _timeout);
 	}
 
 private:
 	Poco::Net::StreamSocket _socket;
 	SocketDispatcher::SocketHandler::Ptr _pHandler;
+	int _mode;
+	Poco::Timespan _timeout;
+};
+
+
+class UpdateSocketNotification: public TaskNotification
+{
+public:
+	typedef Poco::AutoPtr<UpdateSocketNotification> Ptr;
+
+	UpdateSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout):
+		TaskNotification(dispatcher),
+		_socket(socket),
+		_mode(mode),
+		_timeout(timeout)
+	{
+	}
+
+	void execute()
+	{
+		AutoSetEvent ase(_done);
+
+		_dispatcher.updateSocketImpl(_socket, _mode, _timeout);
+	}
+
+private:
+	Poco::Net::StreamSocket _socket;
+	int _mode;
 	Poco::Timespan _timeout;
 };
 
@@ -250,21 +204,62 @@ public:
 };
 
 
-SocketDispatcher::SocketDispatcher(int threadCount, Poco::Timespan timeout, int maxReadsPerWorker):
+class SendBytesNotification: public TaskNotification
+{
+public:
+	typedef Poco::AutoPtr<SendBytesNotification> Ptr;
+
+	SendBytesNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const void* pBuffer, std::size_t length, int options):
+		TaskNotification(dispatcher),
+		_socket(socket),
+		_buffer(reinterpret_cast<const char*>(pBuffer), length),
+		_options(options)
+	{
+	}
+
+	void execute()
+	{
+		AutoSetEvent ase(_done);
+
+		_dispatcher.sendBytesImpl(_socket, _buffer, _options);
+	}
+
+private:
+	Poco::Net::StreamSocket _socket;
+	Poco::Buffer<char> _buffer;
+	int _options;
+};
+
+
+class ShutdownSendNotification: public TaskNotification
+{
+public:
+	typedef Poco::AutoPtr<ShutdownSendNotification> Ptr;
+
+	ShutdownSendNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket):
+		TaskNotification(dispatcher),
+		_socket(socket)
+	{
+	}
+
+	void execute()
+	{
+		AutoSetEvent ase(_done);
+
+		_dispatcher.shutdownSendImpl(_socket);
+	}
+
+private:
+	Poco::Net::StreamSocket _socket;
+};
+
+
+SocketDispatcher::SocketDispatcher(int threadCount, Poco::Timespan timeout):
 	_timeout(timeout),
-	_maxReadsPerWorker(maxReadsPerWorker),
-	_mainRunnable(*this, &SocketDispatcher::runMain),
-	_workerRunnable(*this, &SocketDispatcher::runWorker),
 	_stopped(false),
 	_logger(Poco::Logger::get("WebTunnel.SocketDispatcher"s))
 {
-	for (int i = 0; i < threadCount; i++)
-	{
-		ThreadPtr pThread = new Poco::Thread;
-		pThread->start(_workerRunnable);
-		_workerThreads.push_back(pThread);
-	}
-	_mainThread.start(_mainRunnable);
+	_thread.start(*this);
 }
 
 
@@ -284,19 +279,10 @@ SocketDispatcher::~SocketDispatcher()
 void SocketDispatcher::stop()
 {
 	if (!stopped())
-	{
-		{
-			Poco::FastMutex::ScopedLock lock(_stoppedMtx);
-
-			_stopped = true;
-		}
-		_mainQueue.wakeUpAll();
-		_workerQueue.wakeUpAll();
-		_mainThread.join();
-		for (ThreadVec::iterator it = _workerThreads.begin(); it != _workerThreads.end(); ++it)
-		{
-			(*it)->join();
-		}
+	{	
+		_stopped = true;
+		_queue.wakeUpAll();
+		_thread.join();
 		_socketMap.clear();
 		_pollSet.clear();
 	}
@@ -306,67 +292,133 @@ void SocketDispatcher::stop()
 void SocketDispatcher::reset()
 {
 	ResetNotification::Ptr pNf = new ResetNotification(*this);
-	_mainQueue.enqueueNotification(pNf);
-	pNf->wait();
+	_queue.enqueueNotification(pNf);
+	_pollSet.wakeUp();
+	if (!inDispatcherThread())
+	{
+		pNf->wait();
+	}
 }
 
 
-void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout)
+void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
 {
-	AddSocketNotification::Ptr pNf = new AddSocketNotification(*this, socket, pHandler, timeout);
-	_mainQueue.enqueueNotification(pNf);
-	pNf->wait();
+	poco_assert (!socket.getBlocking());
+	AddSocketNotification::Ptr pNf = new AddSocketNotification(*this, socket, pHandler, mode, timeout);
+	_queue.enqueueNotification(pNf);
+	_pollSet.wakeUp();
+	if (!inDispatcherThread())
+	{
+		pNf->wait();
+	}
+}
+
+
+void SocketDispatcher::updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout)
+{
+	if (inDispatcherThread())
+	{
+		updateSocketImpl(socket, mode, timeout);
+	}
+	else
+	{
+		UpdateSocketNotification::Ptr pNf = new UpdateSocketNotification(*this, socket, mode, timeout);
+		_queue.enqueueNotification(pNf);
+		_pollSet.wakeUp();
+		pNf->wait();
+	}
 }
 
 
 void SocketDispatcher::removeSocket(const Poco::Net::StreamSocket& socket)
 {
 	RemoveSocketNotification::Ptr pNf = new RemoveSocketNotification(*this, socket);
-	_mainQueue.enqueueNotification(pNf);
-	pNf->wait();
+	_queue.enqueueNotification(pNf);
+	_pollSet.wakeUp();
+	if (!inDispatcherThread())
+	{
+		pNf->wait();
+	}
 }
 
 
 void SocketDispatcher::closeSocket(const Poco::Net::StreamSocket& socket)
 {
 	CloseSocketNotification::Ptr pNf = new CloseSocketNotification(*this, socket);
-	_mainQueue.enqueueNotification(pNf);
-	pNf->wait();
+	_queue.enqueueNotification(pNf);
+	_pollSet.wakeUp();
+	if (!inDispatcherThread())
+	{
+		pNf->wait();
+	}
 }
 
 
-void SocketDispatcher::runMain()
+void SocketDispatcher::sendBytes(Poco::Net::StreamSocket& socket, const void* buffer, std::size_t length, int options)
+{
+	if (inDispatcherThread())
+	{
+		sendBytesImpl(socket, Poco::Buffer<char>(reinterpret_cast<const char*>(buffer), length), options);
+	}
+	else
+	{
+		SendBytesNotification::Ptr pNf = new SendBytesNotification(*this, socket, buffer, length, options);
+		_queue.enqueueNotification(pNf);
+		_pollSet.wakeUp();
+		pNf->wait();
+	}
+}
+
+
+void SocketDispatcher::shutdownSend(Poco::Net::StreamSocket& socket)
+{
+	if (inDispatcherThread())
+	{
+		shutdownSendImpl(socket);
+	}
+	else
+	{
+		ShutdownSendNotification::Ptr pNf = new ShutdownSendNotification(*this, socket);
+		_queue.enqueueNotification(pNf);
+		_pollSet.wakeUp();
+		pNf->wait();
+	}
+}
+
+
+void SocketDispatcher::run()
 {
 	Poco::Timespan currentTimeout(_timeout);
+	Poco::Timestamp lastSocketDump;
 	while (!stopped())
 	{
 		try
 		{
+			bool dumpSockets = false;
+			if (_logger.trace() && lastSocketDump.isElapsed(30*Poco::Timestamp::resolution()))
+			{
+				_logger.trace("Have %z sockets in dispatcher, %z in PollSet."s, _socketMap.size(), _pollSet.size());
+				dumpSockets = true;
+				lastSocketDump.update();
+			}
 			for (SocketMap::iterator it = _socketMap.begin(); it != _socketMap.end(); ++it)
 			{
-				if (it->second->wantRead && it->second->timeout != 0 && it->second->timeout < it->second->activity.elapsed())
+				if (dumpSockets)
 				{
-					it->second->wantRead = false;
+					_logger.trace("Socket %8?d -> %4d; %8Ld; %2z"s, it->first.impl()->sockfd(), it->second->mode, it->second->timeout.totalMilliseconds(), it->second->pendingSends.size());
+				}
+				if (it->second->timeout != 0 && it->second->timeout < it->second->activity.elapsed())
+				{
 					it->second->activity.update();
 					timeout(it->first, it->second);
 				}
-				if (it->second->wantRead)
+				if (it->second->pendingSends.empty())
 				{
-					if (!it->second->polling)
-					{
-						it->second->polling = true;
-						_pollSet.update(it->first, Poco::Net::PollSet::POLL_READ | Poco::Net::PollSet::POLL_ERROR);
-					}
+					_pollSet.update(it->first, it->second->mode);
 				}
 				else
 				{
-					if (it->second->polling)
-					{
-						it->second->polling = false;
-						_pollSet.update(it->first, 0);
-					}
-					// reset timeout clock
-					it->second->activity.update();
+					_pollSet.update(it->first, (it->second->mode & ~Poco::Net::PollSet::POLL_READ) | Poco::Net::PollSet::POLL_WRITE);
 				}
 			}
 
@@ -377,13 +429,16 @@ void SocketDispatcher::runMain()
 				for (Poco::Net::PollSet::SocketModeMap::const_iterator it = socketModeMap.begin(); it != socketModeMap.end(); ++it)
 				{
 					SocketMap::iterator its = _socketMap.find(it->first);
-					if (its != _socketMap.end() && its->second->wantRead)
+					if (its != _socketMap.end())
 					{
-						its->second->wantRead = false;
 						its->second->activity.update();
 						if (it->second & Poco::Net::PollSet::POLL_READ)
 						{
 							readable(its->first, its->second);
+						}
+						if ((it->second & Poco::Net::PollSet::POLL_WRITE))
+						{
+							writable(its->first, its->second);
 						}
 						if (it->second & Poco::Net::PollSet::POLL_ERROR)
 						{
@@ -397,7 +452,7 @@ void SocketDispatcher::runMain()
 				if (currentTimeout.totalMicroseconds() < 4*_timeout.totalMicroseconds()) currentTimeout += _timeout.totalMicroseconds()/2;
 			}
 
-			Poco::Notification::Ptr pNf = _socketMap.empty() ? _mainQueue.waitDequeueNotification(MAIN_QUEUE_TIMEOUT) : _mainQueue.dequeueNotification();
+			Poco::Notification::Ptr pNf = _socketMap.empty() ? _queue.waitDequeueNotification(MAIN_QUEUE_TIMEOUT) : _queue.dequeueNotification();
 			while (pNf)
 			{
 				TaskNotification::Ptr pTaskNf = pNf.cast<TaskNotification>();
@@ -405,7 +460,7 @@ void SocketDispatcher::runMain()
 				{
 					pTaskNf->execute();
 				}
-				pNf = _socketMap.empty() ? _mainQueue.waitDequeueNotification(MAIN_QUEUE_TIMEOUT) : _mainQueue.dequeueNotification();
+				pNf = _socketMap.empty() ? _queue.waitDequeueNotification(MAIN_QUEUE_TIMEOUT) : _queue.dequeueNotification();
 			}
 		}
 		catch (Poco::Net::NetException& exc)
@@ -427,107 +482,126 @@ void SocketDispatcher::runMain()
 }
 
 
-void SocketDispatcher::runWorker()
+void SocketDispatcher::readable(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
 {
-	while (!stopped())
+	try
 	{
-		try
+		Poco::Net::StreamSocket ss(socket);
+		pInfo->pHandler->readable(*this, ss);
+	}
+	catch (Poco::Exception& exc)
+	{
+		_logger.log(exc);
+	}
+}
+
+
+void SocketDispatcher::writable(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
+{
+	try
+	{
+		Poco::Net::StreamSocket ss(socket);
+		if (pInfo->pendingSends.empty())
 		{
-			Poco::Notification::Ptr pNf = _workerQueue.waitDequeueNotification(WORKER_QUEUE_TIMEOUT);
-			if (pNf)
+			pInfo->pHandler->writable(*this, ss);
+		}
+		else
+		{
+			while (!pInfo->pendingSends.empty())
 			{
-				TaskNotification::Ptr pTaskNf = pNf.cast<TaskNotification>();
-				if (pTaskNf)
+				PendingSend& pending = *pInfo->pendingSends.begin();
+				if (pending.options == PendingSend::OPT_SHUTDOWN)
 				{
-					pTaskNf->execute();
+					ss.shutdownSend();
+					if (pInfo->pendingSends.size() > 1)
+					{
+						_logger.warning("Discarding pending writes after shutdown");
+					}
+					pInfo->pendingSends.clear();
+				}
+				else
+				{
+					int sent = ss.sendBytes(pending.buffer.begin(), static_cast<int>(pending.buffer.size()), pending.options);
+					if (sent > 0)
+					{
+						if (sent < pending.buffer.size())
+						{
+							std::memmove(pending.buffer.begin(), pending.buffer.begin() + sent, pending.buffer.size() - sent);
+							pending.buffer.resize(pending.buffer.size() - sent);
+							break;
+						}
+						else
+						{
+							pInfo->pendingSends.pop_front();
+						}
+					}
+					else break;
 				}
 			}
 		}
-		catch (Poco::Exception& exc)
+	}
+	catch (Poco::Exception& exc)
+	{
+		_logger.log(exc);
+	}
+}
+
+
+void SocketDispatcher::exception(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
+{
+	try
+	{
+		Poco::Net::StreamSocket ss(socket);
+		pInfo->pHandler->exception(*this, ss);
+	}
+	catch (Poco::Exception& exc)
+	{
+		_logger.log(exc);
+	}
+}
+
+
+void SocketDispatcher::timeout(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
+{
+	try
+	{
+		Poco::Net::StreamSocket ss(socket);
+		pInfo->pHandler->timeout(*this, ss);
+	}
+	catch (Poco::Exception& exc)
+	{
+		_logger.log(exc);
+	}
+}
+
+
+void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
+{
+	mode |= Poco::Net::PollSet::POLL_ERROR;
+	_socketMap[socket] = new SocketInfo(pHandler, mode, timeout);
+	_pollSet.add(socket, mode);
+}
+
+
+void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout)
+{
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
+	{
+		if (timeout != 0)
 		{
-			_logger.error("Exception in worker thread: %s"s, exc.displayText());
+			it->second->timeout = timeout;
 		}
+		mode |= Poco::Net::PollSet::POLL_ERROR;
+		it->second->mode = mode;
+		_pollSet.update(socket, mode);
 	}
-}
-
-
-void SocketDispatcher::readable(const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo)
-{
-	_workerQueue.enqueueNotification(new ReadableNotification(*this, socket, pInfo));
-}
-
-
-void SocketDispatcher::exception(const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo)
-{
-	_workerQueue.enqueueNotification(new ExceptionNotification(*this, socket, pInfo));
-}
-
-
-void SocketDispatcher::timeout(const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketInfo::Ptr& pInfo)
-{
-	_workerQueue.enqueueNotification(new TimeoutNotification(*this, socket, pInfo));
-}
-
-
-void SocketDispatcher::readableImpl(Poco::Net::StreamSocket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
-{
-	try
-	{
-		int reads = 0;
-		bool expectMore = false;
-		do
-		{
-			if (socket.impl()->initialized())
-			{
-				expectMore = pInfo->pHandler->readable(*this, socket);
-			}
-		}
-		while (socket.impl()->initialized() && (socket.available() > 0 || (expectMore && reads++ < _maxReadsPerWorker && socket.poll(_timeout, Poco::Net::Socket::SELECT_READ))));
-	}
-	catch (Poco::Exception& exc)
-	{
-		_logger.log(exc);
-	}
-	pInfo->wantRead = socket.impl()->initialized();
-}
-
-
-void SocketDispatcher::exceptionImpl(Poco::Net::StreamSocket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
-{
-	try
-	{
-		pInfo->pHandler->exception(*this, socket);
-	}
-	catch (Poco::Exception& exc)
-	{
-		_logger.log(exc);
-	}
-}
-
-
-void SocketDispatcher::timeoutImpl(Poco::Net::StreamSocket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
-{
-	try
-	{
-		pInfo->pHandler->timeout(*this, socket);
-	}
-	catch (Poco::Exception& exc)
-	{
-		_logger.log(exc);
-	}
-	pInfo->wantRead = socket.impl()->initialized();
-}
-
-
-void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, Poco::Timespan timeout)
-{
-	_socketMap[socket] = new SocketInfo(pHandler, timeout);
-	_pollSet.add(socket, Poco::Net::PollSet::POLL_READ | Poco::Net::PollSet::POLL_ERROR);
 }
 
 
 void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 {
+	_logger.debug("Removing socket %?d...", socket.impl()->sockfd());
 	_socketMap.erase(socket);
 	try
 	{
@@ -541,15 +615,16 @@ void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 
 void SocketDispatcher::closeSocketImpl(Poco::Net::StreamSocket& socket)
 {
-	_socketMap.erase(socket);
+	_logger.debug("Closing socket %?d...", socket.impl()->sockfd());
 	try
 	{
 		_pollSet.remove(socket);
+		socket.close();
 	}
 	catch (Poco::IOException&)
 	{
 	}
-	socket.shutdown();
+	_socketMap.erase(socket);
 }
 
 
@@ -557,6 +632,63 @@ void SocketDispatcher::resetImpl()
 {
 	_socketMap.clear();
 	_pollSet.clear();
+}
+
+
+void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, int options)
+{
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
+	{
+		if  (it->second->pendingSends.empty())
+		{
+			int sent = socket.sendBytes(buffer.begin(), static_cast<int>(buffer.size()), options);
+			if (sent < 0)
+			{
+				it->second->pendingSends.emplace_back(std::move(buffer), options);
+			}
+			else if (sent < buffer.size())
+			{
+				it->second->pendingSends.emplace_back(buffer.begin() + sent, buffer.size() - sent, options);
+			}
+		}
+		else
+		{
+			it->second->pendingSends.emplace_back(std::move(buffer), options);
+		}
+	}
+	else
+	{
+		_logger.error("sendBytes() called with unknown socket.");
+	}
+}
+
+
+void SocketDispatcher::shutdownSendImpl(Poco::Net::StreamSocket& socket)
+{
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
+	{
+		if  (it->second->pendingSends.empty())
+		{
+			socket.shutdownSend();
+		}
+		else
+		{
+			it->second->pendingSends.emplace_back(PendingSend::OPT_SHUTDOWN);
+		}
+	}
+}
+
+
+bool SocketDispatcher::hasPendingSends(const Poco::Net::StreamSocket& socket) const
+{
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
+	{
+		return !it->second->pendingSends.empty();
+	}
+	else return false;
 }
 
 

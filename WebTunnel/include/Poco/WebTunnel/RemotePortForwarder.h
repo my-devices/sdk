@@ -52,7 +52,7 @@ public:
 	virtual ~SocketFactory();
 		/// Destroys the SocketFactory.
 
-	virtual Poco::Net::StreamSocket createSocket(const Poco::Net::SocketAddress& addr, Poco::Timespan timeout);
+	virtual Poco::Net::StreamSocket createSocket(const Poco::Net::SocketAddress& addr);
 		/// Creates and connects a socket to the given address.
 		/// If the socket cannot be connected within the given timeout,
 		/// throws a Poco::TimeoutException.
@@ -99,6 +99,12 @@ public:
 	const Poco::Timespan& getLocalTimeout() const;
 		/// Returns the timeout for the forwarded local ports.
 
+	void setCloseTimeout(const Poco::Timespan& timeout);
+		/// Sets the close timeout for the forwarded local ports.
+
+	const Poco::Timespan& getCloseTimeout() const;
+		/// Returns the close timeout for the forwarded local ports.
+
 	void setConnectTimeout(const Poco::Timespan& timeout);
 		/// Sets the timeout for connecting to local ports.
 
@@ -112,18 +118,22 @@ public:
 		/// Transmits properties (key-value pairs) to the remote peer.
 
 protected:
-	bool multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
+	void multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
 	void multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
 	void multiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
-	bool demultiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
+	void demultiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
 	void demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
 	void demultiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
-	bool forwardData(const char* buffer, int size, Poco::UInt16 channel);
-	bool openChannel(Poco::UInt16 channel, Poco::UInt16 port);
+	void connect(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
+	void connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
+	void connectTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
+	void forwardData(const char* buffer, int size, Poco::UInt16 channel);
+	void openChannel(Poco::UInt16 channel, Poco::UInt16 port);
 	void removeChannel(Poco::UInt16 channel);
 	void sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode, Poco::UInt16 errorCode);
 	void closeWebSocket(CloseReason reason, bool active);
-	void pingWebSocket();
+	int setChannelFlag(Poco::UInt16 channel, int flag);
+	int getChannelFlags(Poco::UInt16 channel) const;
 
 private:
 	class TunnelMultiplexer: public SocketDispatcher::SocketHandler
@@ -136,9 +146,13 @@ private:
 		{
 		}
 
-		bool readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
-			return _forwarder.multiplex(dispatcher, socket, _channel, _buffer);
+			_forwarder.multiplex(dispatcher, socket, _channel, _buffer);
+		}
+
+		void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
 		}
 
 		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -166,9 +180,13 @@ private:
 		{
 		}
 
-		bool readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
-			return _forwarder.demultiplex(dispatcher, socket, _buffer);
+			_forwarder.demultiplex(dispatcher, socket, _buffer);
+		}
+
+		void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
 		}
 
 		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -186,20 +204,65 @@ private:
 		Poco::Buffer<char> _buffer;
 	};
 
-	typedef std::map<Poco::UInt16, Poco::Net::StreamSocket> ChannelMap;
+	class TunnelConnector: public SocketDispatcher::SocketHandler
+	{
+	public:
+		TunnelConnector(RemotePortForwarder& forwarder, Poco::UInt16 channel):
+			_forwarder(forwarder),
+			_channel(channel)
+		{
+		}
+
+		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
+		}
+
+		void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
+			_forwarder.connect(dispatcher, socket, _channel);
+		}
+
+		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
+			_forwarder.connectError(dispatcher, socket, _channel);
+		}
+
+		void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		{
+			_forwarder.connectTimeout(dispatcher, socket, _channel);
+		}
+
+	private:
+		RemotePortForwarder& _forwarder;
+		Poco::UInt16 _channel;
+	};
+
+	enum ConnectionFlags
+	{
+		CF_CLOSED_LOCAL = 0x01,
+		CF_CLOSED_REMOTE = 0x02
+	};
+
+	struct ChannelInfo
+	{
+		Poco::Net::StreamSocket socket;
+		int flags = 0;
+	};
+	using ChannelMap = std::map<Poco::UInt16, ChannelInfo>;
 
 	SocketDispatcher& _dispatcher;
 	SocketFactory::Ptr _pSocketFactory;
 	Poco::SharedPtr<Poco::Net::WebSocket> _pWebSocket;
-	Poco::FastMutex _webSocketMutex;
+	int _webSocketFlags = 0;
 	Poco::Net::IPAddress _host;
 	std::set<Poco::UInt16> _ports;
 	ChannelMap _channelMap;
 	Poco::Timespan _connectTimeout;
 	Poco::Timespan _localTimeout;
+	Poco::Timespan _closeTimeout;
 	Poco::Timespan _remoteTimeout;
-	bool _timeoutCount;
-	Poco::FastMutex _mutex;
+	int _timeoutCount = 0;
+	mutable Poco::FastMutex _mutex;
 	Poco::Logger& _logger;
 
 	RemotePortForwarder();

@@ -201,7 +201,7 @@ public:
 	{
 	}
 
-	bool readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 	{
 		int n = 0;
 		try
@@ -213,14 +213,14 @@ public:
 			_logger.debug("Exception while receiving data from local socket: %s"s, exc.displayText());
 			shutdown(*_pWebSocket, Poco::Net::WebSocket::WS_UNEXPECTED_CONDITION, _logger);
 			cleanupDispatcher(socket, *_pWebSocket);
-			return false;
+			return;
 		}
 		catch (Poco::Exception& exc)
 		{
 			_logger.error("Exception while receiving data from local socket: %s"s, exc.displayText());
 			shutdown(*_pWebSocket, Poco::Net::WebSocket::WS_UNEXPECTED_CONDITION, _logger);
 			cleanupDispatcher(socket, *_pWebSocket);
-			return false;
+			return;
 		}
 		if (n > 0)
 		{
@@ -228,7 +228,7 @@ public:
 			{
 				Poco::FastMutex::ScopedLock lock(webSocketMutex());
 				_pWebSocket->sendFrame(_buffer.begin(), n, Poco::Net::WebSocket::FRAME_BINARY);
-				return true;
+				return;
 			}
 			catch (Poco::Exception& exc)
 			{
@@ -242,7 +242,11 @@ public:
 			shutdown(*_pWebSocket, Poco::Net::WebSocket::WS_NORMAL_CLOSE, _logger);
 			cleanupDispatcher(socket, *_pWebSocket);
 		}
-		return false;
+		return;
+	}
+
+	void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	{
 	}
 
 	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -279,7 +283,7 @@ public:
 	{
 	}
 
-	bool readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 	{
 		Poco::Net::WebSocket webSocket(socket);
 		int flags;
@@ -293,33 +297,33 @@ public:
 		{
 			_logger.debug("Exception while receiving data from remote socket: %s"s, exc.displayText());
 			cleanupDispatcher(socket, _streamSocket);
-			return false;
+			return;
 		}
 		catch (Poco::Exception& exc)
 		{
 			_logger.error("Exception while receiving data from remote socket: %s"s, exc.displayText());
 			cleanupDispatcher(socket, _streamSocket);
-			return false;
+			return;
 		}
 		if ((flags & Poco::Net::WebSocket::FRAME_OP_BITMASK) == Poco::Net::WebSocket::FRAME_OP_PONG)
 		{
 			_logger.debug("PONG received"s);
 			_timeoutCount = 0;
-			return false;
+			return;
 		}
 		if (n > 0 && (flags & Poco::Net::WebSocket::FRAME_OP_BITMASK) == Poco::Net::WebSocket::FRAME_OP_BINARY)
 		{
 			try
 			{
 				_streamSocket.sendBytes(_buffer.begin(), n);
-				return true;
+				return;
 			}
 			catch (Poco::Exception& exc)
 			{
 				_logger.error("Exception while sending data: %s"s, exc.displayText());
 				cleanupDispatcher(socket, _streamSocket);
 				shutdown(webSocket, Poco::Net::WebSocket::WS_UNEXPECTED_CONDITION, _logger);
-				return false;
+				return;
 			}
 		}
 		else if (n <= 0 || (flags & Poco::Net::WebSocket::FRAME_OP_BITMASK) == Poco::Net::WebSocket::FRAME_OP_CLOSE)
@@ -332,7 +336,11 @@ public:
 		{
 			_logger.debug("Ignoring unsupported frame type"s);
 		}
-		return false;
+		return;
+	}
+
+	void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	{
 	}
 
 	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -469,10 +477,12 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 		}
 
 		socket.setNoDelay(true);
+		socket.setBlocking(false);
 		pWebSocket->setNoDelay(true);
+		pWebSocket->setBlocking(false);
 
-		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(_pDispatcher, pWebSocket, _webSocketMutex), _localTimeout);
-		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(_pDispatcher, socket, _webSocketMutex), _remoteTimeout);
+		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(_pDispatcher, pWebSocket, _webSocketMutex), Poco::Net::PollSet::POLL_READ, _localTimeout);
+		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(_pDispatcher, socket, _webSocketMutex), Poco::Net::PollSet::POLL_READ, _remoteTimeout);
 	}
 	catch (Poco::Exception& exc)
 	{
