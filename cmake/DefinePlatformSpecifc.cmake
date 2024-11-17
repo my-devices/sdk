@@ -49,6 +49,11 @@ else(MSVC)
     set(STATIC_POSTFIX "" CACHE STRING "Set static library postfix" FORCE)
 endif(MSVC)
 
+if (DEFINED POCO_SANITIZEFLAGS AND NOT "${POCO_SANITIZEFLAGS}" STREQUAL "")
+	message(STATUS "Using sanitize flags: ${POCO_SANITIZEFLAGS}")
+	add_compile_options(${POCO_SANITIZEFLAGS})
+	add_link_options(${POCO_SANITIZEFLAGS})
+endif()
 
 
 # Add a d postfix to the debug libraries

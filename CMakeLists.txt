@@ -54,6 +54,7 @@ endif()
 include(PocoMacros)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+set(POCO_SANITIZEFLAGS CACHE STRING "Compiler-dependent sanitizer flags (like -fsanitize=address or /fsanitize=address")
 
 if(MSVC)
 	if (BUILD_SHARED_LIBS)
