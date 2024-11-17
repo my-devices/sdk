@@ -265,9 +265,9 @@ private:
 	mutable Poco::FastMutex _mutex;
 	Poco::Logger& _logger;
 
-	RemotePortForwarder();
-	RemotePortForwarder(const RemotePortForwarder&);
-	RemotePortForwarder& operator = (const RemotePortForwarder&);
+	RemotePortForwarder() = delete;
+	RemotePortForwarder(const RemotePortForwarder&) = delete;
+	RemotePortForwarder& operator = (const RemotePortForwarder&) = delete;
 
 	friend class TunnelMultiplexer;
 	friend class TunnelDemultiplexer;

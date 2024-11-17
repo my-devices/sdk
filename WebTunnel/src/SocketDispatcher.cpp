@@ -429,7 +429,15 @@ void SocketDispatcher::readable(const Poco::Net::Socket& socket, SocketDispatche
 	try
 	{
 		Poco::Net::StreamSocket ss(socket);
-		pInfo->pHandler->readable(*this, ss);
+		do
+		{
+			pInfo->pHandler->readable(*this, ss);
+		}
+		while (ss.available() > 0 && !ss.poll(0, Poco::Net::PollSet::POLL_READ));
+		// Need to loop here as there could still be buffered data in an internal socket 
+		// buffer (especially with SecureStreamSocket) that would not be indicated by PollSet.
+		// However, we don't want to be stuck handling just that one
+		// socket if a peer drowns us in data. 
 	}
 	catch (Poco::Exception& exc)
 	{
@@ -531,12 +539,12 @@ void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, i
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
-		_logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);
 		if (timeout != 0)
 		{
 			it->second->timeout = timeout;
 		}
 		mode |= Poco::Net::PollSet::POLL_ERROR;
+		_logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);
 		it->second->mode = mode;
 		_pollSet.update(socket, mode);
 	}

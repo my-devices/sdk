@@ -146,6 +146,35 @@ public:
 	Poco::Timespan getRemoteTimeout() const;
 		/// Returns the timeout for the remote WebSocket connection.
 
+	void setCloseTimeout(Poco::Timespan timeout);
+		/// Sets the timeout for closing a connection.
+
+	Poco::Timespan getCloseTimeout() const;
+		/// Returns the timeout for closing a connection.
+
+	enum ConnectionFlags
+	{
+		CF_CLOSED_LOCAL = 0x01,
+		CF_CLOSED_REMOTE = 0x02,
+		CF_ERROR = 0x04
+	};
+
+	struct ConnectionPair
+	{
+		ConnectionPair(const Poco::Net::WebSocket& ws, const Poco::Net::StreamSocket ss, Poco::Timespan ts):
+			webSocket(ws),
+			streamSocket(ss),
+			closeTimeout(ts)
+		{
+		}
+
+		Poco::Net::WebSocket webSocket;
+		int webSocketFlags = 0;
+		Poco::Net::StreamSocket streamSocket;
+		int streamSocketFlags = 0;
+		Poco::Timespan closeTimeout;
+	};
+
 protected:
 	void forward(Poco::Net::StreamSocket& socket);
 
@@ -155,17 +184,16 @@ private:
 	Poco::URI _remoteURI;
 	Poco::Timespan _localTimeout;
 	Poco::Timespan _remoteTimeout;
-	int _timeoutCount;
+	Poco::Timespan _closeTimeout;
 	WebSocketFactory::Ptr _pWebSocketFactory;
 	Poco::Net::ServerSocket _serverSocket;
 	Poco::Net::TCPServer _tcpServer;
 	Poco::SharedPtr<SocketDispatcher> _pDispatcher;
-	Poco::FastMutex _webSocketMutex;
 	Poco::Logger& _logger;
 
-	LocalPortForwarder();
-	LocalPortForwarder(const LocalPortForwarder&);
-	LocalPortForwarder& operator = (const LocalPortForwarder&);
+	LocalPortForwarder() = delete;
+	LocalPortForwarder(const LocalPortForwarder&) = delete;
+	LocalPortForwarder& operator = (const LocalPortForwarder&) = delete;
 
 	static const std::string SEC_WEBSOCKET_PROTOCOL;
 	static const std::string X_WEBTUNNEL_REMOTEPORT;
@@ -205,6 +233,12 @@ inline Poco::Timespan LocalPortForwarder::getLocalTimeout() const
 inline Poco::Timespan LocalPortForwarder::getRemoteTimeout() const
 {
 	return _remoteTimeout;
+}
+
+
+inline Poco::Timespan LocalPortForwarder::getCloseTimeout() const
+{
+	return _closeTimeout;
 }
 
 
