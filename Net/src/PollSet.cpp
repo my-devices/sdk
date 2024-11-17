@@ -63,7 +63,7 @@ public:
 			SocketImpl::error();
 		}
 		struct epoll_event ev;
-		ev.events |= EPOLLIN;
+		ev.events = EPOLLIN;
 		ev.data.ptr = 0;
 		if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _eventfd, &ev) < 0)
 		{
@@ -122,6 +122,25 @@ public:
 		_socketMap.erase(socket.impl());
 	}
 
+	void update(const Socket& socket, int mode)
+	{
+		poco_socket_t fd = socket.impl()->sockfd();
+		struct epoll_event ev;
+		ev.events = 0;
+		if (mode & PollSet::POLL_READ)
+			ev.events |= EPOLLIN;
+		if (mode & PollSet::POLL_WRITE)
+			ev.events |= EPOLLOUT;
+		if (mode & PollSet::POLL_ERROR)
+			ev.events |= EPOLLERR;
+		ev.data.ptr = socket.impl();
+		int err = epoll_ctl(_epollfd, EPOLL_CTL_MOD, fd, &ev);
+		if (err)
+		{
+			SocketImpl::error();
+		}
+	}
+
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
@@ -143,25 +162,6 @@ public:
 		Poco::FastMutex::ScopedLock lock(_mutex);
 
 		return _socketMap.size();
-	}
-
-	void update(const Socket& socket, int mode)
-	{
-		poco_socket_t fd = socket.impl()->sockfd();
-		struct epoll_event ev;
-		ev.events = 0;
-		if (mode & PollSet::POLL_READ)
-			ev.events |= EPOLLIN;
-		if (mode & PollSet::POLL_WRITE)
-			ev.events |= EPOLLOUT;
-		if (mode & PollSet::POLL_ERROR)
-			ev.events |= EPOLLERR;
-		ev.data.ptr = socket.impl();
-		int err = epoll_ctl(_epollfd, EPOLL_CTL_MOD, fd, &ev);
-		if (err)
-		{
-			SocketImpl::error();
-		}
 	}
 
 	void clear()
@@ -188,7 +188,7 @@ public:
 		do
 		{
 			Poco::Timestamp start;
-			rc = epoll_wait(_epollfd, &_events[0], _events.size(), remainingTime.totalMilliseconds());
+			rc = epoll_wait(_epollfd, _events.data(), _events.size(), remainingTime.totalMilliseconds());
 			if (rc < 0 && SocketImpl::lastError() == POCO_EINTR)
 			{
 				Poco::Timestamp end;
@@ -277,6 +277,24 @@ public:
 		_socketMap.erase(fd);
 	}
 
+	void update(const Socket& socket, int mode)
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+
+		poco_socket_t fd = socket.impl()->sockfd();
+		for (auto it = _pollfds.begin(); it != _pollfds.end(); ++it)
+		{
+			if (it->fd == fd)
+			{
+				it->events = 0;
+				if (mode & PollSet::POLL_READ)
+					it->events |= POLLIN;
+				if (mode & PollSet::POLL_WRITE)
+					it->events |= POLLOUT;
+			}
+		}
+	}
+
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
@@ -297,24 +315,6 @@ public:
 		Poco::FastMutex::ScopedLock lock(_mutex);
 
 		return _socketMap.size();
-	}
-
-	void update(const Socket& socket, int mode)
-	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-
-		poco_socket_t fd = socket.impl()->sockfd();
-		for (auto it = _pollfds.begin(); it != _pollfds.end(); ++it)
-		{
-			if (it->fd == fd)
-			{
-				it->events = 0;
-				if (mode & PollSet::POLL_READ)
-					it->events |= POLLIN;
-				if (mode & PollSet::POLL_WRITE)
-					it->events |= POLLOUT;
-			}
-		}
 	}
 
 	void clear()
@@ -371,9 +371,9 @@ public:
 		{
 			Poco::Timestamp start;
 #ifdef _WIN32
-			rc = WSAPoll(&_pollfds[0], static_cast<ULONG>(_pollfds.size()), static_cast<INT>(remainingTime.totalMilliseconds()));
+			rc = WSAPoll(_pollfds.data(), static_cast<ULONG>(_pollfds.size()), static_cast<INT>(remainingTime.totalMilliseconds()));
 #else
-			rc = ::poll(&_pollfds[0], _pollfds.size(), remainingTime.totalMilliseconds());
+			rc = ::poll(_pollfds.data(), _pollfds.size(), remainingTime.totalMilliseconds());
 #endif
 			if (rc < 0 && SocketImpl::lastError() == POCO_EINTR)
 			{
@@ -451,6 +451,13 @@ public:
 		_map.erase(socket);
 	}
 
+	void update(const Socket& socket, int mode)
+	{
+		Poco::FastMutex::ScopedLock lock(_mutex);
+
+		_map[socket] = mode;
+	}
+
 	bool has(const Socket& socket) const
 	{
 		Poco::FastMutex::ScopedLock lock(_mutex);
@@ -470,13 +477,6 @@ public:
 		Poco::FastMutex::ScopedLock lock(_mutex);
 
 		return _map.size();
-	}
-
-	void update(const Socket& socket, int mode)
-	{
-		Poco::FastMutex::ScopedLock lock(_mutex);
-
-		_map[socket] = mode;
 	}
 
 	void clear()
