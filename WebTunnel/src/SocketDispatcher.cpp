@@ -457,7 +457,7 @@ void SocketDispatcher::writable(const Poco::Net::Socket& socket, SocketDispatche
 					ss.shutdownSend();
 					if (pInfo->pendingSends.size() > 1)
 					{
-						_logger.warning("Discarding pending writes after shutdown");
+						_logger.debug("Discarding pending writes after shutdown");
 					}
 					pInfo->pendingSends.clear();
 				}
@@ -519,6 +519,7 @@ void SocketDispatcher::timeout(const Poco::Net::Socket& socket, SocketDispatcher
 
 void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
 {
+	_logger.trace("Adding socket %?d (%d)..."s, socket.impl()->sockfd(), mode);
 	mode |= Poco::Net::PollSet::POLL_ERROR;
 	_socketMap[socket] = new SocketInfo(pHandler, mode, timeout);
 	_pollSet.add(socket, mode);
@@ -530,6 +531,7 @@ void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, i
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
+		_logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);
 		if (timeout != 0)
 		{
 			it->second->timeout = timeout;
@@ -543,7 +545,7 @@ void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, i
 
 void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 {
-	_logger.debug("Removing socket %?d...", socket.impl()->sockfd());
+	_logger.trace("Removing socket %?d..."s, socket.impl()->sockfd());
 	_socketMap.erase(socket);
 	try
 	{
@@ -557,7 +559,7 @@ void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 
 void SocketDispatcher::closeSocketImpl(Poco::Net::StreamSocket& socket)
 {
-	_logger.debug("Closing socket %?d...", socket.impl()->sockfd());
+	_logger.trace("Closing socket %?d..."s, socket.impl()->sockfd());
 	try
 	{
 		_pollSet.remove(socket);
