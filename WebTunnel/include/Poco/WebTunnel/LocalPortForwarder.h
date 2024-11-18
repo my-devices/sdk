@@ -197,6 +197,7 @@ private:
 
 	static const std::string SEC_WEBSOCKET_PROTOCOL;
 	static const std::string X_WEBTUNNEL_REMOTEPORT;
+	static const std::string X_WEBTUNNEL_KEEPALIVE;
 	static const std::string WEBTUNNEL_PROTOCOL;
 
 	friend class LocalPortForwarderConnection;

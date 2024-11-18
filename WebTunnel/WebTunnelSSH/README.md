@@ -80,6 +80,16 @@ The above settings will disable validation of the remote host key and prevent wa
 when `ssh` connects to `localhost`, as it does when invoked from `remote-ssh`.
 It also prevents `ssh` from writing an entry to the `known_hosts` file.
 
+Alternatively, if you do not want to edit the SSH configuration file, you can
+create a `.remote-ssh.properties` file in your home directory with the following
+line:
+
+```
+ssh.extraArguments = -o StrictHostKeyChecking=no,-o UserKnownHostsFile=/dev/null,-o LogLevel=QUIET
+```
+
+Note that the specified arguments must be delimited by a comma.
+
 ### Using remote-ssh for Transferring Files Using SCP
 
 On platforms supporting the `scp` program for secure file transfers, `remote-ssh`

@@ -24,6 +24,7 @@
 #include "Poco/Net/HTTPBasicCredentials.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/NumberParser.h"
 #include "Poco/Format.h"
 #include "Poco/Buffer.h"
 
@@ -433,6 +434,7 @@ private:
 
 const std::string LocalPortForwarder::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string LocalPortForwarder::X_WEBTUNNEL_REMOTEPORT("X-WebTunnel-RemotePort");
+const std::string LocalPortForwarder::X_WEBTUNNEL_KEEPALIVE("X-WebTunnel-KeepAlive");
 const std::string LocalPortForwarder::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.client/1.0");
 
 
@@ -515,6 +517,7 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 		Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
 		request.set(SEC_WEBSOCKET_PROTOCOL, WEBTUNNEL_PROTOCOL);
 		request.set(X_WEBTUNNEL_REMOTEPORT, Poco::NumberFormatter::format(_remotePort));
+		request.set(X_WEBTUNNEL_KEEPALIVE, Poco::NumberFormatter::format(_remoteTimeout.totalSeconds()));
 		Poco::Net::HTTPResponse response;
 		Poco::SharedPtr<Poco::Net::WebSocket> pWebSocket = _pWebSocketFactory->createWebSocket(_remoteURI, request, response);
 		if (response.get(SEC_WEBSOCKET_PROTOCOL, ""s) != WEBTUNNEL_PROTOCOL)
@@ -542,6 +545,13 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 			pWebSocket->close();
 			socket.close();
 			return;
+		}
+
+		if (response.has(X_WEBTUNNEL_KEEPALIVE))
+		{
+			int keepAlive = Poco::NumberParser::parse(response.get(X_WEBTUNNEL_KEEPALIVE));
+			_remoteTimeout.assign(keepAlive, 0);
+			_logger.debug("Server has requested a keep-alive timeout (remoteTimeout) of %d seconds."s, keepAlive);
 		}
 
 		Poco::SharedPtr<ConnectionPair> pConnectionPair = new ConnectionPair(*pWebSocket, socket, _closeTimeout);

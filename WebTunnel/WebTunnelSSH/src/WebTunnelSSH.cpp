@@ -31,6 +31,7 @@
 #include "Poco/Environment.h"
 #include "Poco/Format.h"
 #include "Poco/String.h"
+#include "Poco/StringTokenizer.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include <iostream>
@@ -500,6 +501,10 @@ protected:
 
 			Poco::UInt16 localPort = forwarder.localPort();
 
+			std::string extraSSHArgs = config().getString("ssh.extraArguments"s, ""s);
+			Poco::StringTokenizer extraSSHArgsTok(extraSSHArgs, ","s, Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+			std::vector<std::string> extraArgsVec(extraSSHArgsTok.begin(), extraSSHArgsTok.end());
+
 			Poco::Process::Args sshArgs;
 			if (Poco::icompare(_sshClient, 0, 5, "putty") == 0 || Poco::icompare(_sshClient, 0, 3, "scp") == 0)
 				sshArgs.push_back("-P"s);
@@ -513,12 +518,15 @@ protected:
 				sshArgs.push_back("-l"s);
 				sshArgs.push_back(_login);
 			}
+
 			if (!_identity.empty())
 			{
 				sshArgs.push_back("-i");
 				sshArgs.push_back(_identity);
 			}
+			sshArgs.insert(sshArgs.end(), extraArgsVec.begin(), extraArgsVec.end());
 			sshArgs.insert(sshArgs.end(), itArgs, args.end());
+			
 			if (Poco::icompare(_sshClient, 0, 3, "scp") != 0)
 			{
 				sshArgs.push_back("localhost"s);
