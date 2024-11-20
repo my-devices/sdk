@@ -91,20 +91,23 @@ void RemotePortForwarder::stop()
 {
 	const Poco::Timestamp::TimeDiff STOP_TIMEOUT = 500000;
 
-	_dispatcher.queueTask(
-		[pSelf=this](SocketDispatcher& dispatcher)
-		{
-			pSelf->closeWebSocket(RPF_CLOSE_GRACEFUL, true);
-		}
-	);
-
-	_logger.debug("Waiting for WebSocket closing handshake to complete..."s);
-	Poco::Timestamp closeTime;
-	while (_dispatcher.hasSocket(*_pWebSocket) && !closeTime.isElapsed(STOP_TIMEOUT))
+	if (_dispatcher.hasSocket(*_pWebSocket))
 	{
-		Poco::Thread::sleep(20);
+		_dispatcher.queueTask(
+			[pSelf=this](SocketDispatcher& dispatcher)
+			{
+				pSelf->closeWebSocket(RPF_CLOSE_GRACEFUL, true);
+			}
+		);
+
+		_logger.debug("Waiting for WebSocket closing handshake to complete..."s);
+		Poco::Timestamp closeTime;
+		while (_dispatcher.hasSocket(*_pWebSocket) && !closeTime.isElapsed(STOP_TIMEOUT))
+		{
+			Poco::Thread::sleep(20);
+		}
+		_dispatcher.removeSocket(*_pWebSocket);
 	}
-	_dispatcher.removeSocket(*_pWebSocket);
 }
 
 
