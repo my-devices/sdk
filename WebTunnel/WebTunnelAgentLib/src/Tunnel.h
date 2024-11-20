@@ -95,6 +95,9 @@ protected:
 	static const std::string SEC_WEBSOCKET_PROTOCOL;
 	static const std::string WEBTUNNEL_PROTOCOL;
 	static const std::string WEBTUNNEL_AGENT;
+	static const std::string X_PTTH_SET_PROPERTY;
+	static const std::string X_PTTH_ERROR;
+	static const std::string X_WEBTUNNEL_KEEPALIVE;
 
 private:
 	std::string _id;

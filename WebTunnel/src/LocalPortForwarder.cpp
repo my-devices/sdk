@@ -447,11 +447,11 @@ LocalPortForwarder::LocalPortForwarder(Poco::UInt16 localPort, Poco::UInt16 remo
 	_pWebSocketFactory(pWebSocketFactory),
 	_serverSocket(_localAddr),
 	_tcpServer(new LocalPortForwarderConnectionFactory(*this), _serverSocket),
+	_pDispatcher(new SocketDispatcher),
 	_logger(Poco::Logger::get("WebTunnel.LocalPortForwarder"s))
 {
 	_localAddr = _serverSocket.address();
 	_tcpServer.start();
-	_pDispatcher = new SocketDispatcher(10);
 }
 
 
@@ -464,7 +464,7 @@ LocalPortForwarder::LocalPortForwarder(const Poco::Net::SocketAddress& localAddr
 	_pWebSocketFactory(pWebSocketFactory),
 	_serverSocket(_localAddr),
 	_tcpServer(new LocalPortForwarderConnectionFactory(*this), _serverSocket, pServerParams),
-	_pDispatcher(new SocketDispatcher(16)),
+	_pDispatcher(new SocketDispatcher),
 	_logger(Poco::Logger::get("WebTunnel.LocalPortForwarder"s))
 {
 	_localAddr = _serverSocket.address();

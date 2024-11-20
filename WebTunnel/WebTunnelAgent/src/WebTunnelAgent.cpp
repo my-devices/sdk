@@ -155,7 +155,6 @@ public:
 		_appPort(0),
 		_useProxy(false),
 		_proxyPort(0),
-		_threads(8),
 		_retryDelay(MIN_RETRY_DELAY),
 		_status(STATUS_DISCONNECTED)
 	{
@@ -405,7 +404,7 @@ protected:
 				}
 				pWebSocket->setNoDelay(true);
 				_retryDelay = MIN_RETRY_DELAY;
-				_pDispatcher = new Poco::WebTunnel::SocketDispatcher(_threads);
+				_pDispatcher = new Poco::WebTunnel::SocketDispatcher;
 				_pForwarder = new Poco::WebTunnel::RemotePortForwarder(*_pDispatcher, pWebSocket, _host, _ports, _remoteTimeout, _pSocketFactory);
 				_pForwarder->webSocketClosed += Poco::delegate(this, &WebTunnelAgent::onClose);
 				_pForwarder->setConnectTimeout(_connectTimeout);
@@ -825,7 +824,6 @@ protected:
 				_localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
 				_connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout"s, 10), 0);
 				_remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
-				_threads = config().getInt("webtunnel.threads"s, 8);
 				_httpPath = config().getString("webtunnel.httpPath"s, ""s);
 				_httpPort = config().getUInt16("webtunnel.httpPort"s, 0);
 				_httpsRequired = config().getBool("webtunnel.https.enable"s, false);
@@ -975,7 +973,6 @@ private:
 	Poco::Timespan _httpTimeout;
 	Poco::Timespan _propertiesUpdateInterval;
 	std::string _notifyExec;
-	int _threads;
 	Poco::SharedPtr<Poco::WebTunnel::SocketDispatcher> _pDispatcher;
 	Poco::SharedPtr<Poco::WebTunnel::RemotePortForwarder> _pForwarder;
 	Poco::SharedPtr<Poco::Net::HTTPClientSession> _pHTTPClientSession;

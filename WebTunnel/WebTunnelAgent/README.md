@@ -378,11 +378,6 @@ will be passed as command-line argument to the executable and will be one of:
   * `error`: there has been an error establishing the tunnel. A second parameter will
     also be passed containing more information about the error.
 
-#### webtunnel.threads
-
-The number of I/O threads the `WebTunnelAgent` should use. Should be left at the default
-(4).
-
 #### webtunnel.properties
 
 This setting specifies additional device properties that are sent to the

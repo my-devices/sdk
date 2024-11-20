@@ -86,8 +86,8 @@ public:
 		virtual void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 	};
 
-	SocketDispatcher(int threadCount, Poco::Timespan timeout = Poco::Timespan(5000));
-		/// Creates the SocketDispatcher, using the given number of worker threads.
+	explicit SocketDispatcher(Poco::Timespan timeout = Poco::Timespan(5000));
+		/// Creates the SocketDispatcher.
 		///
 		/// The given timeout is used for the main select loop, as well as
 		/// by workers to poll if more reads are possible, up to the given

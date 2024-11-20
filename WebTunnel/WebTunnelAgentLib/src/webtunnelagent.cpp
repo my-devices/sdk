@@ -69,7 +69,6 @@ webtunnel.password =
 webtunnel.connectTimeout = 10
 webtunnel.localTimeout = 7200
 webtunnel.remoteTimeout = 900
-webtunnel.threads = 4
 http.timeout = 30
 tls.acceptUnknownCertificate = false
 tls.ciphers = HIGH:!DSS:!aNULL@STRENGTH
@@ -414,7 +413,7 @@ webtunnel_agent WebTunnelAgent_API webtunnel_agent_create(const char* reflector_
 			pConfig->setString("webtunnel.ports"s, portsList);
 		}
 
-		Poco::SharedPtr<Poco::WebTunnel::SocketDispatcher> pDispatcher = new Poco::WebTunnel::SocketDispatcher(pConfig->getInt("webtunnel.threads"s, 4));
+		Poco::SharedPtr<Poco::WebTunnel::SocketDispatcher> pDispatcher = new Poco::WebTunnel::SocketDispatcher;
 		Poco::WebTunnel::SocketFactory::Ptr pSocketFactory;
 #if defined(WEBTUNNEL_ENABLE_TLS)
 		if (pConfig->getBool("webtunnel.https.enable"s, false))

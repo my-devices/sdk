@@ -226,7 +226,7 @@ private:
 };
 
 
-SocketDispatcher::SocketDispatcher(int threadCount, Poco::Timespan timeout):
+SocketDispatcher::SocketDispatcher(Poco::Timespan timeout):
 	_timeout(timeout),
 	_stopped(false),
 	_logger(Poco::Logger::get("WebTunnel.SocketDispatcher"s))

@@ -35,6 +35,9 @@ namespace WebTunnelAgentLib {
 const std::string Tunnel::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string Tunnel::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
 const std::string Tunnel::WEBTUNNEL_AGENT("WebTunnelAgentLib/1.0.0");
+const std::string Tunnel::X_PTTH_SET_PROPERTY("X-PTTH-Set-Property");
+const std::string Tunnel::X_PTTH_ERROR("X-PTTH-Error");
+const std::string Tunnel::X_WEBTUNNEL_KEEPALIVE("X-WebTunnel-KeepAlive");
 
 
 class ReconnectTask: public Poco::Util::TimerTask
@@ -127,11 +130,11 @@ void Tunnel::stop()
 
 void Tunnel::addProperties(Poco::Net::HTTPRequest& request, const std::map<std::string, std::string>& props)
 {
-	request.add("X-PTTH-Set-Property"s, Poco::format("device;targetHost=%s"s, _host.toString()));
-	request.add("X-PTTH-Set-Property"s, Poco::format("device;targetPorts=%s"s, formatPorts()));
+	request.add(X_PTTH_SET_PROPERTY, Poco::format("device;targetHost=%s"s, _host.toString()));
+	request.add(X_PTTH_SET_PROPERTY, Poco::format("device;targetPorts=%s"s, formatPorts()));
 	if (!_httpPath.empty())
 	{
-		request.add("X-PTTH-Set-Property"s, Poco::format("device;httpPath=%s"s, quoteString(_httpPath)));
+		request.add(X_PTTH_SET_PROPERTY, Poco::format("device;httpPath=%s"s, quoteString(_httpPath)));
 	}
 
 	addPortProperty(request, "http"s, _httpPort);
@@ -142,21 +145,22 @@ void Tunnel::addProperties(Poco::Net::HTTPRequest& request, const std::map<std::
 
 	if (!_deviceName.empty())
 	{
-		request.add("X-PTTH-Set-Property"s, Poco::format("device;name=%s"s, quoteString(_deviceName)));
+		request.add(X_PTTH_SET_PROPERTY, Poco::format("device;name=%s"s, quoteString(_deviceName)));
 	}
 	if (!_tenant.empty())
 	{
-		request.add("X-PTTH-Set-Property"s, Poco::format("device;tenant=%s"s, quoteString(_tenant)));
+		request.add(X_PTTH_SET_PROPERTY, Poco::format("device;tenant=%s"s, quoteString(_tenant)));
 	}
 
 	if (!props.empty())
 	{
 		for (std::map<std::string, std::string>::const_iterator it = props.begin(); it != props.end(); ++it)
 		{
-			request.add("X-PTTH-Set-Property"s, Poco::format("device;%s=%s"s, it->first, quoteString(it->second)));
+			request.add(X_PTTH_SET_PROPERTY, Poco::format("device;%s=%s"s, it->first, quoteString(it->second)));
 		}
 	}
 	request.set("User-Agent"s, _userAgent);
+	request.set(X_WEBTUNNEL_KEEPALIVE, Poco::NumberFormatter::format(_remoteTimeout.totalSeconds()));
 }
 
 
@@ -164,11 +168,11 @@ void Tunnel::addPortProperty(Poco::Net::HTTPRequest& request, const std::string&
 {
 	if (port != 0)
 	{
-		request.add("X-PTTH-Set-Property"s, Poco::format("device;%sPort=%hu"s, proto, port));
+		request.add(X_PTTH_SET_PROPERTY, Poco::format("device;%sPort=%hu"s, proto, port));
 	}
 	else
 	{
-		request.add("X-PTTH-Set-Property"s, Poco::format("device;%sPort="s, proto));
+		request.add(X_PTTH_SET_PROPERTY, Poco::format("device;%sPort="s, proto));
 	}
 }
 
@@ -265,6 +269,12 @@ void Tunnel::connect()
 			if (response.get(SEC_WEBSOCKET_PROTOCOL, ""s) == WEBTUNNEL_PROTOCOL)
 			{
 				_logger.debug("WebSocket established. Creating RemotePortForwarder..."s);
+				if (response.has(X_WEBTUNNEL_KEEPALIVE))
+				{
+					int keepAlive = Poco::NumberParser::parse(response.get(X_WEBTUNNEL_KEEPALIVE));
+					_remoteTimeout.assign(keepAlive, 0);
+					_logger.debug("Server has requested a keep-alive timeout (remoteTimeout) of %d seconds."s, keepAlive);
+				}
 				pWebSocket->setNoDelay(true);
 				_retryDelay = MIN_RETRY_DELAY;
 				_pForwarder = new Poco::WebTunnel::RemotePortForwarder(*_pDispatcher, pWebSocket, _host, _ports, _remoteTimeout, _pSocketFactory);
@@ -314,7 +324,7 @@ void Tunnel::connect()
 			}
 			else
 			{
-				std::string msg = response.get("X-PTTH-Error"s, exc.displayText());
+				std::string msg = response.get(X_PTTH_ERROR, exc.displayText());
 				statusChanged(STATUS_ERROR, Poco::format("Cannot connect to reflector at %s: %s"s, reflectorURI.toString(), msg));
 				_logger.error(_lastError);
 				if (_retryDelay < MAX_RETRY_DELAY)
