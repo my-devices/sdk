@@ -98,10 +98,10 @@ void RemotePortForwarder::stop()
 		}
 	);
 
+	_logger.debug("Waiting for WebSocket closing handshake to complete..."s);
 	Poco::Timestamp closeTime;
 	while (_dispatcher.hasSocket(*_pWebSocket) && !closeTime.isElapsed(STOP_TIMEOUT))
 	{
-		_logger.debug("Waiting for WebSocket closing handshake to complete..."s);
 		Poco::Thread::sleep(20);
 	}
 	_dispatcher.removeSocket(*_pWebSocket);
@@ -526,7 +526,6 @@ int RemotePortForwarder::getChannelFlags(Poco::UInt16 channel) const
 
 void RemotePortForwarder::sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode, Poco::UInt16 errorCode)
 {
-	_logger.debug("sendResponse(%hu, %hu, %hu)"s, channel, static_cast<Poco::UInt16>(opcode), errorCode);
 	char buffer[6];
 	std::size_t hn = Protocol::writeHeader(buffer, sizeof(buffer), opcode, 0, channel, errorCode);
 	try
