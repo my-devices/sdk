@@ -128,6 +128,35 @@ private:
 };
 
 
+class HasSocketNotification: public SocketDispatcher::TaskNotification
+{
+public:
+	using Ptr = Poco::AutoPtr<HasSocketNotification>;
+
+	HasSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket):
+		TaskNotification(dispatcher),
+		_socket(socket)
+	{
+	}
+
+	void execute()
+	{
+		AutoSetEvent ase(_done);
+
+		_result = _dispatcher.hasSocketImpl(_socket);
+	}
+	
+	bool result() const
+	{
+		return _result;
+	}
+
+private:
+	Poco::Net::StreamSocket _socket;
+	bool _result = false;
+};
+
+
 class ResetNotification: public SocketDispatcher::TaskNotification
 {
 public:
@@ -292,6 +321,23 @@ void SocketDispatcher::closeSocket(const Poco::Net::StreamSocket& socket)
 	if (!inDispatcherThread())
 	{
 		pNf->wait();
+	}
+}
+
+
+bool SocketDispatcher::hasSocket(const Poco::Net::StreamSocket& socket)
+{
+	if (inDispatcherThread())
+	{
+		return hasSocketImpl(socket);
+	}
+	else
+	{
+		HasSocketNotification::Ptr pNf = new HasSocketNotification(*this, socket);
+		_queue.enqueueNotification(pNf);
+		_pollSet.wakeUp();
+		pNf->wait();
+		return pNf->result();
 	}
 }
 
@@ -553,14 +599,18 @@ void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, i
 
 void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 {
-	_logger.trace("Removing socket %?d..."s, socket.impl()->sockfd());
-	_socketMap.erase(socket);
-	try
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
 	{
-		_pollSet.remove(socket);
-	}
-	catch (Poco::IOException&)
-	{
+		_logger.trace("Removing socket %?d..."s, socket.impl()->sockfd());
+		_socketMap.erase(it);
+		try
+		{
+			_pollSet.remove(socket);
+		}
+		catch (Poco::IOException&)
+		{
+		}
 	}
 }
 
@@ -577,6 +627,12 @@ void SocketDispatcher::closeSocketImpl(Poco::Net::StreamSocket& socket)
 	{
 	}
 	_socketMap.erase(socket);
+}
+
+
+bool SocketDispatcher::hasSocketImpl(const Poco::Net::StreamSocket& socket) const
+{
+	return _socketMap.find(socket) != _socketMap.end();
 }
 
 

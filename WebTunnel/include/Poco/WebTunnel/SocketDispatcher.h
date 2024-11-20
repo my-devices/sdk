@@ -108,6 +108,9 @@ public:
 	void closeSocket(const Poco::Net::StreamSocket& socket);
 		/// Closes and removes a socket and its associated handler from the SocketDispatcher.
 
+	bool hasSocket(const Poco::Net::StreamSocket& socket);
+		/// Returns true if the socket is active in the SocketDispatcher.
+
 	void stop();
 		/// Stops the SocketDispatcher and removes all sockets.
 
@@ -256,6 +259,7 @@ protected:
 	void updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout);
 	void removeSocketImpl(const Poco::Net::StreamSocket& socket);
 	void closeSocketImpl(Poco::Net::StreamSocket& socket);
+	bool hasSocketImpl(const Poco::Net::StreamSocket& socket) const;
 	void resetImpl();
 	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int flags);
 	void shutdownSendImpl(Poco::Net::StreamSocket& socket);
@@ -278,6 +282,7 @@ private:
 	friend class UpdateSocketNotification;
 	friend class RemoveSocketNotification;
 	friend class CloseSocketNotification;
+	friend class HasSocketNotification;
 	friend class ResetNotification;
 	friend class SendBytesNotification;
 	friend class ShutdownSendNotification;
