@@ -117,9 +117,9 @@ protected:
 	struct SendState
 	{
 		int length = 0;
-		int remainingPayloadOffset = 0;
-		int remainingPayloadLength = 0;
-		Poco::Buffer<char> payload{0};
+		int remainingOffset = 0;
+		int remainingLength = 0;
+		Poco::Buffer<char> buffer{0};
 	};
 
 	int peekHeader(ReceiveState& receiveState);

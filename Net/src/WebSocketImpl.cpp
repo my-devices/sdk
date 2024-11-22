@@ -60,35 +60,34 @@ WebSocketImpl::~WebSocketImpl()
 
 int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 {
-	if (_sendState.remainingPayloadLength > 0)
+	if (_sendState.remainingLength > 0)
 	{
 		if (length != _sendState.length)
 		{
 			throw InvalidArgumentException("Pending send buffer length mismatch");
 		}
-		int sent = _pStreamSocketImpl->sendBytes(_sendState.payload.begin() + _sendState.remainingPayloadOffset, _sendState.remainingPayloadLength);
+		int sent = _pStreamSocketImpl->sendBytes(_sendState.buffer.begin() + _sendState.remainingOffset, _sendState.remainingLength);
 		if (sent >= 0)
 		{
-			if (sent < _sendState.remainingPayloadLength)
+			if (sent < _sendState.remainingLength)
 			{
-				_sendState.remainingPayloadOffset += sent;
-				_sendState.remainingPayloadLength -= sent;
+				_sendState.remainingOffset += sent;
+				_sendState.remainingLength -= sent;
 				return -1;
 			}
 			else 
 			{
 				_sendState.length = 0;
-				_sendState.remainingPayloadOffset = 0;
-				_sendState.remainingPayloadLength = 0;
+				_sendState.remainingOffset = 0;
+				_sendState.remainingLength = 0;
 				return length;
 			}
 		}
 		else return -1;
 	}
 
-	Poco::Buffer<char>& frame(_sendState.payload);
-	frame.resize(length + MAX_HEADER_LENGTH, false);
-	Poco::MemoryOutputStream ostr(frame.begin(), frame.size());
+	_sendState.buffer.resize(length + MAX_HEADER_LENGTH, false);
+	Poco::MemoryOutputStream ostr(_sendState.buffer.begin(), _sendState.buffer.size());
 	Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
 
 	if (flags == 0) flags = WebSocket::FRAME_BINARY;
@@ -120,7 +119,7 @@ int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 		const char* m = reinterpret_cast<const char*>(&mask);
 		const char* b = reinterpret_cast<const char*>(buffer);
 		writer.writeRaw(m, MASK_LENGTH);
-		char* p = frame.begin() + ostr.charsWritten();
+		char* p = _sendState.buffer.begin() + ostr.charsWritten();
 		for (int i = 0; i < length; i++)
 		{
 			p[i] = b[i] ^ m[i % MASK_LENGTH];
@@ -128,33 +127,33 @@ int WebSocketImpl::sendBytes(const void* buffer, int length, int flags)
 	}
 	else
 	{
-		std::memcpy(frame.begin() + ostr.charsWritten(), buffer, length);
+		std::memcpy(_sendState.buffer.begin() + ostr.charsWritten(), buffer, length);
 	}
 
 	int frameLength = length + static_cast<int>(ostr.charsWritten());
-	int sent = _pStreamSocketImpl->sendBytes(frame.begin(), frameLength);
+	int sent = _pStreamSocketImpl->sendBytes(_sendState.buffer.begin(), frameLength);
 	if (sent >= 0)
 	{
 		if (sent < frameLength)
 		{
 			_sendState.length = length;
-			_sendState.remainingPayloadOffset = sent;
-			_sendState.remainingPayloadLength = frameLength - sent;
+			_sendState.remainingOffset = sent;
+			_sendState.remainingLength = frameLength - sent;
 			return -1;
 		}
 		else 
 		{
 			_sendState.length = 0;
-			_sendState.remainingPayloadOffset = 0;
-			_sendState.remainingPayloadLength = 0;
+			_sendState.remainingOffset = 0;
+			_sendState.remainingLength = 0;
 			return length;
 		}
 	}
 	else
 	{
 		_sendState.length = length;
-		_sendState.remainingPayloadOffset = 0;
-		_sendState.remainingPayloadLength = frameLength;
+		_sendState.remainingOffset = 0;
+		_sendState.remainingLength = frameLength;
 		return -1;
 	}	
 }
