@@ -294,7 +294,7 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 			}
 			else
 			{
-				_dispatcher.shutdownSend(socket);
+				shutdownSendChannel(channel);
 			}
 			break;
 
@@ -486,6 +486,17 @@ void RemotePortForwarder::openChannel(Poco::UInt16 channel, Poco::UInt16 port)
 		_logger.warning("Open request for existing channel %hu to port %hu."s, channel, port);
 		lock.unlock();
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_CHANNEL_IN_USE);
+	}
+}
+
+
+void RemotePortForwarder::shutdownSendChannel(Poco::UInt16 channel)
+{
+	Poco::FastMutex::ScopedLock lock(_mutex);
+	ChannelMap::iterator it = _channelMap.find(channel);
+	if (it != _channelMap.end())
+	{
+		_dispatcher.shutdownSend(it->second.socket);
 	}
 }
 

@@ -129,6 +129,7 @@ protected:
 	void connectTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
 	void forwardData(const char* buffer, int size, Poco::UInt16 channel);
 	void openChannel(Poco::UInt16 channel, Poco::UInt16 port);
+	void shutdownSendChannel(Poco::UInt16 channel);
 	void removeChannel(Poco::UInt16 channel);
 	void sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode, Poco::UInt16 errorCode);
 	void closeWebSocket(CloseReason reason, bool active);
