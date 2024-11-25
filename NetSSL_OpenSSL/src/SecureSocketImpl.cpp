@@ -237,30 +237,34 @@ void SecureSocketImpl::listen(int backlog)
 }
 
 
-void SecureSocketImpl::shutdown()
+int SecureSocketImpl::shutdown()
 {
 	if (_pSSL)
 	{
-        // Don't shut down the socket more than once.
         int shutdownState = SSL_get_shutdown(_pSSL);
         bool shutdownSent = (shutdownState & SSL_SENT_SHUTDOWN) == SSL_SENT_SHUTDOWN;
         if (!shutdownSent)
         {
-			// A proper clean shutdown would require us to
-			// retry the shutdown if we get a zero return
-			// value, until SSL_shutdown() returns 1.
-			// However, this will lead to problems with
-			// most web browsers, so we just set the shutdown
-			// flag by calling SSL_shutdown() once and be
-			// done with it.
 			int rc = SSL_shutdown(_pSSL);
-			if (rc < 0) handleError(rc);
-			if (_pSocket->getBlocking())
+			if (rc < 0) 
 			{
-				_pSocket->shutdown();
+				if (SocketImpl::lastError() == POCO_EWOULDBLOCK)
+					rc = SecureStreamSocket::ERR_SSL_WANT_WRITE;
+				else
+					rc = handleError(rc);
 			}
+			if (rc >= 0)
+			{
+				_pSocket->shutdownSend();
+			}
+			return rc;
+		}
+		else 
+		{
+			return (shutdownState & SSL_RECEIVED_SHUTDOWN) == SSL_RECEIVED_SHUTDOWN;
 		}
 	}
+	return 1; 
 }
 
 
@@ -500,7 +504,10 @@ int SecureSocketImpl::handleError(int rc)
 #endif
 		if (socketError)
 		{
-			SocketImpl::error(socketError);
+			if (socketError == POCO_EWOULDBLOCK)
+				return SSL_ERROR_WANT_READ;
+			else
+				SocketImpl::error(socketError);
 		}
 		// fallthrough
 	default:

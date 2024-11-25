@@ -148,13 +148,19 @@ public:
 		/// number of connections that can be queued
 		/// for this socket.
 
-	void shutdown();
+	int shutdown();
 		/// Shuts down the connection by attempting
 		/// an orderly SSL shutdown, then actually
-		/// shutting down the TCP connection.
+		/// shutting down the TCP connection in the
+		/// send direction.
 
 	void close();
 		/// Close the socket.
+		///
+		/// If the SSL connection has not been shut down
+		/// yet, tries to perform a fast shutdown
+		/// (sending a close notify shutdown alert message,
+		/// but not waiting for the response).
 
 	void abort();
 		/// Aborts the connection by closing the

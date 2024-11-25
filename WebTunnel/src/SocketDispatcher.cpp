@@ -508,12 +508,17 @@ void SocketDispatcher::writable(const Poco::Net::Socket& socket, SocketDispatche
 				PendingSend& pending = *pInfo->pendingSends.begin();
 				if (pending.options == PendingSend::OPT_SHUTDOWN)
 				{
-					ss.shutdownSend();
-					if (pInfo->pendingSends.size() > 1)
+					_logger.debug("Shutting down socket %?d..."s, ss.impl()->sockfd());
+					if (ss.shutdownSend() >= 0)
 					{
-						_logger.debug("Discarding pending writes after shutdown");
+						_logger.debug("Shut down socket %?d."s, ss.impl()->sockfd());
+						if (pInfo->pendingSends.size() > 1)
+						{
+							_logger.debug("Discarding pending writes after shutdown."s);
+						}
+						pInfo->pendingSends.clear();
 					}
-					pInfo->pendingSends.clear();
+					else break;
 				}
 				else
 				{
@@ -667,7 +672,7 @@ void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buff
 	}
 	else
 	{
-		_logger.error("sendBytes() called with unknown socket.");
+		_logger.error("sendBytes() called with unknown socket."s);
 	}
 }
 
@@ -679,7 +684,12 @@ void SocketDispatcher::shutdownSendImpl(Poco::Net::StreamSocket& socket)
 	{
 		if  (it->second->pendingSends.empty())
 		{
-			socket.shutdownSend();
+			int rc = socket.shutdownSend();
+			if (rc < 0)
+			{
+				// would block, try again later
+				it->second->pendingSends.emplace_back(PendingSend::OPT_SHUTDOWN);
+			}
 		}
 		else
 		{
