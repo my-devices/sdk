@@ -65,7 +65,7 @@ RemotePortForwarder::RemotePortForwarder(SocketDispatcher& dispatcher, Poco::Sha
 	_ports(ports),
 	_connectTimeout(30, 0),
 	_localTimeout(7200, 0),
-	_closeTimeout(30, 0),
+	_closeTimeout(2, 0),
 	_remoteTimeout(remoteTimeout),
 	_logger(Poco::Logger::get("WebTunnel.RemotePortForwarder"s))
 {
@@ -164,13 +164,16 @@ void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 		{
 			if (_logger.debug())
 			{
-				_logger.debug("Actively closing channel %hu."s, channel);
+				_logger.debug("Local peer shutting down channel %hu."s, channel);
 			}
-			dispatcher.updateSocket(socket, 0, _closeTimeout);
 			if (setChannelFlag(channel, CF_CLOSED_LOCAL) & CF_CLOSED_REMOTE)
 			{
 				_logger.debug("Channel %hu also already closed by remote peer."s, channel);
 				removeChannel(channel);
+			}
+			else
+			{
+				dispatcher.updateSocket(socket, 0, _closeTimeout);
 			}
 			hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_CLOSE, 0, channel);
 		}
@@ -285,11 +288,11 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 		case Protocol::WT_OP_CLOSE:
 			if (_logger.debug())
 			{
-				_logger.debug("Passively closing channel %hu."s, channel);
+				_logger.debug("Remote peer shutting down channel %hu."s, channel);
 			}
 			if (setChannelFlag(channel, CF_CLOSED_REMOTE) & CF_CLOSED_LOCAL)
 			{
-				_logger.debug("Channel %hu also already closed by local peer."s, channel);
+				_logger.debug("Channel %hu also already been shut down by local peer."s, channel);
 				removeChannel(channel);
 			}
 			else
@@ -496,6 +499,7 @@ void RemotePortForwarder::shutdownSendChannel(Poco::UInt16 channel)
 	ChannelMap::iterator it = _channelMap.find(channel);
 	if (it != _channelMap.end())
 	{
+		_logger.debug("Shutting down channel %hu"s, channel);
 		_dispatcher.shutdownSend(it->second.socket);
 	}
 }

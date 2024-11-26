@@ -240,7 +240,7 @@ private:
 
 	enum ConnectionFlags
 	{
-		CF_CLOSED_LOCAL = 0x01,
+		CF_CLOSED_LOCAL  = 0x01,
 		CF_CLOSED_REMOTE = 0x02
 	};
 
