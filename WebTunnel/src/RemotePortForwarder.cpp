@@ -19,6 +19,7 @@
 #include "Poco/BinaryWriter.h"
 #include "Poco/MemoryStream.h"
 #include "Poco/CountingStream.h"
+#include <algorithm>
 #include <cstring>
 
 
@@ -160,6 +161,10 @@ void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 	try
 	{
 		n = socket.receiveBytes(buffer.begin() + hn, static_cast<int>(buffer.size() - hn));
+		if (_logger.trace() && n >= 0)
+		{
+			_logger.dump(Poco::format("Received frame from device, channel=%hu, size=%d"s, channel, n), buffer.begin() + hn, (std::min)(n, 256), Poco::Message::PRIO_TRACE);
+		}
 		if (n == 0)
 		{
 			if (_logger.debug())
@@ -254,6 +259,10 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 	try
 	{
 		n = _pWebSocket->receiveFrame(buffer.begin(), static_cast<int>(buffer.size()), wsFlags);
+		if (_logger.trace() && n >= 0)
+		{
+			_logger.dump(Poco::format("Received WebSocket frame, size=%d, flags=%d"s, n, wsFlags), buffer.begin(), (std::min)(n, 256), Poco::Message::PRIO_TRACE);
+		}
 		if (n < 0) return;
 	}
 	catch (Poco::Exception& exc)
@@ -390,6 +399,7 @@ void RemotePortForwarder::connect(SocketDispatcher& dispatcher, Poco::Net::Strea
 	socket.setNoDelay(true);
 	try
 	{
+		_logger.debug("Socket for channel %hu is connected."s, channel);
 		sendResponse(channel, Protocol::WT_OP_OPEN_CONFIRM, 0);
 	}
 	catch (Poco::Exception& exc)
