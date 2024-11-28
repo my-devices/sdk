@@ -67,7 +67,7 @@ void SecureStreamSocketImpl::connect(const SocketAddress& address, const Poco::T
 	_impl.connect(address, timeout, !_lazyHandshake);
 	reset(_impl.sockfd());
 }
-	
+
 
 void SecureStreamSocketImpl::connectNB(const SocketAddress& address)
 {
@@ -80,19 +80,19 @@ void SecureStreamSocketImpl::connectSSL()
 {
 	_impl.connectSSL(!_lazyHandshake);
 }
-	
+
 
 void SecureStreamSocketImpl::bind(const SocketAddress& address, bool reuseAddress)
 {
 	throw Poco::InvalidAccessException("Cannot bind() a SecureStreamSocketImpl");
 }
 
-	
+
 void SecureStreamSocketImpl::listen(int backlog)
 {
 	throw Poco::InvalidAccessException("Cannot listen() on a SecureStreamSocketImpl");
 }
-	
+
 
 void SecureStreamSocketImpl::close()
 {
@@ -148,15 +148,16 @@ void SecureStreamSocketImpl::shutdownReceive()
 {
 }
 
-	
-void SecureStreamSocketImpl::shutdownSend()
+
+int SecureStreamSocketImpl::shutdownSend()
 {
+	return _impl.shutdown();
 }
 
-	
-void SecureStreamSocketImpl::shutdown()
+
+int SecureStreamSocketImpl::shutdown()
 {
-	_impl.shutdown();
+	return _impl.shutdown();
 }
 
 
@@ -187,7 +188,7 @@ void SecureStreamSocketImpl::setLazyHandshake(bool flag)
 	_lazyHandshake = flag;
 }
 
-	
+
 bool SecureStreamSocketImpl::getLazyHandshake() const
 {
 	return _lazyHandshake;
@@ -208,8 +209,7 @@ void SecureStreamSocketImpl::verifyPeerCertificate(const std::string& hostName)
 
 int SecureStreamSocketImpl::completeHandshake()
 {
-	_impl.completeHandshake();
-	return 0;
+	return _impl.completeHandshake();
 }
 
 
