@@ -154,5 +154,5 @@ documentation for configuring a HTTP proxy, including proxy credentials.
 
 ### Logging
 
-Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#ssltls-configuration)
+Please refer to the [`WebTunnelAgent`](../WebTunnelAgent/README.md#logging)
 documentation for configuring logging.
