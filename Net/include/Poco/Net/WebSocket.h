@@ -49,6 +49,11 @@ class Net_API WebSocket: public StreamSocket
 	/// Note that special frames like PING must be handled at
 	/// application level. In the case of a PING, a PONG message
 	/// must be returned.
+	///
+	/// Once connected, a WebSocket can be put into non-blocking
+	/// mode, by calling setBlocking(false). 
+	/// Please refer to the sendFrame() and receiveFrame() documentation
+	/// for non-blocking behavior.
 {
 public:
 	enum Mode
@@ -208,11 +213,15 @@ public:
 		/// Values from the FrameFlags, FrameOpcodes and SendFlags enumerations
 		/// can be specified in flags.
 		///
-		/// Returns the number of bytes sent, which may be
-		/// less than the number of bytes specified.
+		/// Returns the number of bytes sent.
 		///
-		/// Certain socket implementations may also return a negative
-		/// value denoting a certain condition.
+		/// If the WebSocket is non-blocking and the frame could not
+		/// be sent in full, returns -1. In this case, the call
+		/// to sendFrame() must be repeated with exactly the same
+		/// parameters as soon as the socket becomes writable again 
+		/// (see select() or poll()). 
+		/// The value of length is returned after the complete
+		/// frame has been sent.
 
 	int receiveFrame(void* buffer, int length, int& flags);
 		/// Receives a frame from the socket and stores it
@@ -242,11 +251,22 @@ public:
 		///
 		/// The frame flags and opcode (FrameFlags and FrameOpcodes)
 		/// is stored in flags.
+		///
+		/// In case of a non-blocking socket, may return -1, even
+		/// if a partial frame has been received. 
+		/// In this case, receiveFrame() should be called again as 
+		/// soon as more data becomes available (see select() or poll()).
+		/// Eventually, receiveFrame() will return the complete frame.
+		/// The given buffer will not be modified until the full frame has 
+		/// been received.
 
 	int receiveFrame(Poco::Buffer<char>& buffer, int& flags);
 		/// Receives a frame from the socket and stores it
 		/// after any previous content in buffer.
 		/// The buffer will be grown as necessary.
+		///
+		/// See the note below if you want the received data
+		/// to be stored at the beginning of the buffer.
 		///
 		/// The frame's payload size must not exceed the
 		/// maximum payload size set with setMaxPayloadSize().
@@ -274,6 +294,21 @@ public:
 		///
 		/// The frame flags and opcode (FrameFlags and FrameOpcodes)
 		/// is stored in flags.
+		///
+		/// Note: Since the data received from the WebSocket is appended
+		/// to the given Poco::Buffer, the buffer passed to this method
+		/// should be created with a size of 0, or resize(0) should be
+		/// called on the buffer beforehand, if the expectation is that
+		/// the received data is stored starting at the beginning of the
+		/// buffer.
+		///
+		/// In case of a non-blocking socket, may return -1, even
+		/// if a partial frame has been received. 
+		/// In this case, receiveFrame() should be called again as 
+		/// soon as more data becomes available (see select() or poll()).
+		/// Eventually, receiveFrame() will return the complete frame.
+		/// The given buffer will not be modified until the full frame has 
+		/// been received.
 
 	Mode mode() const;
 		/// Returns WS_SERVER if the WebSocket is a server-side

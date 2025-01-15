@@ -42,12 +42,21 @@ public:
 	// StreamSocketImpl
 	virtual int sendBytes(const void* buffer, int length, int flags);
 		/// Sends a WebSocket protocol frame.
+		///
+		/// See WebSocket::sendFrame() for more information, including
+		/// behavior if set to non-blocking.
 
 	virtual int receiveBytes(void* buffer, int length, int flags);
 		/// Receives a WebSocket protocol frame.
+		///
+		/// See WebSocket::receiveFrame() for more information, including
+		/// behavior if set to non-blocking.
 		
 	virtual int receiveBytes(Poco::Buffer<char>& buffer, int flags = 0, const Poco::Timespan& span = 0);
 		/// Receives a WebSocket protocol frame.
+		///
+		/// See WebSocket::receiveFrame() for more information, including
+		/// behavior if set to non-blocking.
 
 	virtual SocketImpl* acceptConnection(SocketAddress& clientAddr);
 	virtual void connect(const SocketAddress& address);
@@ -112,19 +121,20 @@ protected:
 		int payloadLength = 0;
 		int remainingPayloadLength = 0;
 		Poco::Buffer<char> payload{0};
+		int maskOffset = 0;
 	};
 
 	struct SendState
 	{
 		int length = 0;
-		int remainingOffset = 0;
-		int remainingLength = 0;
-		Poco::Buffer<char> buffer{0};
+		int remainingPayloadOffset = 0;
+		int remainingPayloadLength = 0;
+		Poco::Buffer<char> payload{0};
 	};
 
 	int peekHeader(ReceiveState& receiveState);
 	void skipHeader(int headerLength);
-	int receivePayload(char *buffer, int payloadLength, char mask[MASK_LENGTH], bool useMask);
+	int receivePayload(char *buffer, int payloadLength, char mask[MASK_LENGTH], bool useMask, int maskOffset);
 	int receiveNBytes(void* buffer, int length);
 	int receiveSomeBytes(char* buffer, int length);
 	int peekSomeBytes(char* buffer, int length);
