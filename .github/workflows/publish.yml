@@ -23,14 +23,6 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-      - uses: little-core-labs/get-git-tag@v3.0.1
-        with:
-          tagRegex: "v(.*)"
-          tagRegexGroup: 1
-      - name: Print Version
-        run: |
-          echo $GIT_TAG_NAME
-        shell: bash
       -
         name: Build
         run: |
@@ -62,7 +54,7 @@ jobs:
           msiexec /i smtools-windows-x64.msi /quiet /qn 
           smksp_registrar.exe list 
           smctl.exe keypair ls 
-          C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user 
+          certutil.exe -csp "DigiCert Signing Manager KSP" -key -user 
           smksp_cert_sync.exe 
         shell: cmd 
       -
