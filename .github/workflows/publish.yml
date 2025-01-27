@@ -28,6 +28,8 @@ jobs:
         run: |
           cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build
           cmake --build cmake-build --config Release
+      # Code Signing with DigiCert ONE:
+      # https://docs.digicert.com/en/software-trust-manager/ci-cd-integrations/plugins/github/install-client-tools-for-standard-keypair-signing-on-github.html
       -
         name: Install certificate
         run: |
