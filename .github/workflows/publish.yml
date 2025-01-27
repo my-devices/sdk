@@ -28,13 +28,18 @@ jobs:
         run: |
           cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build
           cmake --build cmake-build --config Release
+      -
+        name: Install certificate
+        run: |
+          echo '${{ secrets.SM_CLIENT_CERT_FILE_B64 }}' >CodeSigningCert.b64
+          certutil -decode CodeSigningCert.b64 D:\\CodeSigningCert.p12
       - 
         name: Set variables 
         run: | 
           echo "::set-output name=version::${GITHUB_REF#refs/tags/v}" 
           echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV" 
           echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV" 
-          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV" 
+          echo "SM_CLIENT_CERT_FILE=D:\\CodeSigningCert.p12" >> "$GITHUB_ENV" 
           echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV" 
           echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH 
           echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH 
@@ -53,9 +58,7 @@ jobs:
       -
         name: Sign executables
         run: |
-          echo '${{ secrets.SM_CLIENT_CERT_FILE_B64 }}' >CodeSigningCert.b64
-          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
-          signtool.exe sign /f CodeSigningCert.pfx /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
+          signtool.exe sign /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
       -
         name: Zip
         run: 7z a -tzip remote-clients.zip cmake-build\bin\Release\*.exe
