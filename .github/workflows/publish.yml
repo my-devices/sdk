@@ -28,12 +28,34 @@ jobs:
         run: |
           cmake -G "Visual Studio 17 2022" -A x64 -S. -Bcmake-build
           cmake --build cmake-build --config Release
-#      -
-#        name: Sign
-#        run: |
-#          echo '${{ secrets.SIGNING_CERT }}' >CodeSigningCert.b64
-#          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
-#          & 'C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.17763.0\\x86\\signtool.exe' sign /f CodeSigningCert.pfx /p '${{ secrets.SIGNING_PASS }}' /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
+      - 
+        name: Set variables 
+        run: | 
+          echo "::set-output name=version::${GITHUB_REF#refs/tags/v}" 
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV" 
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV" 
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV" 
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV" 
+          echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH 
+          echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH 
+          echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH 
+        shell: bash  
+      - 
+        name: Setup SSM KSP on windows latest 
+        run: | 
+          curl -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o smtools-windows-x64.msi 
+          msiexec /i smtools-windows-x64.msi /quiet /qn 
+          smksp_registrar.exe list 
+          smctl.exe keypair ls 
+          C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user 
+          smksp_cert_sync.exe 
+        shell: cmd 
+      -
+        name: Sign executables
+        run: |
+          echo '${{ secrets.SM_CLIENT_CERT_FILE_B64 }}' >CodeSigningCert.b64
+          certutil -decode CodeSigningCert.b64 CodeSigningCert.pfx
+          signtool.exe sign /f CodeSigningCert.pfx /sha1 ${{ secrets.SM_CODE_SIGNING_CERT_SHA1_HASH }} /tr http://timestamp.digicert.com /td sha256 /fd sha256 /v cmake-build\\bin\\Release\\*.exe
       -
         name: Zip
         run: 7z a -tzip remote-clients.zip cmake-build\bin\Release\*.exe
