@@ -1,7 +1,7 @@
 //
 // webtunnelclient.cpp
 //
-// Copyright (c) 2020-2024, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2020-2025, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0

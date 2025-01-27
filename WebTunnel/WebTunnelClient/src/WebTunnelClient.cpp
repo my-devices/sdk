@@ -1,7 +1,7 @@
 //
 // WebTunnelClient.cpp
 //
-// Copyright (c) 2013-2024, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2025, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -292,7 +292,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI>"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE Client.\n"
-			"Copyright (c) 2013-2024 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2025 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward a remote TCP port to the local\n"
 			"host via the macchina.io REMOTE server.\n\n"
