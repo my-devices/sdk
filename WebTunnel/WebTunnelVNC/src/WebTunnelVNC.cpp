@@ -9,6 +9,7 @@
 
 
 #include "Poco/WebTunnel/LocalPortForwarder.h"
+#include "Poco/WebTunnel/Version.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
@@ -70,18 +71,9 @@ public:
 class WebTunnelVNC: public Poco::Util::Application
 {
 public:
-	WebTunnelVNC():
-		_helpRequested(false),
-		_localPort(0),
-		_remotePort(5900),
-		_username(Poco::Environment::get("REMOTE_USERNAME"s, ""s)),
-		_password(Poco::Environment::get("REMOTE_PASSWORD"s, ""s))
-	{
-	}
+	WebTunnelVNC() = default;
 
-	~WebTunnelVNC()
-	{
-	}
+	~WebTunnelVNC() = default;
 
 protected:
 	void initialize(Poco::Util::Application& self)
@@ -128,6 +120,12 @@ protected:
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleHelp)));
+
+		options.addOption(
+			Option("version"s, "v"s, "Display version information and exit."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleVersion)));
 
 		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
@@ -184,6 +182,11 @@ protected:
 	void handleHelp(const std::string& name, const std::string& value)
 	{
 		_helpRequested = true;
+	}
+
+	void handleVersion(const std::string& name, const std::string& value)
+	{
+		_versionRequested = true;
 	}
 
 	void handleConfig(const std::string& name, const std::string& value)
@@ -302,7 +305,11 @@ protected:
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
-		if (_helpRequested || args.empty())
+		if (_versionRequested)
+		{
+			std::cout << Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION) << std::endl;
+		}
+		else if (_helpRequested || args.empty())
 		{
 			displayHelp();
 		}
@@ -426,11 +433,12 @@ protected:
 	}
 
 private:
-	bool _helpRequested;
-	Poco::UInt16 _localPort;
-	Poco::UInt16 _remotePort;
-	std::string _username;
-	std::string _password;
+	bool _helpRequested = false;
+	bool _versionRequested = false;
+	Poco::UInt16 _localPort = 0;
+	Poco::UInt16 _remotePort = 5900;
+	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
+	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
 	SSLInitializer _sslInitializer;
 };
 

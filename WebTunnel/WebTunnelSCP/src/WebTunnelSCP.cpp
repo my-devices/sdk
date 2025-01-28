@@ -9,6 +9,7 @@
 
 
 #include "Poco/WebTunnel/LocalPortForwarder.h"
+#include "Poco/WebTunnel/Version.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
@@ -70,12 +71,7 @@ public:
 class WebTunnelSCP: public Poco::Util::Application
 {
 public:
-	WebTunnelSCP():
-		_helpRequested(false),
-		_localPort(0),
-		_remotePort(22),
-		_username(Poco::Environment::get("REMOTE_USERNAME"s, ""s)),
-		_password(Poco::Environment::get("REMOTE_PASSWORD"s, ""s))
+	WebTunnelSCP()
 	{
 #if defined(POCO_OS_FAMILY_WINDOWS)
 		_scpClient = findExecutable("scp.exe"s);
@@ -84,9 +80,7 @@ public:
 #endif
 	}
 
-	~WebTunnelSCP()
-	{
-	}
+	~WebTunnelSCP() = default;
 
 protected:
 	void initialize(Poco::Util::Application& self)
@@ -133,6 +127,12 @@ protected:
 				.required(false)
 				.repeatable(false)
 				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleHelp)));
+
+		options.addOption(
+			Option("version"s, "v"s, "Display version information and exit."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelSCP>(this, &WebTunnelSCP::handleVersion)));
 
 		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
@@ -203,6 +203,11 @@ protected:
 	void handleHelp(const std::string& name, const std::string& value)
 	{
 		_helpRequested = true;
+	}
+
+	void handleVersion(const std::string& name, const std::string& value)
+	{
+		_versionRequested = true;
 	}
 
 	void handleConfig(const std::string& name, const std::string& value)
@@ -337,7 +342,11 @@ protected:
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
-		if (_helpRequested || args.empty())
+		if (_versionRequested)
+		{
+			std::cout << Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION) << std::endl;
+		}
+		else if (_helpRequested || args.empty())
 		{
 			displayHelp();
 		}
@@ -498,11 +507,12 @@ protected:
 	}
 
 private:
-	bool _helpRequested;
-	Poco::UInt16 _localPort;
-	Poco::UInt16 _remotePort;
-	std::string _username;
-	std::string _password;
+	bool _helpRequested = false;
+	bool _versionRequested = false;
+	Poco::UInt16 _localPort = 0;
+	Poco::UInt16 _remotePort = 22;
+	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
+	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
 	std::string _scpClient;
 	std::string _protocol;
 	std::string _identity;

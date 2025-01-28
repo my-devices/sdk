@@ -110,6 +110,7 @@ pocomsg.h
 .cproject
 .settings
 cmake-build/
+cmake-build-*/
 
 # Temporary files #
 ###################

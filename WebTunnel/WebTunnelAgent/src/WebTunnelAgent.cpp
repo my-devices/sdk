@@ -9,6 +9,7 @@
 
 
 #include "Poco/WebTunnel/RemotePortForwarder.h"
+#include "Poco/WebTunnel/Version.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
 #include "Poco/Net/HTTPClientSession.h"
@@ -58,11 +59,6 @@ using Poco::Util::OptionSet;
 using Poco::Util::OptionCallback;
 using Poco::Util::HelpFormatter;
 using namespace std::string_literals;
-
-
-#ifndef WEBTUNNEL_VERSION
-#define WEBTUNNEL_VERSION "2.0.0"
-#endif
 
 
 class SSLInitializer
@@ -145,18 +141,7 @@ public:
 	Poco::BasicEvent<const std::string> disconnected;
 	Poco::BasicEvent<const std::string> error;
 
-	WebTunnelAgent():
-		_helpRequested(false),
-		_httpPort(0),
-		_httpsRequired(false),
-		_sshPort(0),
-		_vncPort(0),
-		_rdpPort(0),
-		_appPort(0),
-		_useProxy(false),
-		_proxyPort(0),
-		_retryDelay(MIN_RETRY_DELAY),
-		_status(STATUS_DISCONNECTED)
+	WebTunnelAgent()
 	{
 		_random.seed();
 	}
@@ -197,6 +182,12 @@ protected:
 				.callback(OptionCallback<WebTunnelAgent>(this, &WebTunnelAgent::handleHelp)));
 
 		options.addOption(
+			Option("version"s, "v"s, "Display version information and exit."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelAgent>(this, &WebTunnelAgent::handleVersion)));
+
+		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
@@ -214,6 +205,11 @@ protected:
 	void handleHelp(const std::string& name, const std::string& value)
 	{
 		_helpRequested = true;
+	}
+
+	void handleVersion(const std::string& name, const std::string& value)
+	{
+		_versionRequested = true;
 	}
 
 	void handleConfig(const std::string& name, const std::string& value)
@@ -585,7 +581,7 @@ protected:
 			retryDelay += _random.next(500*_retryDelay);
 			Poco::Clock nextClock;
 			nextClock += retryDelay;
-			logger().information(Poco::format("Will reconnect in %.2f seconds."s, retryDelay/1000000.0));
+			logger().information("Will reconnect in %.2f seconds."s, retryDelay/1000000.0);
 			_pTimer->schedule(new Poco::Util::TimerTaskAdapter<WebTunnelAgent>(*this, &WebTunnelAgent::reconnectTask), nextClock);
 		}
 	}
@@ -782,10 +778,14 @@ protected:
 
 	int main(const std::vector<std::string>& args)
 	{
-		if (_helpRequested || !config().has("webtunnel.reflectorURI"s))
+		if (_versionRequested)
+		{
+			std::cout << Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION) << std::endl;
+		}
+		else if (_helpRequested || !config().has("webtunnel.reflectorURI"s))
 		{
 			displayHelp();
-		}
+		}	
 		else
 		{
 			try
@@ -810,7 +810,7 @@ protected:
 					}
 					else if (port != 0)
 					{
-						logger().error(Poco::format("Out-of-range port number specified in configuration: %d"s, port));
+						logger().error("Out-of-range port number specified in configuration: %d"s, port);
 						return Poco::Util::Application::EXIT_CONFIG;
 					}
 				}
@@ -856,19 +856,19 @@ protected:
 
 				if (_httpPort != 0 && _ports.find(_httpPort) == _ports.end())
 				{
-					logger().warning(Poco::format("HTTP port (%hu) not in list of forwarded ports."s, _httpPort));
+					logger().warning("HTTP port (%hu) not in list of forwarded ports."s, _httpPort);
 				}
 				if (_sshPort != 0 && _ports.find(_sshPort) == _ports.end())
 				{
-					logger().warning(Poco::format("SSH port (%hu) not in list of forwarded ports."s, _sshPort));
+					logger().warning("SSH port (%hu) not in list of forwarded ports."s, _sshPort);
 				}
 				if (_vncPort != 0 && _ports.find(_vncPort) == _ports.end())
 				{
-					logger().warning(Poco::format("VNC/RFB port (%hu) not in list of forwarded ports."s, _vncPort));
+					logger().warning("VNC/RFB port (%hu) not in list of forwarded ports."s, _vncPort);
 				}
 				if (_rdpPort != 0 && _ports.find(_rdpPort) == _ports.end())
 				{
-					logger().warning(Poco::format("RDP port (%hu) not in list of forwarded ports."s, _rdpPort));
+					logger().warning("RDP port (%hu) not in list of forwarded ports."s, _rdpPort);
 				}
 				if (_appPort != 0 && _ports.find(_appPort) == _ports.end())
 				{
@@ -885,10 +885,7 @@ protected:
 					_userAgent += "; ";
 					_userAgent += Poco::Environment::osArchitecture();
 					_userAgent += ") POCO/";
-					_userAgent += Poco::format("%d.%d.%d"s,
-						static_cast<int>(Poco::Environment::libraryVersion() >> 24),
-						static_cast<int>((Poco::Environment::libraryVersion() >> 16) & 0xFF),
-						static_cast<int>((Poco::Environment::libraryVersion() >> 8) & 0xFF));
+					_userAgent += Poco::WebTunnel::formatVersion(Poco::Environment::libraryVersion());
 				}
 
 				_notifyExec = config().getString("webtunnel.status.notify"s, ""s);
@@ -946,7 +943,8 @@ protected:
 	static const std::string X_WEBTUNNEL_KEEPALIVE;
 
 private:
-	bool _helpRequested;
+	bool _helpRequested = false;
+	bool _versionRequested = false;
 	std::string _deviceName;
 	std::string _deviceVersion;
 	std::string _tenant;
@@ -956,15 +954,15 @@ private:
 	Poco::URI _redirectURI;
 	std::string _userAgent;
 	std::string _httpPath;
-	Poco::UInt16 _httpPort;
-	bool _httpsRequired;
-	Poco::UInt16 _sshPort;
-	Poco::UInt16 _vncPort;
-	Poco::UInt16 _rdpPort;
-	Poco::UInt16 _appPort;
-	bool _useProxy;
+	Poco::UInt16 _httpPort = 0;
+	bool _httpsRequired = false;
+	Poco::UInt16 _sshPort = 0;
+	Poco::UInt16 _vncPort = 0;
+	Poco::UInt16 _rdpPort = 0;
+	Poco::UInt16 _appPort = 0;
+	bool _useProxy = false;
 	std::string _proxyHost;
-	Poco::UInt16 _proxyPort;
+	Poco::UInt16 _proxyPort = 0;
 	std::string _proxyUsername;
 	std::string _proxyPassword;
 	Poco::Timespan _localTimeout;
@@ -978,11 +976,11 @@ private:
 	Poco::SharedPtr<Poco::Net::HTTPClientSession> _pHTTPClientSession;
 	Poco::Event _stopped;
 	Poco::Event _disconnected;
-	int _retryDelay;
+	int _retryDelay = MIN_RETRY_DELAY;
 	Poco::SharedPtr<Poco::Util::Timer> _pTimer;
 	Poco::Util::TimerTask::Ptr _pPropertiesUpdateTask;
 	SSLInitializer _sslInitializer;
-	Status _status;
+	Status _status = STATUS_DISCONNECTED;
 	Poco::Random _random;
 	Poco::WebTunnel::SocketFactory::Ptr _pSocketFactory;
 };
@@ -990,7 +988,7 @@ private:
 
 const std::string WebTunnelAgent::SEC_WEBSOCKET_PROTOCOL("Sec-WebSocket-Protocol");
 const std::string WebTunnelAgent::WEBTUNNEL_PROTOCOL("com.appinf.webtunnel.server/1.0");
-const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/" WEBTUNNEL_VERSION);
+const std::string WebTunnelAgent::WEBTUNNEL_AGENT("WebTunnelAgent/"s + Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION));
 const std::string WebTunnelAgent::X_PTTH_SET_PROPERTY("X-PTTH-Set-Property");
 const std::string WebTunnelAgent::X_PTTH_ERROR("X-PTTH-Error");
 const std::string WebTunnelAgent::X_WEBTUNNEL_KEEPALIVE("X-WebTunnel-KeepAlive");

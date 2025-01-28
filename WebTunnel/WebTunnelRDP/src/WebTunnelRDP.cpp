@@ -9,6 +9,7 @@
 
 
 #include "Poco/WebTunnel/LocalPortForwarder.h"
+#include "Poco/WebTunnel/Version.h"
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
@@ -123,6 +124,12 @@ protected:
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleHelp)));
 
 		options.addOption(
+			Option("version"s, "v"s, "Display version information and exit."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleVersion)));
+
+		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
@@ -191,6 +198,11 @@ protected:
 	void handleHelp(const std::string& name, const std::string& value)
 	{
 		_helpRequested = true;
+	}
+
+	void handleVersion(const std::string& name, const std::string& value)
+	{
+		_versionRequested = true;
 	}
 
 	void handleConfig(const std::string& name, const std::string& value)
@@ -319,7 +331,11 @@ protected:
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
-		if (_helpRequested || args.empty())
+		if (_versionRequested)
+		{
+			std::cout << Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION) << std::endl;
+		}
+		else if (_helpRequested || args.empty())
 		{
 			displayHelp();
 		}
@@ -469,6 +485,7 @@ protected:
 
 private:
 	bool _helpRequested = false;
+	bool _versionRequested = false;
 	bool _fullScreen = false;
 	Poco::UInt16 _localPort = 0;
 	Poco::UInt16 _remotePort = 3389;
