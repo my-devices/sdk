@@ -406,7 +406,7 @@ void SocketDispatcher::run()
 				}
 				else
 				{
-					_pollSet.update(it->first, (it->second->mode & ~Poco::Net::PollSet::POLL_READ) | Poco::Net::PollSet::POLL_WRITE);
+					_pollSet.update(it->first, it->second->mode | Poco::Net::PollSet::POLL_WRITE);
 				}
 			}
 

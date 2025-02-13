@@ -156,6 +156,8 @@ const Poco::Timespan& RemotePortForwarder::remoteTimeout() const
 
 void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer)
 {
+	if (dispatcher.hasPendingSends(*_pWebSocket)) return;
+
 	std::size_t hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_DATA, 0, channel);
 	int n = 0;
 	try
