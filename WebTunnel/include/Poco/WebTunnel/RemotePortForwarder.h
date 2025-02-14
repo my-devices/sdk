@@ -118,9 +118,11 @@ public:
 		/// Transmits properties (key-value pairs) to the remote peer.
 
 protected:
+	bool wantMultiplex(SocketDispatcher& dispatcher);
 	void multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
 	void multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
 	void multiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
+	bool wantDemultiplex(SocketDispatcher& dispatcher);
 	void demultiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
 	void demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
 	void demultiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
@@ -146,6 +148,16 @@ private:
 			_buffer(Protocol::WT_FRAME_MAX_SIZE + Protocol::WT_FRAME_HEADER_SIZE)
 		{
 		}
+
+		bool wantRead(SocketDispatcher& dispatcher)
+		{
+			return _forwarder.wantMultiplex(dispatcher);
+		}
+	
+		bool wantWrite(SocketDispatcher& dispatcher)
+		{
+			return false;
+		}	
 
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
@@ -181,6 +193,16 @@ private:
 		{
 		}
 
+		bool wantRead(SocketDispatcher& dispatcher)
+		{
+			return _forwarder.wantDemultiplex(dispatcher);
+		}
+	
+		bool wantWrite(SocketDispatcher& dispatcher)
+		{
+			return false;
+		}	
+
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
 			_forwarder.demultiplex(dispatcher, socket, _buffer);
@@ -214,6 +236,16 @@ private:
 		{
 		}
 
+		bool wantRead(SocketDispatcher& dispatcher)
+		{
+			return false;
+		}
+	
+		bool wantWrite(SocketDispatcher& dispatcher)
+		{
+			return true;
+		}
+	
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
 		}
@@ -244,6 +276,12 @@ private:
 		CF_CLOSED_REMOTE = 0x02
 	};
 
+	enum
+	{
+		MAX_PENDING_SENDS = 100,
+		THROTTLE_RECEIVE_DELAY = 1000
+	};
+
 	struct ChannelInfo
 	{
 		Poco::Net::StreamSocket socket;
@@ -262,6 +300,8 @@ private:
 	Poco::Timespan _localTimeout;
 	Poco::Timespan _closeTimeout;
 	Poco::Timespan _remoteTimeout;
+	Poco::Clock _lastSend;
+	Poco::Clock _delayReceiveUntil;
 	int _timeoutCount = 0;
 	mutable Poco::FastMutex _mutex;
 	Poco::Logger& _logger;

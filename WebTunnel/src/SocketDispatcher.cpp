@@ -400,14 +400,16 @@ void SocketDispatcher::run()
 					it->second->activity.update();
 					timeout(it->first, it->second);
 				}
-				if (it->second->pendingSends.empty())
-				{
-					_pollSet.update(it->first, it->second->mode);
-				}
+				int mode = it->second->mode;
+				if ((mode & Poco::Net::PollSet::POLL_READ) != 0 && it->second->pHandler->wantRead(*this))
+					mode |= Poco::Net::PollSet::POLL_READ;
 				else
-				{
-					_pollSet.update(it->first, it->second->mode | Poco::Net::PollSet::POLL_WRITE);
-				}
+					mode &= ~Poco::Net::PollSet::POLL_READ;
+				if (!it->second->pendingSends.empty() || ((mode & Poco::Net::PollSet::POLL_WRITE) != 0 && it->second->pHandler->wantWrite(*this)))
+					mode |= Poco::Net::PollSet::POLL_WRITE;
+				else
+					mode &= ~Poco::Net::PollSet::POLL_WRITE;
+				_pollSet.update(it->first, mode);
 			}
 
 			Poco::Net::PollSet::SocketModeMap socketModeMap = _pollSet.poll(currentTimeout);
@@ -699,12 +701,12 @@ void SocketDispatcher::shutdownSendImpl(Poco::Net::StreamSocket& socket)
 }
 
 
-bool SocketDispatcher::hasPendingSends(const Poco::Net::StreamSocket& socket) const
+std::size_t SocketDispatcher::countPendingSends(const Poco::Net::StreamSocket& socket) const
 {
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
-		return !it->second->pendingSends.empty();
+		return it->second->pendingSends.size();
 	}
 	else return false;
 }

@@ -80,6 +80,8 @@ public:
 	public:
 		using Ptr = Poco::AutoPtr<SocketHandler>;
 
+		virtual bool wantRead(SocketDispatcher& dispatcher) = 0;
+		virtual bool wantWrite(SocketDispatcher& dispatcher) = 0;
 		virtual void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
@@ -123,8 +125,8 @@ public:
 		/// stored and written the next time the socket becomes writable again.
 		/// While at least one write is pending, that socket will not accept new data.
 	
-	bool hasPendingSends(const Poco::Net::StreamSocket& socket) const;
-		/// Returns true if there are pending sends for the given socket.
+	std::size_t countPendingSends(const Poco::Net::StreamSocket& socket) const;
+		/// Returns the number of pending sends for the given socket.
 
 	void shutdownSend(Poco::Net::StreamSocket& socket);
 		/// Shuts down the sending direction of the socket, but only after

@@ -154,10 +154,14 @@ const Poco::Timespan& RemotePortForwarder::remoteTimeout() const
 }
 
 
+bool RemotePortForwarder::wantMultiplex(SocketDispatcher& dispatcher)
+{
+	return dispatcher.countPendingSends(*_pWebSocket) == 0;
+}
+
+
 void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer)
 {
-	if (dispatcher.hasPendingSends(*_pWebSocket)) return;
-
 	std::size_t hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_DATA, 0, channel);
 	int n = 0;
 	try
@@ -208,6 +212,7 @@ void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 	try
 	{
 		dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(n + hn), Poco::Net::WebSocket::FRAME_BINARY);
+		_lastSend.update();
 	}
 	catch (Poco::Exception& exc)
 	{
@@ -225,6 +230,7 @@ void RemotePortForwarder::multiplexError(SocketDispatcher& dispatcher, Poco::Net
 	try
 	{
 		dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(hn), Poco::Net::WebSocket::FRAME_BINARY);
+		_lastSend.update();
 	}
 	catch (Poco::Exception& exc)
 	{
@@ -243,6 +249,7 @@ void RemotePortForwarder::multiplexTimeout(SocketDispatcher& dispatcher, Poco::N
 		try
 		{
 			dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(hn), Poco::Net::WebSocket::FRAME_BINARY);
+			_lastSend.update();
 		}
 		catch (Poco::Exception& exc)
 		{
@@ -251,6 +258,13 @@ void RemotePortForwarder::multiplexTimeout(SocketDispatcher& dispatcher, Poco::N
 		}
 	}
 	removeChannel(channel);
+}
+
+
+bool RemotePortForwarder::wantDemultiplex(SocketDispatcher& dispatcher)
+{
+	Poco::Clock now;
+	return now >= _delayReceiveUntil;
 }
 
 
@@ -290,6 +304,14 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 		{
 		case Protocol::WT_OP_DATA:
 			forwardData(buffer.begin() + hn, static_cast<int>(n - hn), channel);
+			if (_lastSend.isElapsed(_remoteTimeout.totalMicroseconds()))
+			{
+				// Send a PING if we haven't sent anything to the reflector for some time,
+				// as may happend during a large file transfer. 
+				_logger.debug("Sending PING."s);
+				dispatcher.sendBytes(*_pWebSocket, 0, 0, Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_PING);
+				_lastSend.update();	
+			}
 			break;
 
 		case Protocol::WT_OP_OPEN_REQUEST:
@@ -383,6 +405,7 @@ void RemotePortForwarder::demultiplexTimeout(SocketDispatcher& dispatcher, Poco:
 		{
 			_logger.debug("Sending PING."s);
 			dispatcher.sendBytes(*_pWebSocket, 0, 0, Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_PING);
+			_lastSend.update();
 		}
 		catch (Poco::Exception&)
 		{
@@ -452,6 +475,11 @@ void RemotePortForwarder::forwardData(const char* buffer, int size, Poco::UInt16
 		{
 			removeChannel(channel);
 			sendResponse(channel, Protocol::WT_OP_ERROR, Protocol::WT_ERR_SOCKET);
+		}
+		if (_dispatcher.countPendingSends(streamSocket) > MAX_PENDING_SENDS)
+		{
+			Poco::Clock now;
+			_delayReceiveUntil = now + THROTTLE_RECEIVE_DELAY;
 		}
 	}
 	else
@@ -561,6 +589,7 @@ void RemotePortForwarder::sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode,
 	try
 	{
 		_dispatcher.sendBytes(*_pWebSocket, buffer, hn, Poco::Net::WebSocket::FRAME_BINARY);
+		_lastSend.update();
 	}
 	catch (Poco::Exception&)
 	{
@@ -590,6 +619,7 @@ void RemotePortForwarder::closeWebSocket(CloseReason reason, bool active)
 					Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
 					writer << static_cast<Poco::UInt16>(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
 					_dispatcher.sendBytes(*_pWebSocket, buffer, sizeof(buffer), Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_CLOSE);
+					_lastSend.update();
 				}
 			}
 			catch (Poco::Exception&)
@@ -644,6 +674,7 @@ void RemotePortForwarder::updateProperties(const std::map<std::string, std::stri
 	writeProperties(bufferWriter, props);
 
 	_dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(payloadSize + Protocol::WT_FRAME_HEADER_SIZE), Poco::Net::WebSocket::FRAME_BINARY);
+	_lastSend.update();
 }
 
 

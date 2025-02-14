@@ -196,6 +196,16 @@ public:
 	{
 	}
 
+	bool wantRead(SocketDispatcher& dispatcher)
+	{
+		return true;
+	}
+
+	bool wantWrite(SocketDispatcher& dispatcher)
+	{
+		return false;
+	}
+
 	void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 	{
 		poco_assert_dbg (socket == _pConnectionPair->streamSocket);
@@ -305,6 +315,16 @@ public:
 		_pConnectionPair(pConnectionPair),
 		_logger(Poco::Logger::get("WebTunnel.WebSocketToStreamSocketForwarder"s))
 	{
+	}
+
+	bool wantRead(SocketDispatcher& dispatcher)
+	{
+		return true;
+	}
+
+	bool wantWrite(SocketDispatcher& dispatcher)
+	{
+		return false;
 	}
 
 	void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
