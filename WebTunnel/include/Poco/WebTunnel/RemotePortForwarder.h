@@ -114,6 +114,22 @@ public:
 	const Poco::Timespan& remoteTimeout() const;
 		/// Returns the timeout for the remote connection.
 
+	void setThrottleDelay(Poco::Timespan delay);
+		/// Sets the upstream receive delay if throttling is necessary.
+
+	Poco::Timespan getThrottleDelay() const;
+		/// Returns the upstream receive delay if throttling is necessary.
+
+	void setThrottleMaxPendingBytesToSend(std::size_t count);
+		/// Sets the maximum number of pending bytes to send downstream (
+		/// to the local device) before the upstream
+		/// connection (to reflector) is throttled.
+
+	std::size_t getThrottleMaxPendingBytesToSend() const;
+		/// Returns the maximum number of pending bytes to send downstream (
+		/// to the local device) before the upstream
+		/// connection (to reflector) is throttled.
+
 	void updateProperties(const std::map<std::string, std::string>& props);
 		/// Transmits properties (key-value pairs) to the remote peer.
 
@@ -276,12 +292,6 @@ private:
 		CF_CLOSED_REMOTE = 0x02
 	};
 
-	enum
-	{
-		MAX_PENDING_SENDS = 100,
-		THROTTLE_RECEIVE_DELAY = 1000
-	};
-
 	struct ChannelInfo
 	{
 		Poco::Net::StreamSocket socket;
@@ -300,6 +310,8 @@ private:
 	Poco::Timespan _localTimeout;
 	Poco::Timespan _closeTimeout;
 	Poco::Timespan _remoteTimeout;
+	Poco::Timespan _throttleDelay;
+	std::size_t _throttleMaxPendingBytesToSend;
 	Poco::Clock _lastSend;
 	Poco::Clock _delayReceiveUntil;
 	int _timeoutCount = 0;

@@ -405,6 +405,8 @@ protected:
 				_pForwarder->webSocketClosed += Poco::delegate(this, &WebTunnelAgent::onClose);
 				_pForwarder->setConnectTimeout(_connectTimeout);
 				_pForwarder->setLocalTimeout(_localTimeout);
+				if (_throttleDelay != 0) _pForwarder->setThrottleDelay(_throttleDelay);
+				if (_throttleMaxPendingBytesToSend != 0) _pForwarder->setThrottleMaxPendingBytesToSend(_throttleMaxPendingBytesToSend);
 				logger().information("WebTunnel connection established."s);
 
 				if (!props.empty() && _propertiesUpdateInterval > 0)
@@ -834,6 +836,8 @@ protected:
 				_userAgent = config().getString("webtunnel.userAgent"s, ""s);
 				_httpTimeout = Poco::Timespan(config().getInt("http.timeout"s, 30), 0);
 				_propertiesUpdateInterval = Poco::Timespan(config().getInt("webtunnel.propertiesUpdateInterval"s, 0), 0);
+				_throttleDelay = config().getUInt64("webtunnel.throttle.maxPendingBytesToSend"s, 0);
+				_throttleMaxPendingBytesToSend = config().getUInt32("webtunnel.throttle.delay"s, 0);
 
 				_useProxy = config().getBool("http.proxy.enable"s, false);
 				_proxyHost = config().getString("http.proxy.host"s, ""s);
@@ -970,6 +974,8 @@ private:
 	Poco::Timespan _remoteTimeout;
 	Poco::Timespan _httpTimeout;
 	Poco::Timespan _propertiesUpdateInterval;
+	std::size_t _throttleMaxPendingBytesToSend = 0;
+	Poco::Timespan _throttleDelay;
 	std::string _notifyExec;
 	Poco::SharedPtr<Poco::WebTunnel::SocketDispatcher> _pDispatcher;
 	Poco::SharedPtr<Poco::WebTunnel::RemotePortForwarder> _pForwarder;

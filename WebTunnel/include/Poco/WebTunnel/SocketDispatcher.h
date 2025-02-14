@@ -128,6 +128,9 @@ public:
 	std::size_t countPendingSends(const Poco::Net::StreamSocket& socket) const;
 		/// Returns the number of pending sends for the given socket.
 
+	std::size_t countPendingBytesToSend(const Poco::Net::StreamSocket& socket) const;
+		/// Returns the number of pending bytes to send for the given socket.
+
 	void shutdownSend(Poco::Net::StreamSocket& socket);
 		/// Shuts down the sending direction of the socket, but only after
 		/// all pending sends has been sent.

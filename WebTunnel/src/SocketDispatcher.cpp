@@ -17,6 +17,7 @@
 #include "Poco/WebTunnel/SocketDispatcher.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/Event.h"
+#include <numeric>
 
 
 using namespace std::string_literals;
@@ -708,7 +709,24 @@ std::size_t SocketDispatcher::countPendingSends(const Poco::Net::StreamSocket& s
 	{
 		return it->second->pendingSends.size();
 	}
-	else return false;
+	else return 0;
+}
+
+
+std::size_t SocketDispatcher::countPendingBytesToSend(const Poco::Net::StreamSocket& socket) const
+{
+	auto it = _socketMap.find(socket);
+	if (it != _socketMap.end())
+	{
+		return std::accumulate(
+			it->second->pendingSends.begin(), it->second->pendingSends.end(), 0, 
+			[](std::size_t n, const PendingSend& p2)
+			{
+				return n + p2.buffer.size();
+			}
+		);
+	}
+	else return 0;
 }
 
 

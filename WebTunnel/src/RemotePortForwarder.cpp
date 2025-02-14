@@ -68,6 +68,8 @@ RemotePortForwarder::RemotePortForwarder(SocketDispatcher& dispatcher, Poco::Sha
 	_localTimeout(7200, 0),
 	_closeTimeout(2, 0),
 	_remoteTimeout(remoteTimeout),
+	_throttleDelay(1000),
+	_throttleMaxPendingBytesToSend(256*1024),
 	_logger(Poco::Logger::get("WebTunnel.RemotePortForwarder"s))
 {
 	pWebSocket->setBlocking(false);
@@ -151,6 +153,30 @@ const Poco::Timespan& RemotePortForwarder::getConnectTimeout() const
 const Poco::Timespan& RemotePortForwarder::remoteTimeout() const
 {
 	return _remoteTimeout;
+}
+
+
+void RemotePortForwarder::setThrottleDelay(Poco::Timespan delay)
+{
+	_throttleDelay = delay;
+}
+
+
+Poco::Timespan RemotePortForwarder::getThrottleDelay() const
+{
+	return _throttleDelay;
+}
+
+
+void RemotePortForwarder::setThrottleMaxPendingBytesToSend(std::size_t count)
+{
+	_throttleMaxPendingBytesToSend = count;
+}
+
+
+std::size_t RemotePortForwarder::getThrottleMaxPendingBytesToSend() const
+{
+	return _throttleMaxPendingBytesToSend;
 }
 
 
@@ -476,10 +502,11 @@ void RemotePortForwarder::forwardData(const char* buffer, int size, Poco::UInt16
 			removeChannel(channel);
 			sendResponse(channel, Protocol::WT_OP_ERROR, Protocol::WT_ERR_SOCKET);
 		}
-		if (_dispatcher.countPendingSends(streamSocket) > MAX_PENDING_SENDS)
+		if (_dispatcher.countPendingBytesToSend(streamSocket) > _throttleMaxPendingBytesToSend)
 		{
 			Poco::Clock now;
-			_delayReceiveUntil = now + THROTTLE_RECEIVE_DELAY;
+			_delayReceiveUntil = now + _throttleDelay.totalMicroseconds();
+			_logger.debug("Too many bytes pending to be sent in channel %hu. Throttling upstream WebTunnel connection."s, channel);
 		}
 	}
 	else
