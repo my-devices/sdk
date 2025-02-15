@@ -171,7 +171,7 @@ public:
 		}
 		catch (Poco::Exception& exc)
 		{
-			logger.warning("Error shutting down WebSocket: %s"s, exc.displayText());
+			logger.debug("Error shutting down WebSocket: %s"s, exc.displayText());
 		}
 	}
 
@@ -198,7 +198,7 @@ public:
 
 	bool wantRead(SocketDispatcher& dispatcher)
 	{
-		return true;
+		return dispatcher.countPendingSends(_pConnectionPair->webSocket) == 0;
 	}
 
 	bool wantWrite(SocketDispatcher& dispatcher)
@@ -319,7 +319,7 @@ public:
 
 	bool wantRead(SocketDispatcher& dispatcher)
 	{
-		return true;
+		return dispatcher.countPendingSends(_pConnectionPair->streamSocket) == 0;
 	}
 
 	bool wantWrite(SocketDispatcher& dispatcher)
