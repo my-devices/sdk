@@ -338,24 +338,24 @@ public:
 			n = _pConnectionPair->webSocket.receiveFrame(_buffer.begin(), static_cast<int>(_buffer.size()), flags);
 			if (n < 0) return;
 		}
-		catch (Poco::Net::ConnectionResetException& exc)
-		{
-			_logger.debug("Exception while receiving data from remote socket: %s"s, exc.displayText());
-			_pDispatcher->removeSocket(_pConnectionPair->webSocket);
-			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_ERROR;
-
-			_pDispatcher->shutdownSend(_pConnectionPair->streamSocket);
-			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
-			return;
-		}
 		catch (Poco::Exception& exc)
 		{
-			_logger.debug("Exception while receiving data from remote socket: %s"s, exc.displayText());
 			_pDispatcher->removeSocket(_pConnectionPair->webSocket);
-			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_ERROR;
+			if (!(_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
+			{
+				_logger.error("Exception while receiving data from remote socket: %s"s, exc.displayText());
+				_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_ERROR;
+			}
+			else
+			{
+				_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_REMOTE;
+			}
 
-			_pDispatcher->shutdownSend(_pConnectionPair->streamSocket);
-			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+			if (!(_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
+			{
+				_pDispatcher->shutdownSend(_pConnectionPair->streamSocket);
+				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+			}
 			return;
 		}
 		if ((flags & Poco::Net::WebSocket::FRAME_OP_BITMASK) == Poco::Net::WebSocket::FRAME_OP_PONG)

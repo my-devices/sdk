@@ -596,6 +596,7 @@ void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, i
 		if (timeout != 0)
 		{
 			it->second->timeout = timeout;
+			it->second->activity.update();
 		}
 		mode |= Poco::Net::PollSet::POLL_ERROR;
 		_logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);

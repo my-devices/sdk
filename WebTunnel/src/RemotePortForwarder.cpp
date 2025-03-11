@@ -309,8 +309,15 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 	}
 	catch (Poco::Exception& exc)
 	{
-		_logger.error("Error receiving WebSocket frame: %s"s, exc.displayText());
-		closeWebSocket(RPF_CLOSE_ERROR, false);
+		if (_webSocketFlags & CF_CLOSED_LOCAL)
+		{
+			_dispatcher.removeSocket(*_pWebSocket);
+		}
+		else
+		{
+			_logger.error("Error receiving WebSocket frame: %s"s, exc.displayText());
+			closeWebSocket(RPF_CLOSE_ERROR, false);
+		}
 		return;
 	}
 	if ((wsFlags & Poco::Net::WebSocket::FRAME_OP_BITMASK) == Poco::Net::WebSocket::FRAME_OP_PONG)
