@@ -32,12 +32,13 @@ class AddSocketNotification: public SocketDispatcher::TaskNotification
 public:
 	using Ptr = Poco::AutoPtr<AddSocketNotification>;
 
-	AddSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketHandler::Ptr& pHandler, int mode, Poco::Timespan timeout):
+	AddSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, const SocketDispatcher::SocketHandler::Ptr& pHandler, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout):
 		TaskNotification(dispatcher),
 		_socket(socket),
 		_pHandler(pHandler),
 		_mode(mode),
-		_timeout(timeout)
+		_receiveTimeout(receiveTimeout),
+		_sendTimeout(sendTimeout)
 	{
 	}
 
@@ -45,14 +46,15 @@ public:
 	{
 		AutoSetEvent ase(_done);
 
-		_dispatcher.addSocketImpl(_socket, _pHandler, _mode, _timeout);
+		_dispatcher.addSocketImpl(_socket, _pHandler, _mode, _receiveTimeout, _sendTimeout);
 	}
 
 private:
 	Poco::Net::StreamSocket _socket;
 	SocketDispatcher::SocketHandler::Ptr _pHandler;
 	int _mode;
-	Poco::Timespan _timeout;
+	Poco::Timespan _receiveTimeout;
+	Poco::Timespan _sendTimeout;
 };
 
 
@@ -61,11 +63,12 @@ class UpdateSocketNotification: public SocketDispatcher::TaskNotification
 public:
 	using Ptr = Poco::AutoPtr<UpdateSocketNotification>;
 
-	UpdateSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout):
+	UpdateSocketNotification(SocketDispatcher& dispatcher, const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout):
 		TaskNotification(dispatcher),
 		_socket(socket),
 		_mode(mode),
-		_timeout(timeout)
+		_receiveTimeout(receiveTimeout),
+		_sendTimeout(sendTimeout)
 	{
 	}
 
@@ -73,13 +76,14 @@ public:
 	{
 		AutoSetEvent ase(_done);
 
-		_dispatcher.updateSocketImpl(_socket, _mode, _timeout);
+		_dispatcher.updateSocketImpl(_socket, _mode, _receiveTimeout, _sendTimeout);
 	}
 
 private:
 	Poco::Net::StreamSocket _socket;
 	int _mode;
-	Poco::Timespan _timeout;
+	Poco::Timespan _receiveTimeout;
+	Poco::Timespan _sendTimeout;
 };
 
 
@@ -194,7 +198,7 @@ public:
 	{
 		AutoSetEvent ase(_done);
 
-		_dispatcher.sendBytesImpl(_socket, std::move(_buffer), _options);
+		_dispatcher.sendBytesImpl(_socket, std::move(_buffer), _options, true);
 	}
 
 private:
@@ -229,6 +233,7 @@ private:
 
 SocketDispatcher::SocketDispatcher(Poco::Timespan timeout):
 	_timeout(timeout),
+	_sendTimeout(30, 0),
 	_stopped(false),
 	_logger(Poco::Logger::get("WebTunnel.SocketDispatcher"s))
 {
@@ -246,6 +251,12 @@ SocketDispatcher::~SocketDispatcher()
 	{
 		poco_unexpected();
 	}
+}
+
+
+void SocketDispatcher::setSendTimeout(Poco::Timespan sendTimeout)
+{
+	_sendTimeout = sendTimeout;
 }
 
 
@@ -274,9 +285,9 @@ void SocketDispatcher::reset()
 }
 
 
-void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
+void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout)
 {
-	AddSocketNotification::Ptr pNf = new AddSocketNotification(*this, socket, pHandler, mode, timeout);
+	AddSocketNotification::Ptr pNf = new AddSocketNotification(*this, socket, pHandler, mode, receiveTimeout, sendTimeout);
 	_queue.enqueueNotification(pNf);
 	_pollSet.wakeUp();
 	if (!inDispatcherThread())
@@ -286,15 +297,15 @@ void SocketDispatcher::addSocket(const Poco::Net::StreamSocket& socket, SocketHa
 }
 
 
-void SocketDispatcher::updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout)
+void SocketDispatcher::updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout)
 {
 	if (inDispatcherThread())
 	{
-		updateSocketImpl(socket, mode, timeout);
+		updateSocketImpl(socket, mode, receiveTimeout, sendTimeout);
 	}
 	else
 	{
-		UpdateSocketNotification::Ptr pNf = new UpdateSocketNotification(*this, socket, mode, timeout);
+		UpdateSocketNotification::Ptr pNf = new UpdateSocketNotification(*this, socket, mode, receiveTimeout, sendTimeout);
 		_queue.enqueueNotification(pNf);
 		_pollSet.wakeUp();
 		pNf->wait();
@@ -347,7 +358,7 @@ void SocketDispatcher::sendBytes(Poco::Net::StreamSocket& socket, const void* bu
 {
 	if (inDispatcherThread())
 	{
-		sendBytesImpl(socket, Poco::Buffer<char>(reinterpret_cast<const char*>(buffer), length), options);
+		sendBytesImpl(socket, Poco::Buffer<char>(reinterpret_cast<const char*>(buffer), length), options, false);
 	}
 	else
 	{
@@ -394,19 +405,27 @@ void SocketDispatcher::run()
 			{
 				if (dumpSockets)
 				{
-					_logger.trace("Socket %8?d -> %4d; %8Ld; %2z"s, it->first.impl()->sockfd(), it->second->mode, it->second->timeout.totalMilliseconds(), it->second->pendingSends.size());
+					_logger.trace("Socket %8?d -> %4d; %8Ld; %2z"s, it->first.impl()->sockfd(), it->second->mode, it->second->receiveTimeout.totalMilliseconds(), it->second->pendingSends.size());
 				}
-				if (it->second->timeout != 0 && it->second->timeout < it->second->activity.elapsed())
+				if (it->second->receiveTimeout != 0 && it->second->receiveTimeout < it->second->lastReceive.elapsed())
 				{
-					it->second->activity.update();
+					it->second->lastReceive.update();
 					timeout(it->first, it->second);
 				}
+				if (!it->second->pendingSends.empty() && it->second->sendTimeout < it->second->pendingSends[0].clock.elapsed())
+				{
+					_logger.debug("Socket %?d send timeout."s, it->first.impl()->sockfd());
+					it->second->pendingSends.clear();
+					it->second->sslWriteWantRead = false;
+					Poco::TimeoutException exc("Send timed out"s);
+					exception(it->first, it->second, &exc);
+				}
 				int mode = it->second->mode;
-				if ((mode & Poco::Net::PollSet::POLL_READ) != 0 && it->second->pHandler->wantRead(*this))
+				if ((mode & Poco::Net::PollSet::POLL_READ) != 0 && (it->second->pHandler->wantRead(*this) || it->second->sslWriteWantRead))
 					mode |= Poco::Net::PollSet::POLL_READ;
 				else
 					mode &= ~Poco::Net::PollSet::POLL_READ;
-				if (!it->second->pendingSends.empty() || ((mode & Poco::Net::PollSet::POLL_WRITE) != 0 && it->second->pHandler->wantWrite(*this)))
+				if ((!it->second->pendingSends.empty() && !it->second->sslWriteWantRead) || ((mode & Poco::Net::PollSet::POLL_WRITE) != 0 && it->second->pHandler->wantWrite(*this)))
 					mode |= Poco::Net::PollSet::POLL_WRITE;
 				else
 					mode &= ~Poco::Net::PollSet::POLL_WRITE;
@@ -416,23 +435,27 @@ void SocketDispatcher::run()
 			Poco::Net::PollSet::SocketModeMap socketModeMap = _pollSet.poll(currentTimeout);
 			if (!socketModeMap.empty())
 			{
+				if (_logger.trace()) _logger.trace("================"s);
 				currentTimeout = _timeout;
 				for (Poco::Net::PollSet::SocketModeMap::const_iterator it = socketModeMap.begin(); it != socketModeMap.end(); ++it)
 				{
 					SocketMap::iterator its = _socketMap.find(it->first);
 					if (its != _socketMap.end())
 					{
-						its->second->activity.update();
 						if (it->second & Poco::Net::PollSet::POLL_READ)
 						{
+							if (_logger.trace()) _logger.trace("Socket %?d is readable."s, its->first.impl()->sockfd());
+							its->second->lastReceive.update();
 							readable(its->first, its->second);
 						}
 						if ((it->second & Poco::Net::PollSet::POLL_WRITE))
 						{
+							if (_logger.trace()) _logger.trace("Socket %?d is writable."s, its->first.impl()->sockfd());
 							writable(its->first, its->second);
 						}
 						if (it->second & Poco::Net::PollSet::POLL_ERROR)
 						{
+							if (_logger.trace()) _logger.trace("Socket %?d has exception."s, its->first.impl()->sockfd());
 							exception(its->first, its->second);
 						}
 					}
@@ -478,6 +501,12 @@ void SocketDispatcher::readable(const Poco::Net::Socket& socket, SocketDispatche
 	try
 	{
 		Poco::Net::StreamSocket ss(socket);
+		if (pInfo->sslWriteWantRead)
+		{
+			pInfo->sslWriteWantRead = false;
+			writable(socket, pInfo);
+			if (ss.available() == 0 || pInfo->sslWriteWantRead) return;
+		}
 		do
 		{
 			pInfo->pHandler->readable(*this, ss);
@@ -490,7 +519,7 @@ void SocketDispatcher::readable(const Poco::Net::Socket& socket, SocketDispatche
 	}
 	catch (Poco::Exception& exc)
 	{
-		_logger.log(exc);
+		_logger.error("Error handling readable socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
 	}
 }
 
@@ -525,42 +554,58 @@ void SocketDispatcher::writable(const Poco::Net::Socket& socket, SocketDispatche
 				}
 				else
 				{
-					int sent = ss.sendBytes(pending.buffer.begin(), static_cast<int>(pending.buffer.size()), pending.options);
-					if (sent > 0)
+					if (_logger.trace()) _logger.trace("Sending %z bytes to socket %?d."s, pending.buffer.size(), ss.impl()->sockfd());
+					try
 					{
-						if (sent < pending.buffer.size())
+						int sent = ss.sendBytes(pending.buffer.begin(), static_cast<int>(pending.buffer.size()), pending.options);
+						if (sent > 0)
 						{
-							std::memmove(pending.buffer.begin(), pending.buffer.begin() + sent, pending.buffer.size() - sent);
-							pending.buffer.resize(pending.buffer.size() - sent);
+							if (sent < pending.buffer.size())
+							{
+								if (_logger.trace()) _logger.trace("Short write (%d) on socket %?d."s, sent, ss.impl()->sockfd());
+								std::memmove(pending.buffer.begin(), pending.buffer.begin() + sent, pending.buffer.size() - sent);
+								pending.buffer.resize(pending.buffer.size() - sent);
+								break;
+							}
+							else
+							{
+								pInfo->pendingSends.pop_front();
+							}
+						}
+						else if (sent == ERR_SSL_WANT_READ)
+						{
+							if (_logger.trace()) _logger.trace("SSL write wants read (handshake) on socket %?d."s, ss.impl()->sockfd());
+							pInfo->sslWriteWantRead = true;
 							break;
 						}
-						else
-						{
-							pInfo->pendingSends.pop_front();
-						}
+						else break;
 					}
-					else break;
+					catch (Poco::Exception& exc)
+					{
+						_logger.error("Error writing to socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
+						exception(ss, pInfo, &exc);
+					}
 				}
 			}
 		}
 	}
 	catch (Poco::Exception& exc)
 	{
-		_logger.log(exc);
+		_logger.error("Error handling writable socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
 	}
 }
 
 
-void SocketDispatcher::exception(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo)
+void SocketDispatcher::exception(const Poco::Net::Socket& socket, SocketDispatcher::SocketInfo::Ptr pInfo, const Poco::Exception* pException)
 {
 	try
 	{
 		Poco::Net::StreamSocket ss(socket);
-		pInfo->pHandler->exception(*this, ss);
+		pInfo->pHandler->exception(*this, ss, pException);
 	}
 	catch (Poco::Exception& exc)
 	{
-		_logger.log(exc);
+		_logger.error("Error handling exceptioned socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
 	}
 }
 
@@ -579,27 +624,32 @@ void SocketDispatcher::timeout(const Poco::Net::Socket& socket, SocketDispatcher
 }
 
 
-void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout)
+void SocketDispatcher::addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout)
 {
-	_logger.trace("Adding socket %?d (%d)..."s, socket.impl()->sockfd(), mode);
+	if (_logger.trace()) _logger.trace("Adding socket %?d (%d)..."s, socket.impl()->sockfd(), mode);
 	mode |= Poco::Net::PollSet::POLL_ERROR;
-	_socketMap[socket] = new SocketInfo(pHandler, mode, timeout);
+	if (sendTimeout == 0) sendTimeout = _sendTimeout;
+	_socketMap[socket] = new SocketInfo(pHandler, mode, receiveTimeout, sendTimeout);
 	_pollSet.add(socket, mode);
 }
 
 
-void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout)
+void SocketDispatcher::updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout)
 {
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
-		if (timeout != 0)
+		if (receiveTimeout != 0)
 		{
-			it->second->timeout = timeout;
-			it->second->activity.update();
+			it->second->receiveTimeout = receiveTimeout;
+			it->second->lastReceive.update();
+		}
+		if (sendTimeout != 0)
+		{
+			it->second->sendTimeout = sendTimeout;
 		}
 		mode |= Poco::Net::PollSet::POLL_ERROR;
-		_logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);
+		if (_logger.trace()) _logger.trace("Updating socket %?d (%d -> %d)..."s, socket.impl()->sockfd(), it->second->mode, mode);
 		it->second->mode = mode;
 		_pollSet.update(socket, mode);
 	}
@@ -611,7 +661,7 @@ void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
-		_logger.trace("Removing socket %?d..."s, socket.impl()->sockfd());
+		if (_logger.trace()) _logger.trace("Removing socket %?d..."s, socket.impl()->sockfd());
 		_socketMap.erase(it);
 		try
 		{
@@ -626,7 +676,7 @@ void SocketDispatcher::removeSocketImpl(const Poco::Net::StreamSocket& socket)
 
 void SocketDispatcher::closeSocketImpl(Poco::Net::StreamSocket& socket)
 {
-	_logger.trace("Closing socket %?d..."s, socket.impl()->sockfd());
+	if (_logger.trace()) _logger.trace("Closing socket %?d..."s, socket.impl()->sockfd());
 	try
 	{
 		_pollSet.remove(socket);
@@ -652,21 +702,40 @@ void SocketDispatcher::resetImpl()
 }
 
 
-void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int options)
+void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int options, bool reportException)
 {
+	if (_logger.trace()) _logger.trace("Sending %z bytes on socket %?d."s, buffer.size(), socket.impl()->sockfd());
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{
 		if  (it->second->pendingSends.empty())
 		{
-			int sent = socket.sendBytes(buffer.begin(), static_cast<int>(buffer.size()), options);
-			if (sent < 0)
+			try
 			{
-				it->second->pendingSends.emplace_back(std::move(buffer), options);
+				int sent = socket.sendBytes(buffer.begin(), static_cast<int>(buffer.size()), options);
+				if (sent < 0)
+				{
+					it->second->pendingSends.emplace_back(std::move(buffer), options);
+					if (sent == ERR_SSL_WANT_READ)
+					{
+						if (_logger.trace()) _logger.trace("SSL write wants read (handshake) on socket %?d."s, socket.impl()->sockfd());
+						it->second->sslWriteWantRead = true;
+					}
+				}
+				else if (sent < buffer.size())
+				{
+					if (_logger.trace()) _logger.trace("Short write (%d) on socket %?d."s, sent, socket.impl()->sockfd());
+					it->second->pendingSends.emplace_back(buffer.begin() + sent, buffer.size() - sent, options);	
+				}
 			}
-			else if (sent < buffer.size())
+			catch (Poco::Exception& exc)
 			{
-				it->second->pendingSends.emplace_back(buffer.begin() + sent, buffer.size() - sent, options);
+				_logger.error("Error writing to socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
+				if (reportException)
+				{
+					exception(socket, it->second, &exc);
+				}
+				else throw;
 			}
 		}
 		else
@@ -676,13 +745,14 @@ void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buff
 	}
 	else
 	{
-		_logger.error("sendBytes() called with unknown socket."s);
+		_logger.error("sendBytes() called with unknown socket %?d."s, socket.impl()->sockfd());
 	}
 }
 
 
 void SocketDispatcher::shutdownSendImpl(Poco::Net::StreamSocket& socket)
 {
+	_logger.debug("Shutting down socket %?d"s, socket.impl()->sockfd());
 	auto it = _socketMap.find(socket);
 	if (it != _socketMap.end())
 	{

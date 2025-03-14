@@ -253,12 +253,14 @@ public:
 		}
 		else
 		{
-			_logger.debug("Closing connection"s);
+			_logger.debug("Local connection (socket %?d) closed by peer."s, socket.impl()->sockfd());
 			if (!(_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
 			{
+				_logger.debug("Shutting down remote WebSocket connection %?d."s, _pConnectionPair->webSocket.impl()->sockfd());
 				shutdown(_pConnectionPair->webSocket, Poco::Net::WebSocket::WS_NORMAL_CLOSE, _logger);
 				_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
 				_pDispatcher->updateSocket(_pConnectionPair->webSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+				_pDispatcher->updateSocket(_pConnectionPair->streamSocket, 0);
 			}
 			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_REMOTE;
 			if (_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL)
@@ -272,7 +274,7 @@ public:
 	{
 	}
 
-	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException)
 	{
 		_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
 		if (!(_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
@@ -340,6 +342,7 @@ public:
 		}
 		catch (Poco::Exception& exc)
 		{
+			_logger.error("Exception while receiving frame from remote socket: %s"s, exc.displayText());
 			_pDispatcher->removeSocket(_pConnectionPair->webSocket);
 			if (!(_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
 			{
@@ -353,8 +356,17 @@ public:
 
 			if (!(_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
 			{
-				_pDispatcher->shutdownSend(_pConnectionPair->streamSocket);
+				_logger.debug("Shutting down stream socket due to error on WebSocket."s);
 				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+				try
+				{
+					_pDispatcher->shutdownSend(_pConnectionPair->streamSocket);
+				}
+				catch (Poco::Net::NetException&)
+				{
+					_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+					_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
+				}
 			}
 			return;
 		}
@@ -368,6 +380,7 @@ public:
 		{
 			if (!(_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_ERROR))
 			{
+				_logger.debug("Forwarding data (%d bytes) to stream socket.", n);
 				dispatcher.sendBytes(_pConnectionPair->streamSocket, _buffer.begin(), n, 0);
 			}
 		}
@@ -375,9 +388,18 @@ public:
 		{
 			if (!(_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL))
 			{
-				dispatcher.shutdownSend(_pConnectionPair->streamSocket);
-				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
-				_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+				_logger.debug("Shutting down stream socket due to WebSocket closing."s);
+				try
+				{
+					dispatcher.shutdownSend(_pConnectionPair->streamSocket);
+					_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+					_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+				}
+				catch (Poco::Net::NetException&)
+				{
+					_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+					_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
+				}
 			}
 			if (n == 0)
 			{
@@ -387,8 +409,17 @@ public:
 				}
 				else
 				{
-					_logger.debug("WebSocket connection ungracefully closed by peer."s);
-					dispatcher.shutdownSend(_pConnectionPair->webSocket);
+					if (!(_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_CLOSED_REMOTE))
+					{
+						_logger.debug("WebSocket connection ungracefully closed by peer."s);
+						try
+						{
+							dispatcher.shutdownSend(_pConnectionPair->webSocket);
+						}
+						catch (Poco::Net::NetException&)
+						{
+						}
+					}
 					dispatcher.removeSocket(_pConnectionPair->webSocket);
 				}
 			}
@@ -396,7 +427,8 @@ public:
 			{
 				_logger.debug("WebSocket connection gracefully closed by peer."s);
 				_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_REMOTE;
-				shutdown(_pConnectionPair->webSocket, Poco::Net::WebSocket::WS_NORMAL_CLOSE, _logger);
+				_pDispatcher->shutdownSend(_pConnectionPair->webSocket);
+				_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
 				_pDispatcher->updateSocket(_pConnectionPair->webSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
 			}
 		}
@@ -410,14 +442,22 @@ public:
 	{
 	}
 
-	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+	void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException)
 	{
 		dispatcher.removeSocket(_pConnectionPair->webSocket);
 		_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_ERROR;
 
-		dispatcher.shutdownSend(_pConnectionPair->streamSocket);
-		_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
-		_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+		try
+		{
+			dispatcher.shutdownSend(_pConnectionPair->streamSocket);
+			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+			_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+		}
+		catch (Poco::Net::NetException&)
+		{
+			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;			
+			_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
+		}
 	}
 
 	void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -434,9 +474,17 @@ public:
 			dispatcher.removeSocket(_pConnectionPair->webSocket);
 			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_ERROR;
 
-			dispatcher.shutdownSend(_pConnectionPair->streamSocket);
-			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
-			_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+			try
+			{
+				dispatcher.shutdownSend(_pConnectionPair->streamSocket);
+				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
+				_pDispatcher->updateSocket(_pConnectionPair->streamSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
+			}
+			catch (Poco::Net::NetException&)
+			{
+				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);			
+			}
 		}
 	}
 

@@ -136,19 +136,19 @@ public:
 protected:
 	bool wantMultiplex(SocketDispatcher& dispatcher);
 	void multiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
-	void multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
+	void multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer, const Poco::Exception* pException);
 	void multiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer);
 	bool wantDemultiplex(SocketDispatcher& dispatcher);
 	void demultiplex(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
-	void demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
+	void demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, const Poco::Exception* pException);
 	void demultiplexTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer);
 	void connect(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
-	void connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
+	void connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, const Poco::Exception* pException);
 	void connectTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel);
 	void forwardData(const char* buffer, int size, Poco::UInt16 channel);
 	void openChannel(Poco::UInt16 channel, Poco::UInt16 port);
 	void shutdownSendChannel(Poco::UInt16 channel);
-	void removeChannel(Poco::UInt16 channel);
+	bool removeChannel(Poco::UInt16 channel);
 	void sendResponse(Poco::UInt16 channel, Poco::UInt8 opcode, Poco::UInt16 errorCode);
 	void closeWebSocket(CloseReason reason, bool active);
 	int setChannelFlag(Poco::UInt16 channel, int flag);
@@ -184,9 +184,9 @@ private:
 		{
 		}
 
-		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException)
 		{
-			_forwarder.multiplexError(dispatcher, socket, _channel, _buffer);
+			_forwarder.multiplexError(dispatcher, socket, _channel, _buffer, pException);
 		}
 
 		void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -228,9 +228,9 @@ private:
 		{
 		}
 
-		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException)
 		{
-			_forwarder.demultiplexError(dispatcher, socket, _buffer);
+			_forwarder.demultiplexError(dispatcher, socket, _buffer, pException);
 		}
 
 		void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
@@ -271,9 +271,9 @@ private:
 			_forwarder.connect(dispatcher, socket, _channel);
 		}
 
-		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
+		void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException)
 		{
-			_forwarder.connectError(dispatcher, socket, _channel);
+			_forwarder.connectError(dispatcher, socket, _channel, pException);
 		}
 
 		void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)

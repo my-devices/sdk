@@ -84,24 +84,31 @@ public:
 		virtual bool wantWrite(SocketDispatcher& dispatcher) = 0;
 		virtual void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 		virtual void writable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
-		virtual void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
+		virtual void exception(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, const Poco::Exception* pException = nullptr) = 0;
 		virtual void timeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket) = 0;
 	};
 
-	explicit SocketDispatcher(Poco::Timespan timeout = Poco::Timespan(5000));
+	explicit SocketDispatcher(Poco::Timespan dispatchTimeout = Poco::Timespan(5000));
 		/// Creates the SocketDispatcher.
 		///
-		/// The given timeout is used for the main select loop, as well as
-		/// by workers to poll if more reads are possible, up to the given
-		/// maximum number of reads per worker.
+		/// The given dispatchTimeout is used for the main select loop.
 
 	~SocketDispatcher();
 		/// Destroys the SocketDispatcher.
 
-	void addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout = 0);
+	void setSendTimeout(Poco::Timespan timeout);
+		/// Sets the default send timeout. This must be set before
+		/// the first socket is added and should not be changed
+		/// afterwards as setting it is not thread safe.
+		/// If not set, the default is 30 seconds.
+
+	Poco::Timespan getSendTimeout() const;
+		/// Returns the default send timeout.
+
+	void addSocket(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan receiveTimeout = 0, Poco::Timespan sendTimeout = 0);
 		/// Adds a socket and its handler to the SocketDispatcher.
 
-	void updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout = 0);
+	void updateSocket(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan receiveTimeout = 0, Poco::Timespan sendTimeout = 0);
 		/// Updates the socket's poll mode.
 
 	void removeSocket(const Poco::Net::StreamSocket& socket);
@@ -228,24 +235,28 @@ protected:
 
 		Poco::Buffer<char> buffer{0};
 		int options{0};
+		Poco::Clock clock;
 	};
 
 	struct SocketInfo: public Poco::RefCountedObject
 	{
 		using Ptr = Poco::AutoPtr<SocketInfo>;
 
-		SocketInfo(SocketHandler::Ptr pHnd, int m, Poco::Timespan tmo):
+		SocketInfo(SocketHandler::Ptr pHnd, int m, Poco::Timespan rtmo, Poco::Timespan stmo):
 			pHandler(pHnd),
 			mode(m),
-			timeout(tmo)
+			receiveTimeout(rtmo),
+			sendTimeout(stmo)
 		{
 		}
 
 		SocketHandler::Ptr pHandler;
 		int mode;
-		Poco::Timespan timeout;
-		Poco::Clock activity;
+		Poco::Timespan receiveTimeout;
+		Poco::Timespan sendTimeout;
+		Poco::Clock lastReceive;
 		std::deque<PendingSend> pendingSends;
+		bool sslWriteWantRead = false;
 	};
 
 	using SocketMap = std::map<Poco::Net::Socket, SocketInfo::Ptr>;
@@ -255,24 +266,32 @@ protected:
 		MAIN_QUEUE_TIMEOUT = 1000
 	};
 
+	enum
+	{
+		ERR_SSL_WOULD_BLOCK = -1,
+		ERR_SSL_WANT_READ  = -2,
+		ERR_SSL_WANT_WRITE = -3
+	};
+
 	void run();
 	void readable(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
 	void writable(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
-	void exception(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
+	void exception(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo, const Poco::Exception* pException = nullptr);
 	void timeout(const Poco::Net::Socket& socket, SocketInfo::Ptr pInfo);
-	void addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan timeout);
-	void updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan timeout);
+	void addSocketImpl(const Poco::Net::StreamSocket& socket, SocketHandler::Ptr pHandler, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout);
+	void updateSocketImpl(const Poco::Net::StreamSocket& socket, int mode, Poco::Timespan receiveTimeout, Poco::Timespan sendTimeout);
 	void removeSocketImpl(const Poco::Net::StreamSocket& socket);
 	void closeSocketImpl(Poco::Net::StreamSocket& socket);
 	bool hasSocketImpl(const Poco::Net::StreamSocket& socket) const;
 	void resetImpl();
-	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int flags);
+	void sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buffer<char>&& buffer, int flags, bool reportException = false);
 	void shutdownSendImpl(Poco::Net::StreamSocket& socket);
 	bool stopped();
 	bool inDispatcherThread() const;
 
 private:
 	Poco::Timespan _timeout;
+	Poco::Timespan _sendTimeout;
 	SocketMap _socketMap;
 	Poco::Net::PollSet _pollSet;
 	Poco::Thread _thread;
@@ -306,6 +325,12 @@ inline bool SocketDispatcher::stopped()
 inline bool SocketDispatcher::inDispatcherThread() const
 {
 	return Poco::Thread::current() == &_thread;
+}
+
+
+inline Poco::Timespan SocketDispatcher::getSendTimeout() const
+{
+	return _sendTimeout;
 }
 
 

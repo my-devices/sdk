@@ -248,11 +248,23 @@ void RemotePortForwarder::multiplex(SocketDispatcher& dispatcher, Poco::Net::Str
 }
 
 
-void RemotePortForwarder::multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer)
+void RemotePortForwarder::multiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, Poco::Buffer<char>& buffer, const Poco::Exception* pException)
 {
-	_logger.error("Error reading from local socket for channel %hu"s, channel);
+	if (pException)
+	{
+		_logger.error("Exception on local socket %?d for channel %hu: %s"s, socket.impl()->sockfd(), channel, pException->displayText());
+	}
+	else
+	{
+		_logger.error("Socket error on local socket %?d for channel %hu: %d"s, socket.impl()->sockfd(), channel, socket.impl()->socketError());
+	}
 	removeChannel(channel);
-	std::size_t hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_ERROR, 0, channel, Protocol::WT_ERR_SOCKET);
+	Poco::UInt16 error;
+	if (dynamic_cast<const Poco::TimeoutException*>(pException))
+		error = Protocol::WT_ERR_TIMEOUT;
+	else
+		error = Protocol::WT_ERR_SOCKET;
+	std::size_t hn = Protocol::writeHeader(buffer.begin(), buffer.size(), Protocol::WT_OP_ERROR, 0, channel, error);
 	try
 	{
 		dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(hn), Poco::Net::WebSocket::FRAME_BINARY);
@@ -368,8 +380,14 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 			break;
 
 		case Protocol::WT_OP_ERROR:
-			_logger.error("Status %hu reported by peer. Closing channel %hu."s, portOrErrorCode, channel);
-			removeChannel(channel);
+			if (removeChannel(channel))
+			{
+				_logger.notice("Status %hu reported by peer. Closed channel %hu."s, portOrErrorCode, channel);
+			}
+			else
+			{
+				_logger.debug("Status %hu reported by peer for non-existent channel %hu."s, portOrErrorCode, channel);
+			}
 			break;
 
 		default:
@@ -414,17 +432,17 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 }
 
 
-void RemotePortForwarder::demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer)
+void RemotePortForwarder::demultiplexError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::Buffer<char>& buffer, const Poco::Exception* pException)
 {
-	_logger.error("Error reading from WebSocket."s);
-	if (_webSocketFlags & CF_CLOSED_LOCAL)
+	if (pException)
 	{
-		_dispatcher.removeSocket(*_pWebSocket);
+		_logger.error("WebSocket encountered exception: %s"s, pException->displayText());
 	}
 	else
 	{
-		closeWebSocket(RPF_CLOSE_ERROR, false);
+		_logger.error("WebSocket encountered underlying socket error %d."s, socket.impl()->socketError());
 	}
+	_dispatcher.removeSocket(*_pWebSocket);
 }
 
 
@@ -457,7 +475,7 @@ void RemotePortForwarder::connect(SocketDispatcher& dispatcher, Poco::Net::Strea
 	socket.setNoDelay(true);
 	try
 	{
-		_logger.debug("Socket for channel %hu is connected."s, channel);
+		_logger.debug("Socket %?d for channel %hu is connected."s, socket.impl()->sockfd(), channel);
 		sendResponse(channel, Protocol::WT_OP_OPEN_CONFIRM, 0);
 	}
 	catch (Poco::Exception& exc)
@@ -472,7 +490,7 @@ void RemotePortForwarder::connect(SocketDispatcher& dispatcher, Poco::Net::Strea
 }
 
 
-void RemotePortForwarder::connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel)
+void RemotePortForwarder::connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, const Poco::Exception*)
 {
 	_dispatcher.removeSocket(socket);
 	int rc = socket.impl()->socketError();
@@ -579,7 +597,7 @@ void RemotePortForwarder::shutdownSendChannel(Poco::UInt16 channel)
 }
 
 
-void RemotePortForwarder::removeChannel(Poco::UInt16 channel)
+bool RemotePortForwarder::removeChannel(Poco::UInt16 channel)
 {
 	Poco::FastMutex::ScopedLock lock(_mutex);
 	ChannelMap::iterator it = _channelMap.find(channel);
@@ -587,7 +605,9 @@ void RemotePortForwarder::removeChannel(Poco::UInt16 channel)
 	{
 		_dispatcher.closeSocket(it->second.socket);
 		_channelMap.erase(it);
+		return true;
 	}
+	else return false;
 }
 
 
