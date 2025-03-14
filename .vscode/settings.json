@@ -84,7 +84,8 @@
 		"__verbose_abort": "cpp",
 		"execution": "cpp",
 		"print": "cpp",
-		"variant": "cpp"
+		"variant": "cpp",
+		"charconv": "cpp"
 	},
 	"files.exclude": {
         "**/.dep": true,
