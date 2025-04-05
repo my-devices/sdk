@@ -1,6 +1,11 @@
 # macchina.io REMOTE SDK Changes
 
 
+## Release 2.3.0 (2025-04-05)
+
+- Fixed a compile error on macOS Sequoia 15.4 by upgrading the bundled zlib library.
+
+
 ## Release 2.2.0 (2025-03-17)
 
 - Fixed an issue with high CPU usage during SSL/TLS negotiations.
@@ -23,13 +28,13 @@
 - The WebTunnel protocol implementation has been changed to use non-blocking sockets.
 - Connecting to local web servers over HTTPS (TLS) now works reliably.
 - Applications now support a --version command-line parameter.
-  
-  
+
+
 ## Release 1.17.2 (2024-02-01)
 
-- Fixed a multithreading issue with OpenSSL that would cause random connection drops in 
+- Fixed a multithreading issue with OpenSSL that would cause random connection drops in
   client connections (`remote-client`, `remote-ssh`, etc.).
-  
+
 
 ## Release 1.17.0 (2023-10-27)
 
