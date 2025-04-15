@@ -442,7 +442,14 @@ void RemotePortForwarder::demultiplexError(SocketDispatcher& dispatcher, Poco::N
 	{
 		_logger.error("WebSocket encountered underlying socket error %d."s, socket.impl()->socketError());
 	}
-	_dispatcher.removeSocket(*_pWebSocket);
+	if (_webSocketFlags & CF_CLOSED_LOCAL)
+	{
+		_dispatcher.removeSocket(*_pWebSocket);
+	}
+	else
+	{
+		closeWebSocket(RPF_CLOSE_ERROR, false);
+	}
 }
 
 
@@ -662,19 +669,16 @@ void RemotePortForwarder::closeWebSocket(CloseReason reason, bool active)
 	}
 	try
 	{
-		if (reason == RPF_CLOSE_GRACEFUL)
+		if (active && reason == RPF_CLOSE_GRACEFUL)
 		{
 			try
 			{
-				if (active)
-				{
-					char buffer[2];
-					Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
-					Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
-					writer << static_cast<Poco::UInt16>(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
-					_dispatcher.sendBytes(*_pWebSocket, buffer, sizeof(buffer), Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_CLOSE);
-					_lastSend.update();
-				}
+				char buffer[2];
+				Poco::MemoryOutputStream ostr(buffer, sizeof(buffer));
+				Poco::BinaryWriter writer(ostr, Poco::BinaryWriter::NETWORK_BYTE_ORDER);
+				writer << static_cast<Poco::UInt16>(Poco::Net::WebSocket::WS_NORMAL_CLOSE);
+				_dispatcher.sendBytes(*_pWebSocket, buffer, sizeof(buffer), Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_CLOSE);
+				_lastSend.update();
 			}
 			catch (Poco::Exception&)
 			{
@@ -685,14 +689,24 @@ void RemotePortForwarder::closeWebSocket(CloseReason reason, bool active)
 			_dispatcher.removeSocket(it->second.socket);
 		}
 		_channelMap.clear();
-		_dispatcher.shutdownSend(*_pWebSocket);
+		if (reason == RPF_CLOSE_GRACEFUL)
+		{
+			_dispatcher.shutdownSend(*_pWebSocket);
+		}
 	}
 	catch (Poco::Exception& exc)
 	{
 		_logger.log(exc);
 	}
 
-	_dispatcher.updateSocket(*_pWebSocket, Poco::Net::PollSet::POLL_READ, _closeTimeout);
+	if (reason == RPF_CLOSE_GRACEFUL)
+	{
+		_dispatcher.updateSocket(*_pWebSocket, Poco::Net::PollSet::POLL_READ, _closeTimeout);
+	}
+	else
+	{
+		_dispatcher.removeSocket(*_pWebSocket);
+	}
 	_webSocketFlags |= CF_CLOSED_LOCAL;
 	int eventArg = reason;
 	webSocketClosed(this, eventArg);
