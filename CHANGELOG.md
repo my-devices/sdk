@@ -1,6 +1,13 @@
 # macchina.io REMOTE SDK Changes
 
 
+## Release 2.3.1 (2025-04-15)
+
+- Fixed an issue in WebTunnelAgent/RemotePortForwarder where in rare cases automatic 
+  reconnect would not be triggered if the connection to the server was interrupted 
+  (e.g., by a server restart).
+
+
 ## Release 2.3.0 (2025-04-05)
 
 - Fixed a compile error on macOS Sequoia 15.4 by upgrading the bundled zlib library.
