@@ -77,39 +77,6 @@ jobs:
           ssh ${{ secrets.MACCHINA_USER }}@${env:STAGING_HOST} mkdir -p ${env:STAGING_DIR}/${env:GITHUB_SHA}/bin/windows/10/AMD64/
           scp cmake-build\bin\Release\*.exe remote-clients.zip ${{ secrets.MACCHINA_USER }}@${env:STAGING_HOST}:${env:STAGING_DIR}/${env:GITHUB_SHA}/bin/windows/10/AMD64/
 
-  release_ubuntu2004:
-    runs-on: ubuntu-20.04
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        name: Install Packages
-        run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
-      -
-        name: Build
-        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
-      -
-        name: Strip
-        run: strip cmake-build/bin/*
-      -
-        name: GZip
-        run: |
-          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
-          gzip cmake-build/bin/*
-      -
-        name: Install SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
-          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
-          chmod go-rwx ~/.ssh/id_rsa
-      -
-        name: Copy to Web Server
-        run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/20.04/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/20.04/x86_64
-
   release_ubuntu2204:
     runs-on: ubuntu-22.04
     steps:
@@ -295,7 +262,7 @@ jobs:
 
   sign_and_publish:
     runs-on: ubuntu-22.04
-    needs: ["release_win64", "release_ubuntu2004", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos13_x86_64", "release_macos14_arm64", "release_source"]
+    needs: ["release_win64", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos13_x86_64", "release_macos14_arm64", "release_source"]
     steps:
       -
         name: Checkout
