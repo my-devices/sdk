@@ -61,7 +61,7 @@ jobs:
         name: Sign executables
         run: |
           smctl windows certsync --keypair-alias ${{ secrets.SM_KEYPAIR_ALIAS }}
-          $exes = @(Get-ChildItem make-build\\bin\\Release\\*.exe)
+          $exes = @(Get-ChildItem cmake-build\\bin\\Release\\*.exe)
           foreach ($exe in $exes) { smctl sign --keypair-alias ${{ secrets.SM_KEYPAIR_ALIAS }} --input $file }
       -
         name: Zip
