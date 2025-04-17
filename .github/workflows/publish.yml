@@ -62,7 +62,7 @@ jobs:
         run: |
           smctl windows certsync --keypair-alias ${{ secrets.SM_KEYPAIR_ALIAS }}
           $exes = @(Get-ChildItem cmake-build\\bin\\Release\\*.exe)
-          foreach ($exe in $exes) { smctl sign --keypair-alias ${{ secrets.SM_KEYPAIR_ALIAS }} --input $file }
+          foreach ($exe in $exes) { smctl sign --keypair-alias ${{ secrets.SM_KEYPAIR_ALIAS }} --input $exe }
       -
         name: Zip
         run: 7z a -tzip remote-clients.zip cmake-build\bin\Release\*.exe
