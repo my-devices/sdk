@@ -64,11 +64,11 @@ private:
 
 
 class WebTunnel_API SocketDispatcher: public Poco::Runnable
-	/// SocketDispatcher implements a multi-threaded variant of the
+	/// SocketDispatcher implements a variant of the
 	/// Reactor pattern, optimized for forwarding data from one
 	/// socket to another.
 	///
-	/// The SocketDispatcher runs a select() loop in a separate thread.
+	/// The SocketDispatcher runs a epoll()/poll()/select() loop in a separate thread.
 	/// As soon as a socket becomes readable, it will be put into a work
 	/// queue. A number of worker threads dequeue work queue items and
 	/// process the data received over the socket, using registered
