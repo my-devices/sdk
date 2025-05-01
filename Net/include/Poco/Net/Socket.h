@@ -275,6 +275,9 @@ public:
 
 	SocketImpl* impl() const;
 		/// Returns the SocketImpl for this socket.
+
+	bool good() const;
+		/// Returns true iff the Socket's socket descriptor is valid.
 		
 	bool secure() const;
 		/// Returns true iff the socket's connection is secure
@@ -616,6 +619,12 @@ inline bool Socket::getBlocking() const
 inline SocketImpl* Socket::impl() const
 {
 	return _pImpl;
+}
+
+
+inline bool Socket::good() const
+{
+	return _pImpl->initialized();
 }
 
 

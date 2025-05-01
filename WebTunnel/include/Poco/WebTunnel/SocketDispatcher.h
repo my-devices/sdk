@@ -114,7 +114,7 @@ public:
 	void removeSocket(const Poco::Net::StreamSocket& socket);
 		/// Removes a socket and its associated handler from the SocketDispatcher.
 
-	void closeSocket(const Poco::Net::StreamSocket& socket);
+	void closeSocket(Poco::Net::StreamSocket& socket);
 		/// Closes and removes a socket and its associated handler from the SocketDispatcher.
 
 	bool hasSocket(const Poco::Net::StreamSocket& socket);
@@ -257,6 +257,7 @@ protected:
 		Poco::Clock lastReceive;
 		std::deque<PendingSend> pendingSends;
 		bool sslWriteWantRead = false;
+		bool removed = false;
 	};
 
 	using SocketMap = std::map<Poco::Net::Socket, SocketInfo::Ptr>;
