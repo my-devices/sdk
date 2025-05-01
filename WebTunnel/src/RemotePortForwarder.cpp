@@ -500,7 +500,18 @@ void RemotePortForwarder::connect(SocketDispatcher& dispatcher, Poco::Net::Strea
 void RemotePortForwarder::connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, const Poco::Exception*)
 {
 	int rc = socket.impl()->socketError();
-	_logger.error("Error connecting channel %hu: %d"s, channel, rc);
+	switch (rc)
+	{
+	case POCO_ECONNREFUSED:
+		_logger.error("Error connecting channel %hu: connection refused"s, channel);
+		break;
+	case POCO_ENETUNREACH:
+		_logger.error("Error connecting channel %hu: network unreachable"s, channel);
+		break;
+	default:
+		_logger.error("Error connecting channel %hu: %d"s, channel, rc);
+		break;
+	}
 	if (rc == POCO_ECONNREFUSED)
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_CONN_REFUSED);
 	else
