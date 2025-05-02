@@ -64,11 +64,11 @@ private:
 
 
 class WebTunnel_API SocketDispatcher: public Poco::Runnable
-	/// SocketDispatcher implements a multi-threaded variant of the
+	/// SocketDispatcher implements a variant of the
 	/// Reactor pattern, optimized for forwarding data from one
 	/// socket to another.
 	///
-	/// The SocketDispatcher runs a select() loop in a separate thread.
+	/// The SocketDispatcher runs a epoll()/poll()/select() loop in a separate thread.
 	/// As soon as a socket becomes readable, it will be put into a work
 	/// queue. A number of worker threads dequeue work queue items and
 	/// process the data received over the socket, using registered
@@ -114,7 +114,7 @@ public:
 	void removeSocket(const Poco::Net::StreamSocket& socket);
 		/// Removes a socket and its associated handler from the SocketDispatcher.
 
-	void closeSocket(const Poco::Net::StreamSocket& socket);
+	void closeSocket(Poco::Net::StreamSocket& socket);
 		/// Closes and removes a socket and its associated handler from the SocketDispatcher.
 
 	bool hasSocket(const Poco::Net::StreamSocket& socket);
@@ -257,6 +257,7 @@ protected:
 		Poco::Clock lastReceive;
 		std::deque<PendingSend> pendingSends;
 		bool sslWriteWantRead = false;
+		bool removed = false;
 	};
 
 	using SocketMap = std::map<Poco::Net::Socket, SocketInfo::Ptr>;

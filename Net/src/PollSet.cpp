@@ -406,6 +406,8 @@ public:
 							result[its->second] |= PollSet::POLL_ERROR;
 						if ((it->revents & POLLHUP) && (it->events & POLLIN))
 							result[its->second] |= PollSet::POLL_READ;
+						if ((it->revents & POLLHUP) && (it->events & POLLOUT))
+							result[its->second] |= PollSet::POLL_ERROR;
 					}
 					it->revents = 0;
 				}

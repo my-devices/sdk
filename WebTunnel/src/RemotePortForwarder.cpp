@@ -499,9 +499,20 @@ void RemotePortForwarder::connect(SocketDispatcher& dispatcher, Poco::Net::Strea
 
 void RemotePortForwarder::connectError(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel, const Poco::Exception*)
 {
-	_dispatcher.removeSocket(socket);
-	int rc = socket.impl()->socketError();
-	if (rc == POCO_ECONNREFUSED)
+	int err = socket.impl()->socketError();
+	switch (err)
+	{
+	case POCO_ECONNREFUSED:
+		_logger.error("Error connecting channel %hu: connection refused"s, channel);
+		break;
+	case POCO_ENETUNREACH:
+		_logger.error("Error connecting channel %hu: network unreachable"s, channel);
+		break;
+	default:
+		_logger.error("Error connecting channel %hu: %d"s, channel, err);
+		break;
+	}
+	if (err == POCO_ECONNREFUSED)
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_CONN_REFUSED);
 	else
 		sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_SOCKET);
@@ -511,7 +522,7 @@ void RemotePortForwarder::connectError(SocketDispatcher& dispatcher, Poco::Net::
 
 void RemotePortForwarder::connectTimeout(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket, Poco::UInt16 channel)
 {
-	_dispatcher.removeSocket(socket);
+	_logger.error("Timeout connecting channel %hu."s, channel);
 	sendResponse(channel, Protocol::WT_OP_OPEN_FAULT, Protocol::WT_ERR_TIMEOUT);
 	removeChannel(channel);
 }
