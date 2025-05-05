@@ -1,10 +1,19 @@
 # macchina.io REMOTE SDK Changes
 
 
+## Release 2.3.2 (2025-05-05)
+
+- Fixed an issue where a connection refused error would not be detected on
+  macOS or BSD when connecting to a server. Instead, the connect operation
+  would time out.
+- Improved error reporting.
+- Optimized network code.
+
+
 ## Release 2.3.1 (2025-04-15)
 
-- Fixed an issue in WebTunnelAgent/RemotePortForwarder where in rare cases automatic 
-  reconnect would not be triggered if the connection to the server was interrupted 
+- Fixed an issue in WebTunnelAgent/RemotePortForwarder where in rare cases automatic
+  reconnect would not be triggered if the connection to the server was interrupted
   (e.g., by a server restart).
 
 
