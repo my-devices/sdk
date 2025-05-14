@@ -112,6 +112,39 @@ jobs:
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/x86_64
 
+  release_ubuntu2204_arm64:
+    runs-on: ubuntu-22.04-arm
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install Packages
+        run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
+      -
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/aarch64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/22.04/aarch64
+
   release_ubuntu2404:
     runs-on: ubuntu-24.04
     steps:
@@ -144,6 +177,39 @@ jobs:
         run: |
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/x86_64
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/x86_64
+
+  release_ubuntu2404_arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install Packages
+        run: sudo apt update && sudo apt install cmake ninja-build libssl-dev
+      -
+        name: Build
+        run: cmake -H. -Bcmake-build -GNinja && cmake --build cmake-build --target all
+      -
+        name: Strip
+        run: strip cmake-build/bin/*
+      -
+        name: GZip
+        run: |
+          (cd cmake-build/bin && tar cfz ../../remote-clients.tar.gz remote-*)
+          gzip cmake-build/bin/*
+      -
+        name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.MACCHINA_IO_SSH_HOST_KEY }}' >~/.ssh/known_hosts
+          echo '${{ secrets.MACCHINA_SSH_KEY }}' >~/.ssh/id_rsa
+          chmod go-rwx ~/.ssh/id_rsa
+      -
+        name: Copy to Web Server
+        run: |
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/aarch64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/ubuntu/24.04/aarch64
 
   release_raspberrypi:
     runs-on: raspberrypi
