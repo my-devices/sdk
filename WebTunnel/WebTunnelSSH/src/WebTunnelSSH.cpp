@@ -482,6 +482,8 @@ protected:
 				logger().error("No SSH client program available. Please configure the SSH client program using the ssh.executable configuration property or ssh-client option."s);
 				return Poco::Util::Application::EXIT_CONFIG;
 			}
+			std::string sshClientName = Poco::Path(_sshClient).getBaseName();
+			logger().debug("Using SSH Client: %s"s, _sshClient);
 
 			promptLogin();
 
@@ -515,7 +517,7 @@ protected:
 			std::vector<std::string> extraArgsVec(extraSSHArgsTok.begin(), extraSSHArgsTok.end());
 
 			Poco::Process::Args sshArgs;
-			if (Poco::icompare(_sshClient, 0, 5, "putty") == 0 || Poco::icompare(_sshClient, 0, 3, "scp") == 0)
+			if (Poco::icompare(sshClientName, "putty") == 0 || Poco::icompare(sshClientName, "scp") == 0)
 				sshArgs.push_back("-P"s);
 			else
 				sshArgs.push_back("-p"s);
@@ -536,7 +538,7 @@ protected:
 			sshArgs.insert(sshArgs.end(), extraArgsVec.begin(), extraArgsVec.end());
 			sshArgs.insert(sshArgs.end(), itArgs, args.end());
 			
-			if (Poco::icompare(_sshClient, 0, 3, "scp") != 0)
+			if (Poco::icompare(sshClientName, "scp"s) != 0)
 			{
 				sshArgs.push_back("localhost"s);
 			}
