@@ -617,6 +617,7 @@ protected:
 
 	void notify(const Poco::Process::Args& args)
 	{
+		logger().debug("Calling status notification executable %s with: %s"s, _notifyExec, Poco::cat(","s, args.begin(), args.end()));
 		try
 		{
 			Poco::ProcessHandle ph = Poco::Process::launch(_notifyExec, args);
@@ -895,6 +896,7 @@ protected:
 				_notifyExec = config().getString("webtunnel.status.notify"s, ""s);
 				if (!_notifyExec.empty())
 				{
+					logger().debug("Status notification executable: %s"s, _notifyExec);
 					connected += Poco::delegate(this, &WebTunnelAgent::notifyConnected);
 					disconnected += Poco::delegate(this, &WebTunnelAgent::notifyDisconnected);
 					error += Poco::delegate(this, &WebTunnelAgent::notifyError);
