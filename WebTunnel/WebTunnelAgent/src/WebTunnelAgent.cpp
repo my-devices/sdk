@@ -300,6 +300,10 @@ protected:
 		{
 			request.add(X_PTTH_SET_PROPERTY, Poco::format("device;rdpPort=%hu"s, _rdpPort));
 		}
+		if (_vpnPort != 0)
+		{
+			request.add(X_PTTH_SET_PROPERTY, Poco::format("device;vpnPort=%hu"s, _vpnPort));
+		}
 		if (_appPort != 0)
 		{
 			request.add(X_PTTH_SET_PROPERTY, Poco::format("device;appPort=%hu"s, _appPort));
@@ -833,6 +837,7 @@ protected:
 				_sshPort = config().getUInt16("webtunnel.sshPort"s, 0);
 				_vncPort = config().getUInt16("webtunnel.vncPort"s, 0);
 				_rdpPort = config().getUInt16("webtunnel.rdpPort"s, 0);
+				_vpnPort = config().getUInt16("webtunnel.vpnPort"s, 0);
 				_appPort = config().getUInt16("webtunnel.appPort"s, 0);
 				_userAgent = config().getString("webtunnel.userAgent"s, ""s);
 				_httpTimeout = Poco::Timespan(config().getInt("http.timeout"s, 30), 0);
@@ -874,6 +879,10 @@ protected:
 				if (_rdpPort != 0 && _ports.find(_rdpPort) == _ports.end())
 				{
 					logger().warning("RDP port (%hu) not in list of forwarded ports."s, _rdpPort);
+				}
+				if (_vpnPort != 0 && _ports.find(_vpnPort) == _ports.end())
+				{
+					logger().warning("VPN port (%hu) not in list of forwarded ports."s, _vpnPort);
 				}
 				if (_appPort != 0 && _ports.find(_appPort) == _ports.end())
 				{
@@ -965,6 +974,7 @@ private:
 	Poco::UInt16 _sshPort = 0;
 	Poco::UInt16 _vncPort = 0;
 	Poco::UInt16 _rdpPort = 0;
+	Poco::UInt16 _vpnPort = 0;
 	Poco::UInt16 _appPort = 0;
 	bool _useProxy = false;
 	std::string _proxyHost;
