@@ -142,20 +142,11 @@ Poco::Net::WebSocket* DefaultWebSocketFactory::createWebSocket(const Poco::URI& 
 class BasicSocketForwarder: public SocketDispatcher::SocketHandler
 {
 public:
-	BasicSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher):
+	BasicSocketForwarder(LocalPortForwarder& lpf, Poco::SharedPtr<SocketDispatcher> pDispatcher):
+		_lpf(lpf),
 		_pDispatcher(pDispatcher),
 		_buffer(Protocol::WT_FRAME_MAX_SIZE)
 	{
-	}
-
-	void cleanupDispatcher(Poco::Net::StreamSocket& socket1, Poco::Net::StreamSocket& socket2)
-	{
-		if (_pDispatcher)
-		{
-			_pDispatcher->removeSocket(socket1);
-			_pDispatcher->removeSocket(socket2);
-			_pDispatcher.reset();
-		}
 	}
 
 	void shutdown(Poco::Net::WebSocket& webSocket, Poco::UInt16 statusCode, Poco::Logger& logger)
@@ -175,7 +166,19 @@ public:
 		}
 	}
 
+	void notifyClientDisconnected(const Poco::Net::Socket& socket)
+	{
+		try
+		{
+			_lpf.clientDisconnected(&_lpf, socket.address());
+		}
+		catch (Poco::Exception&)
+		{
+		}
+	}
+
 protected:
+	LocalPortForwarder& _lpf;
 	Poco::SharedPtr<SocketDispatcher> _pDispatcher;
 	Poco::Buffer<char> _buffer;
 };
@@ -189,8 +192,8 @@ protected:
 class StreamSocketToWebSocketForwarder: public BasicSocketForwarder
 {
 public:
-	StreamSocketToWebSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<LocalPortForwarder::ConnectionPair> pConnectionPair):
-		BasicSocketForwarder(pDispatcher),
+	StreamSocketToWebSocketForwarder(LocalPortForwarder& lpf, Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<LocalPortForwarder::ConnectionPair> pConnectionPair):
+		BasicSocketForwarder(lpf, pDispatcher),
 		_pConnectionPair(pConnectionPair),
 		_logger(Poco::Logger::get("WebTunnel.StreamSocketToWebSocketForwarder"s))
 	{
@@ -223,6 +226,7 @@ public:
 			_pDispatcher->updateSocket(_pConnectionPair->webSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
 			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
 
+			notifyClientDisconnected(_pConnectionPair->streamSocket);
 			_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
 			return;
@@ -234,6 +238,7 @@ public:
 			_pDispatcher->updateSocket(_pConnectionPair->webSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
 			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
 
+			notifyClientDisconnected(_pConnectionPair->streamSocket);
 			_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
 			return;
@@ -243,6 +248,7 @@ public:
 			if (_pConnectionPair->webSocketFlags & LocalPortForwarder::CF_ERROR)
 			{
 				// Hard close local stream socket
+				notifyClientDisconnected(_pConnectionPair->streamSocket);
 				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 			}
 			else
@@ -265,6 +271,7 @@ public:
 			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_CLOSED_REMOTE;
 			if (_pConnectionPair->streamSocketFlags & LocalPortForwarder::CF_CLOSED_LOCAL)
 			{
+				notifyClientDisconnected(_pConnectionPair->streamSocket);
 				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 			}
 		}
@@ -283,6 +290,7 @@ public:
 			_pConnectionPair->webSocketFlags |= LocalPortForwarder::CF_CLOSED_LOCAL;
 			_pDispatcher->updateSocket(_pConnectionPair->webSocket, Poco::Net::PollSet::POLL_READ, _pConnectionPair->closeTimeout);
 		}
+		notifyClientDisconnected(_pConnectionPair->streamSocket);
 		_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 	}
 
@@ -312,8 +320,8 @@ private:
 class WebSocketToStreamSocketForwarder: public BasicSocketForwarder
 {
 public:
-	WebSocketToStreamSocketForwarder(Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<LocalPortForwarder::ConnectionPair> pConnectionPair):
-		BasicSocketForwarder(pDispatcher),
+	WebSocketToStreamSocketForwarder(LocalPortForwarder& lpf, Poco::SharedPtr<SocketDispatcher> pDispatcher, Poco::SharedPtr<LocalPortForwarder::ConnectionPair> pConnectionPair):
+		BasicSocketForwarder(lpf, pDispatcher),
 		_pConnectionPair(pConnectionPair),
 		_logger(Poco::Logger::get("WebTunnel.WebSocketToStreamSocketForwarder"s))
 	{
@@ -365,6 +373,7 @@ public:
 				catch (Poco::Net::NetException&)
 				{
 					_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+					notifyClientDisconnected(_pConnectionPair->streamSocket);
 					_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 				}
 			}
@@ -398,6 +407,7 @@ public:
 				catch (Poco::Net::NetException&)
 				{
 					_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+					notifyClientDisconnected(_pConnectionPair->streamSocket);
 					_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 				}
 			}
@@ -455,7 +465,8 @@ public:
 		}
 		catch (Poco::Net::NetException&)
 		{
-			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;			
+			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;	
+			notifyClientDisconnected(_pConnectionPair->streamSocket);		
 			_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 		}
 	}
@@ -483,6 +494,7 @@ public:
 			catch (Poco::Net::NetException&)
 			{
 				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+				notifyClientDisconnected(_pConnectionPair->streamSocket);
 				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);			
 			}
 		}
@@ -626,13 +638,15 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 
 		socket.setNoDelay(true);
 		socket.setBlocking(false);
-		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(_pDispatcher, pConnectionPair), 0, _localTimeout);
+		_pDispatcher->addSocket(socket, new StreamSocketToWebSocketForwarder(*this, _pDispatcher, pConnectionPair), 0, _localTimeout);
 
 		pWebSocket->setNoDelay(true);
 		pWebSocket->setBlocking(false);
-		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(_pDispatcher, pConnectionPair), Poco::Net::PollSet::POLL_READ, _remoteTimeout);
+		_pDispatcher->addSocket(*pWebSocket, new WebSocketToStreamSocketForwarder(*this, _pDispatcher, pConnectionPair), Poco::Net::PollSet::POLL_READ, _remoteTimeout);
 
 		_pDispatcher->updateSocket(socket, Poco::Net::PollSet::POLL_READ);
+
+		clientConnected(this, socket.address());
 	}
 	catch (Poco::Exception& exc)
 	{

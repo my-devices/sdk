@@ -26,6 +26,7 @@
 #include "Poco/Net/StreamSocket.h"
 #include "Poco/Net/SocketAddress.h"
 #include "Poco/Net/WebSocket.h"
+#include "Poco/BasicEvent.h"
 #include "Poco/URI.h"
 #include "Poco/SharedPtr.h"
 #include "Poco/Mutex.h"
@@ -93,6 +94,13 @@ class WebTunnel_API LocalPortForwarder
 	/// WebSocket tunnel connection.
 {
 public:
+	Poco::BasicEvent<const Poco::Net::SocketAddress> clientConnected;
+		/// Fired after a client has successfully connected to the target
+		/// device through a tunnel.
+
+	Poco::BasicEvent<const Poco::Net::SocketAddress> clientDisconnected;
+		/// Fired after a client has disconnected.
+
 	LocalPortForwarder(Poco::UInt16 localPort, Poco::UInt16 remotePort, const Poco::URI& remoteURI, WebSocketFactory::Ptr pWebSocketFactory);
 		/// Creates a LocalPortForwarder, using the given localPort to
 		/// forward to the given remotePort on the remote system, using a WebSocket
