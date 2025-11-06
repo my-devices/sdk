@@ -170,7 +170,7 @@ public:
 	{
 		try
 		{
-			_lpf.clientDisconnected(&_lpf, socket.address());
+			_lpf.clientDisconnected(&_lpf, socket.peerAddress());
 		}
 		catch (Poco::Exception&)
 		{
@@ -646,7 +646,7 @@ void LocalPortForwarder::forward(Poco::Net::StreamSocket& socket)
 
 		_pDispatcher->updateSocket(socket, Poco::Net::PollSet::POLL_READ);
 
-		clientConnected(this, socket.address());
+		clientConnected(this, socket.peerAddress());
 	}
 	catch (Poco::Exception& exc)
 	{
