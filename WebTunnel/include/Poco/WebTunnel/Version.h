@@ -7,7 +7,7 @@
 //
 // Version information for macchina.io REMOTE SDK and clients.
 //
-// Copyright (c) 2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) -2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -39,7 +39,7 @@
 //      Ax: alpha releases
 //      Bx: beta releases
 //
-#define WEBTUNNEL_VERSION 0x02030300U
+#define WEBTUNNEL_VERSION 0x02040000U
 
 
 namespace Poco {

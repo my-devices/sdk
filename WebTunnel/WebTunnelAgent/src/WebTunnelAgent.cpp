@@ -1,7 +1,7 @@
 //
 // WebTunnelAgent.cpp
 //
-// Copyright (c) 2013-2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2013-2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -229,7 +229,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE Device Agent.\n"
-			"Copyright (c) 2013-2025 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2013-2026 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to forward local TCP ports to remote\n"
 			"clients via the macchina.io REMOTE.\n\n"
@@ -792,7 +792,7 @@ protected:
 		else if (_helpRequested || !config().has("webtunnel.reflectorURI"s))
 		{
 			displayHelp();
-		}	
+		}
 		else
 		{
 			try

@@ -1,7 +1,7 @@
 //
 // Tunnel.cpp
 //
-// Copyright (c) 2015-2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2015-2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0

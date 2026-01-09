@@ -80,9 +80,9 @@ and start with:
 sudo /etc/init.d/WebTunnelAgent start
 ```
 
-#### systemd 
+#### systemd
 
-A *systemd* service file is available in 
+A *systemd* service file is available in
 [etc/systemd/system/WebTunnelAgent.service](etc/systemd/system/WebTunnelAgent.service).
 The file must be copied to the target system to `/etc/systemd/system/WebTunnelAgent.service`.
 Like the `init.d` script, it expects the `WebTunnelAgent` executable to be located in
@@ -319,6 +319,13 @@ Used to enable RDP support in the macchina.io REMOTE web interface.
 The port number must also be included in the `webtunnel.ports` list.
 If not set RDP access will not be enabled via the macchina.io REMOTE web interface.
 
+#### webtunnel.vpnPort
+
+This optional setting specifies the port number of the device's OpenVPN server.
+Used to enable OpenVPN support in the macchina.io REMOTE web interface.
+The port number must also be included in the `webtunnel.ports` list.
+If not set OpenVPN access will not be enabled via the macchina.io REMOTE web interface.
+
 #### webtunnel.appPort
 
 This optional setting specifies the port number of the device's
@@ -447,7 +454,7 @@ An alternative form to specify a HTTP proxy, taking a URL, e.g.:
 http.proxy.url = http://proxy.nowhere.com:8080
 ```
 
-Note that `http.proxy.host` and `http.proxy.port` will take precedence, 
+Note that `http.proxy.host` and `http.proxy.port` will take precedence,
 if specified.
 
 This can be used if the proxy address is provided via an environment variable,

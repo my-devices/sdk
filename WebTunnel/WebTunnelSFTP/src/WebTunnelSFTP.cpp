@@ -1,7 +1,7 @@
 //
 // WebTunnelSFTP.cpp
 //
-// Copyright (c) 2014-2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2014-2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -276,7 +276,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SFTP-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE SFTP Client.\n"
-			"Copyright (c) 2021-2025 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2021-2026 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SFTP (Secure/SSH File Transfer Protocol)\n"
 			"connection to a remote host via the macchina.io REMOTE server.\n\n"

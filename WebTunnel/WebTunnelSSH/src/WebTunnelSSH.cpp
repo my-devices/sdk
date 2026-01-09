@@ -1,7 +1,7 @@
 //
 // WebTunnelSSH.cpp
 //
-// Copyright (c) 2014-2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2014-2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -304,7 +304,7 @@ protected:
 		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- SSH-OPTIONS]"s);
 		helpFormatter.setHeader("\n"
 			"macchina.io REMOTE SSH Client.\n"
-			"Copyright (c) 2014-2025 by Applied Informatics Software Engineering GmbH.\n"
+			"Copyright (c) 2014-2026 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
 			"This application is used to launch a SSH connection to a remote\n"
 			"host via the macchina.io REMOTE server.\n\n"
@@ -537,7 +537,7 @@ protected:
 			}
 			sshArgs.insert(sshArgs.end(), extraArgsVec.begin(), extraArgsVec.end());
 			sshArgs.insert(sshArgs.end(), itArgs, args.end());
-			
+
 			if (Poco::icompare(sshClientName, "scp"s) != 0)
 			{
 				sshArgs.push_back("localhost"s);

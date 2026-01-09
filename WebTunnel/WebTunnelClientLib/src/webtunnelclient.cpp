@@ -1,7 +1,7 @@
 //
 // webtunnelclient.cpp
 //
-// Copyright (c) 2020-2025, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2020-2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
@@ -36,7 +36,7 @@ namespace
 
 	struct Holder
 	{
-		enum 
+		enum
 		{
 			SIGNATURE = 0x4D414343
 		};
@@ -138,13 +138,13 @@ int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert,
 	try
 	{
 		std::string cipherList;
-		if (ciphers) 
+		if (ciphers)
 			cipherList = ciphers;
 		else
 			cipherList = "HIGH:!DSS:!aNULL@STRENGTH";
 		std::string caLocation;
 		if (ca_location) caLocation = caLocation;
-			
+
 		Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 		if (accept_unknown_cert)
 			pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
@@ -155,7 +155,7 @@ int WebTunnelClient_API webtunnel_client_configure_tls(bool accept_unknown_cert,
 		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
 #else
 		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
-#endif	
+#endif
 
 		switch (minimum_protocol)
 		{
