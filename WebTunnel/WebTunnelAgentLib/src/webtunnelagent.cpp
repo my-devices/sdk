@@ -38,7 +38,7 @@ namespace
 
 	struct Holder
 	{
-		enum 
+		enum
 		{
 			SIGNATURE = 0x41474E54
 		};
@@ -84,7 +84,7 @@ webtunnel.https.caLocation =
 logging.loggers.root.level = error
 logging.loggers.root.channel = console
 logging.channels.console.class = ColorConsoleChannel
-logging.channels.console.pattern = %Y-%m-%d %H:%M:%S.%i [%p] %s<%I>: %t	
+logging.channels.console.pattern = %Y-%m-%d %H:%M:%S.%i [%p] %s<%I>: %t
 	)PROPS";
 
 
@@ -245,13 +245,13 @@ int WebTunnelAgent_API webtunnel_agent_configure_tls(bool accept_unknown_cert, b
 	try
 	{
 		std::string cipherList;
-		if (ciphers) 
+		if (ciphers)
 			cipherList = ciphers;
 		else
 			cipherList = "HIGH:!DSS:!aNULL@STRENGTH";
 		std::string caLocation;
 		if (ca_location) caLocation = caLocation;
-			
+
 		Poco::SharedPtr<Poco::Net::InvalidCertificateHandler> pCertificateHandler;
 		if (accept_unknown_cert)
 			pCertificateHandler = new Poco::Net::AcceptCertificateHandler(false);
@@ -262,7 +262,7 @@ int WebTunnelAgent_API webtunnel_agent_configure_tls(bool accept_unknown_cert, b
 		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, Poco::Net::Context::VERIFY_RELAXED);
 #else
 		Poco::Net::Context::Ptr pContext = new Poco::Net::Context(Poco::Net::Context::TLS_CLIENT_USE, ""s, ""s, caLocation, Poco::Net::Context::VERIFY_RELAXED, 5, true, cipherList);
-#endif	
+#endif
 
 		switch (minimum_protocol)
 		{
@@ -334,7 +334,7 @@ int WebTunnelAgent_API webtunnel_agent_configure_timeouts(int connect_timeout, i
 webtunnel_agent WebTunnelAgent_API webtunnel_agent_create(const char* reflector_uri, const char* target_host, const char* device_id, const char* device_password, const char* domain_id, const char* tenant_id, const webtunnel_agent_port_spec* ports, unsigned ports_len, const char* custom_config_path)
 {
 	try
-	{	
+	{
 		Poco::Util::PropertyFileConfiguration::Ptr pConfig;
 		if (custom_config_path)
 		{
@@ -404,6 +404,9 @@ webtunnel_agent WebTunnelAgent_API webtunnel_agent_create(const char* reflector_
 					break;
 				case webtunnel_port_app:
 					pConfig->setUInt16("webtunnel.appPort"s, ports[i].port);
+					break;
+				case webtunnel_port_vpn:
+					pConfig->setUInt16("webtunnel.vpnPort"s, ports[i].port);
 					break;
 				case webtunnel_port_other:
 				default:

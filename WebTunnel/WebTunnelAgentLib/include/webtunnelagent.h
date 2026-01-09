@@ -94,7 +94,8 @@ typedef enum webtunnel_agent_port_type
 	webtunnel_port_vnc = 3,
 	webtunnel_port_rdp = 4,
 	webtunnel_port_app = 5,
-	webtunnel_port_other = 6
+	webtunnel_port_other = 6,
+	webtunnel_port_vpn = 7
 } webtunnel_agent_port_type;
 
 
@@ -198,7 +199,7 @@ int WebTunnelAgent_API webtunnel_agent_configure_tls(bool accept_unknown_cert, b
 // proxy_password contains the password for authenticating against the
 // proxy server. If NULL, no authentication will be performed.
 //
-// Returns webtunnel_agent_result_ok if successful, or webtunnel_agent_result_error 
+// Returns webtunnel_agent_result_ok if successful, or webtunnel_agent_result_error
 // if an error occured.
 */
 int WebTunnelAgent_API webtunnel_agent_configure_proxy(bool enable_proxy, const char* proxy_host, unsigned short proxy_port, const char* proxy_username, const char* proxy_password);
@@ -213,7 +214,7 @@ int WebTunnelAgent_API webtunnel_agent_configure_proxy(bool enable_proxy, const 
 //
 // target_host contains the IP address or host name of the target host, which is usually
 // "localhost" (or 127.0.0.1), but can also be a different host.
-// 
+//
 // device_id contains the ID (usually a UUID) of the device on the reflector server.
 //
 // device_password contains an optional device password, or NULL if no password is required.
@@ -221,7 +222,7 @@ int WebTunnelAgent_API webtunnel_agent_configure_proxy(bool enable_proxy, const 
 // domain_id contains the domain ID (UUID) of the device on the reflector server.
 //
 // tenant_id contains the ID of the tenant the device is associated with, or NULL if the
-// devices is not associated with a tenant. 
+// devices is not associated with a tenant.
 //
 // ports and ports_len specify a list of device port numbers to be made available remotely
 // through the reflector server. For each port, a port type can also be specified. Note that
