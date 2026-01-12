@@ -150,7 +150,7 @@ public:
 
 		_result = _dispatcher.hasSocketImpl(_socket);
 	}
-	
+
 	bool result() const
 	{
 		return _result;
@@ -263,7 +263,7 @@ void SocketDispatcher::setSendTimeout(Poco::Timespan sendTimeout)
 void SocketDispatcher::stop()
 {
 	if (!stopped())
-	{	
+	{
 		_stopped = true;
 		_queue.wakeUpAll();
 		_thread.join();
@@ -533,10 +533,10 @@ void SocketDispatcher::readable(const Poco::Net::Socket& socket, SocketDispatche
 			pInfo->pHandler->readable(*this, ss);
 		}
 		while (ss.good() && ss.available() > 0 && !ss.poll(0, Poco::Net::PollSet::POLL_READ));
-		// Need to loop here as there could still be buffered data in an internal socket 
+		// Need to loop here as there could still be buffered data in an internal socket
 		// buffer (especially with SecureStreamSocket) that would not be indicated by PollSet.
 		// However, we don't want to be stuck handling just that one
-		// socket if a peer drowns us in data. 
+		// socket if a peer drowns us in data.
 	}
 	catch (Poco::Exception& exc)
 	{
@@ -604,7 +604,8 @@ void SocketDispatcher::writable(const Poco::Net::Socket& socket, SocketDispatche
 					catch (Poco::Exception& exc)
 					{
 						_logger.error("Error writing to socket %?d: %s"s, socket.impl()->sockfd(), exc.displayText());
-						exception(ss, pInfo, &exc);
+						exception(socket, pInfo, &exc);
+						break;
 					}
 				}
 			}
@@ -740,7 +741,7 @@ void SocketDispatcher::sendBytesImpl(Poco::Net::StreamSocket& socket, Poco::Buff
 				else if (sent < buffer.size())
 				{
 					if (_logger.trace()) _logger.trace("Short write (%d) on socket %?d."s, sent, socket.impl()->sockfd());
-					it->second->pendingSends.emplace_back(buffer.begin() + sent, buffer.size() - sent, options);	
+					it->second->pendingSends.emplace_back(buffer.begin() + sent, buffer.size() - sent, options);
 				}
 			}
 			catch (Poco::Exception& exc)
@@ -805,7 +806,7 @@ std::size_t SocketDispatcher::countPendingBytesToSend(const Poco::Net::StreamSoc
 	if (it != _socketMap.end())
 	{
 		return std::accumulate(
-			it->second->pendingSends.begin(), it->second->pendingSends.end(), 0, 
+			it->second->pendingSends.begin(), it->second->pendingSends.end(), 0,
 			[](std::size_t n, const PendingSend& p2)
 			{
 				return n + p2.buffer.size();
