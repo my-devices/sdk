@@ -234,8 +234,8 @@ jobs:
           ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
           scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/raspberrypi/bullseye/armv7l
 
-  release_macos13_x86_64:
-    runs-on: macos-13
+  release_macos15_x86_64:
+    runs-on: macos-15-intel
     steps:
       -
         name: Checkout
@@ -264,11 +264,11 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/x86_64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/sequoia/x86_64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/sequoia/x86_64
 
-  release_macos14_arm64:
-    runs-on: macos-14
+  release_macos15_arm64:
+    runs-on: macos-15
     steps:
       -
         name: Checkout
@@ -297,8 +297,8 @@ jobs:
       -
         name: Copy to Web Server
         run: |
-          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/arm64
-          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/monterey/arm64
+          ssh ${{ secrets.MACCHINA_USER }}@$STAGING_HOST mkdir -p $STAGING_DIR/$GITHUB_SHA/bin/macos/sequoia/arm64
+          scp cmake-build/bin/*.gz remote-clients.tar.gz ${{ secrets.MACCHINA_USER }}@$STAGING_HOST:$STAGING_DIR/$GITHUB_SHA/bin/macos/sequoia/arm64
 
   release_source:
     runs-on: ubuntu-22.04
@@ -330,7 +330,7 @@ jobs:
 
   sign_and_publish:
     runs-on: ubuntu-22.04
-    needs: ["release_win64", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos13_x86_64", "release_macos14_arm64", "release_source"]
+    needs: ["release_win64", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos15_x86_64", "release_macos15_arm64", "release_source"]
     steps:
       -
         name: Checkout
