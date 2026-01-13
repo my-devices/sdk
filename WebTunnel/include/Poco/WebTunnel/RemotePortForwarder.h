@@ -153,6 +153,7 @@ protected:
 	void closeWebSocket(CloseReason reason, bool active);
 	int setChannelFlag(Poco::UInt16 channel, int flag);
 	int getChannelFlags(Poco::UInt16 channel) const;
+	static std::string socketErrorString(int error);
 
 private:
 	class TunnelMultiplexer: public SocketDispatcher::SocketHandler
@@ -169,11 +170,11 @@ private:
 		{
 			return _forwarder.wantMultiplex(dispatcher);
 		}
-	
+
 		bool wantWrite(SocketDispatcher& dispatcher)
 		{
 			return false;
-		}	
+		}
 
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
@@ -213,11 +214,11 @@ private:
 		{
 			return _forwarder.wantDemultiplex(dispatcher);
 		}
-	
+
 		bool wantWrite(SocketDispatcher& dispatcher)
 		{
 			return false;
-		}	
+		}
 
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
@@ -256,12 +257,12 @@ private:
 		{
 			return false;
 		}
-	
+
 		bool wantWrite(SocketDispatcher& dispatcher)
 		{
 			return true;
 		}
-	
+
 		void readable(SocketDispatcher& dispatcher, Poco::Net::StreamSocket& socket)
 		{
 		}

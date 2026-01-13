@@ -19,6 +19,7 @@
 #include "Poco/BinaryWriter.h"
 #include "Poco/MemoryStream.h"
 #include "Poco/CountingStream.h"
+#include "Poco/NumberFormatter.h"
 #include <algorithm>
 #include <cstring>
 
@@ -256,7 +257,7 @@ void RemotePortForwarder::multiplexError(SocketDispatcher& dispatcher, Poco::Net
 	}
 	else
 	{
-		_logger.error("Socket error on local socket %?d for channel %hu: %d"s, socket.impl()->sockfd(), channel, socket.impl()->socketError());
+		_logger.error("Socket error on local socket %?d for channel %hu: %s"s, socket.impl()->sockfd(), channel, socketErrorString(socket.impl()->socketError()));
 	}
 	removeChannel(channel);
 	Poco::UInt16 error;
@@ -352,10 +353,10 @@ void RemotePortForwarder::demultiplex(SocketDispatcher& dispatcher, Poco::Net::S
 			if (_lastSend.isElapsed(_remoteTimeout.totalMicroseconds()))
 			{
 				// Send a PING if we haven't sent anything to the reflector for some time,
-				// as may happend during a large file transfer. 
+				// as may happend during a large file transfer.
 				_logger.debug("Sending PING."s);
 				dispatcher.sendBytes(*_pWebSocket, 0, 0, Poco::Net::WebSocket::FRAME_FLAG_FIN | Poco::Net::WebSocket::FRAME_OP_PING);
-				_lastSend.update();	
+				_lastSend.update();
 			}
 			break;
 
@@ -440,7 +441,7 @@ void RemotePortForwarder::demultiplexError(SocketDispatcher& dispatcher, Poco::N
 	}
 	else
 	{
-		_logger.error("WebSocket encountered underlying socket error %d."s, socket.impl()->socketError());
+		_logger.error("WebSocket encountered underlying socket error: %s."s, socketErrorString(socket.impl()->socketError()));
 	}
 	if (_webSocketFlags & CF_CLOSED_LOCAL)
 	{
@@ -754,6 +755,92 @@ void RemotePortForwarder::updateProperties(const std::map<std::string, std::stri
 
 	_dispatcher.sendBytes(*_pWebSocket, buffer.begin(), static_cast<int>(payloadSize + Protocol::WT_FRAME_HEADER_SIZE), Poco::Net::WebSocket::FRAME_BINARY);
 	_lastSend.update();
+}
+
+
+std::string RemotePortForwarder::socketErrorString(int error)
+{
+	switch (error)
+	{
+	case POCO_ENOERR:
+		return "no error"s;
+	case POCO_EINTR:
+		return "interrupted"s;
+	case POCO_EACCES:
+		return "permission denied"s;
+	case POCO_EFAULT:
+		return "bad access"s;
+	case POCO_EINVAL:
+		return "invalid argument"s;
+	case POCO_EMFILE:
+		return "too many open files"s;
+	case POCO_EWOULDBLOCK:
+		return "would block"s;
+	case POCO_EINPROGRESS:
+		return "in progress"s;
+	case POCO_EALREADY:
+		return "already in progress"s;
+	case POCO_ENOTSOCK:
+		return "not a socket"s;
+	case POCO_EDESTADDRREQ:
+		return "destination address required"s;
+	case POCO_EMSGSIZE:
+		return "message too big"s;
+	case POCO_EPROTOTYPE:
+		return "wrong protocol type"s;
+	case POCO_ENOPROTOOPT:
+		return "protocol not available"s;
+	case POCO_EPROTONOSUPPORT:
+		return "protocol not supported"s;
+	case POCO_ESOCKTNOSUPPORT:
+		return "socket type not supported"s;
+	case POCO_ENOTSUP:
+		return "operation not supported"s;
+	case POCO_EPFNOSUPPORT:
+		return "protocol family not supported"s;
+	case POCO_EAFNOSUPPORT:
+		return "address family not supported"s;
+	case POCO_EADDRINUSE:
+		return "address already in use"s;
+	case POCO_EADDRNOTAVAIL:
+		return "address not available"s;
+	case POCO_ENETDOWN:
+		return "network is down"s;
+	case POCO_ENETUNREACH:
+		return "network is unreachable"s;
+	case POCO_ENETRESET:
+		return "network dropped connection on reset"s;
+	case POCO_ECONNABORTED:
+		return "connection aborted"s;
+	case POCO_ECONNRESET:
+		return "connection reset"s;
+	case POCO_ENOBUFS:
+		return "no buffer space available"s;
+	case POCO_EISCONN:
+		return "socket is already connected"s;
+	case POCO_ENOTCONN:
+		return "socket is not connected"s;
+	case POCO_ESHUTDOWN:
+		return "socket has been shut down"s;
+	case POCO_ETIMEDOUT:
+		return "timeout"s;
+	case POCO_ECONNREFUSED:
+		return "connection refused"s;
+	case POCO_EHOSTDOWN:
+		return "host is down"s;
+	case POCO_EHOSTUNREACH:
+		return "host is unreachable"s;
+#if defined(POCO_OS_FAMILY_UNIX)
+	case EPIPE:
+		return "broken pipe"s;
+	case EBADF:
+		return "bad socket descriptor"s;
+	case ENOENT:
+		return "no entry"s;
+#endif
+	default:
+		return Poco::NumberFormatter::format(error);
+	}
 }
 
 
