@@ -68,7 +68,7 @@ void SocketAddressTest::testSocketAddress()
 	}
 
 	SocketAddress sa4("pocoproject.org", 80);
-	assertTrue (sa4.host().toString() == "54.93.62.90");
+	assertTrue (sa4.host().toString() == "157.90.17.168");
 	assertTrue (sa4.port() == 80);
 
 	try

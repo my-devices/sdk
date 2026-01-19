@@ -249,7 +249,7 @@ void WebSocketImpl::skipHeader(int headerLength)
 	{
 		char header[MAX_HEADER_LENGTH];
 		int n = receiveNBytes(header, headerLength);
-		poco_assert_dbg (n == headerLength);
+		poco_assert (n == headerLength);
 	}
 }
 

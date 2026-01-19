@@ -20,11 +20,15 @@
 
 #include "Poco/XML/XML.h"
 #include "Poco/SAX/XMLReader.h"
-#include "Poco/XML/ParserEngine.h"
+#include "Poco/TextEncoding.h"
+#include <memory>
 
 
 namespace Poco {
 namespace XML {
+
+
+class ParserEngine;
 
 
 class XML_API SAXParser: public XMLReader
@@ -101,7 +105,7 @@ protected:
 	void setupParse();
 
 private:
-	ParserEngine _engine;
+	std::unique_ptr<ParserEngine> _pEngine;
 	bool _namespaces;
 	bool _namespacePrefixes;
 };

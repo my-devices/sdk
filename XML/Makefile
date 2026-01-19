@@ -6,7 +6,17 @@
 
 include $(POCO_BASE)/build/rules/global
 
-COMMONFLAGS += -DXML_NS -DXML_DTD -DHAVE_EXPAT_CONFIG_H -DEXPAT_POCO
+COMMONFLAGS += -DXML_NS -DXML_DTD -DXML_GE -DHAVE_EXPAT_CONFIG_H -DEXPAT_POCO
+
+ifeq ($(OSNAME),Linux)
+COMMONFLAGS += -DHAVE_GETRANDOM
+else
+ifeq ($(OSNAME),Darwin)
+COMMONFLAGS += -DHAVE_ARC4RANDOM_BUF
+else
+COMMONFLAGS += -DXML_DEV_URANDOM
+endif
+endif
 
 objects = AbstractContainerNode AbstractNode Attr AttrMap Attributes \
 	AttributesImpl CDATASection CharacterData ChildNodesList Comment \

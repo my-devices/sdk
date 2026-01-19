@@ -56,6 +56,12 @@ else()
 	if(WIN32)
 		#TODO: Is XML_STATIC only required with Windows? What does it do?
 		target_compile_definitions(XML PUBLIC XML_STATIC)
+	elseif(APPLE OR BSD)
+		target_compile_definitions(XML PRIVATE HAVE_ARC4RANDOM_BUF)
+	elseif(LINUX)
+		target_compile_definitions(XML PRIVATE HAVE_GETRANDOM)
+	else()
+		target_compile_definitions(XML PRIVATE XML_DEV_URANDOM)
 	endif()
 	target_compile_definitions(XML
 		PUBLIC XML_DTD
