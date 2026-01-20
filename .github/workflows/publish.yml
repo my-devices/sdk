@@ -330,7 +330,7 @@ jobs:
 
   sign_and_publish:
     runs-on: ubuntu-22.04
-    needs: ["release_win64", "release_ubuntu2204", "release_ubuntu2404", "release_raspberrypi", "release_macos15_x86_64", "release_macos15_arm64", "release_source"]
+    needs: ["release_win64", "release_ubuntu2204", "release_ubuntu2204_arm64", "release_ubuntu2404", "release_ubuntu2404_arm64", "release_raspberrypi", "release_macos15_x86_64", "release_macos15_arm64", "release_source"]
     steps:
       -
         name: Checkout
