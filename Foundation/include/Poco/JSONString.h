@@ -83,7 +83,6 @@ std::string Foundation_API toJSON(const std::string& value, int options);
 	/// only the compulsory ones.
 	///
 	/// Returns formatted string.
-	/// If escapeAllUnicode is true, all unicode characters will be escaped, otherwise only the compulsory ones.
 
 
 

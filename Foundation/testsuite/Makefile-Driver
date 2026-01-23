@@ -30,6 +30,7 @@ objects = ActiveMethodTest ActivityTest ActiveDispatcherTest \
 	TextConverterTest TextIteratorTest TextBufferIteratorTest TextTestSuite TextEncodingTest \
 	ThreadLocalTest ThreadPoolTest ThreadTest ThreadingTestSuite TimerTest \
 	TimespanTest TimestampTest TimezoneTest URIStreamOpenerTest URITest \
+	ULIDTest ULIDGeneratorTest ULIDTestSuite \
 	URITestSuite UUIDGeneratorTest UUIDTest UUIDTestSuite ZLibTest \
 	TestPlugin DummyDelegate BasicEventTest FIFOEventTest PriorityEventTest EventTestSuite \
 	LRUCacheTest ExpireCacheTest ExpireLRUCacheTest CacheTestSuite AnyTest FormatTest \
