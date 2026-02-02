@@ -1,11 +1,13 @@
 # macchina.io REMOTE SDK Changes
 
 
-## Release 2.4.0 (2026-01-XX)
+## Release 2.4.0 (2026-02-02)
 
 - WebTunnelAgent: allow specifying a designated OpenVPN port number in the
   list of forwarded ports in the configuration file (`webtunnel.vpnPort`).
-- Various minor fixes and improvements.
+- Fixed a build error with GCC 15.
+- Improved network error handling.
+- Upgraded libraries.
 
 
 ## Release 2.3.2 (2025-05-05)
