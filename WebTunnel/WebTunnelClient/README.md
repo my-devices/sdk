@@ -35,9 +35,9 @@ programs for specific protocols:
 `remote-client` usually does not need a configuration file, most parameters can be passed
 via command-line arguments. Some settings can be set using a configuration file
 (see the `WebTunnelAgent` [documentation](../WebTunnelAgent/README.md#configuration-file-format) for more
-information on configuration files). Also, see the [Configuration](#configuration) section below. 
+information on configuration files). Also, see the [Configuration](#configuration) section below.
 
-At startup, `remote-client` will look for a configuration file `.remote-client.properties` 
+At startup, `remote-client` will look for a configuration file `.remote-client.properties`
 in the current user's home directory, and read it if it's present.
 
 To run `remote-client`, you'll need to specify the URL of the remote device to connect
@@ -102,7 +102,7 @@ or `/help` on Windows) to see a help screen with available command-line options.
 In some environments it may be required to connect to the macchina.io REMOTE server
 via a HTTP proxy. This can be done by providing the address of the proxy server
 on the command-line (`--proxy`, `-P` for short, or `/proxy` on Windows), or by providing the
-proxy server and optionally credentials for the proxy server in a configuration file 
+proxy server and optionally credentials for the proxy server in a configuration file
 (see below).
 
 Below is an example for specifying a proxy server on the command-line:
@@ -132,11 +132,12 @@ The following settings can be provided via a configuration file:
   - `remote.username`: The username for the macchina.io REMOTE server.
   - `remote.password`: The password for the macchina.io REMOTE server.
   - `remote.token`: A token (JSON Web Token) for authenticating against the macchina.io REMOTE server.
-    If a token is given, username and password are not required. NOTE: A token is supported
-    by `remote-client` only, not any of the other client programs like `remote-ssh`.
+    If a token is given, username and password are not required. The `remote-login` program
+    will create a configuration file containing the token, which is read by all
+    client applications.
 
-Credentials specified in command-line arguments or via environment variables 
-(`REMOTE_USERNAME`, `REMOTE_PASSWORD`) will override those in a configuration file.
+Credentials specified in command-line arguments or via environment variables
+(`REMOTE_USERNAME`, `REMOTE_PASSWORD`, `REMOTE_TOKEN`) will override those in a configuration file.
 
 When storing credentials in the configuration file, make sure to keep your configuration
 file secure. From a security perspective it's recommended to not store the credentials

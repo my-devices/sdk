@@ -63,12 +63,16 @@ Furthermore, the following executables are included:
     creates a tunnel connection from your local machine (Windows, macOS) to a remote Windows device
     (which must have the remote desktop feature enabled), then launches a Microsoft Remote Desktop (RDP)
     client using that tunnel connection.
+  - [`remote-login`](WebTunnel/WebTunnelLogin/README.md): This executable obtains an OAuth 2 token from
+    the macchina.io REMOTE server and stores it locally.
+    The token can be used by the other client programs to authenticate against the server, without
+    the user having to enter the credentials each time, until the token expires.
 
-There are also [`WebTunnelAgentLib`](WebTunnel/WebTunnelAgentLib/README.md) and 
-[`WebTunnelClientLib`](WebTunnel/WebTunnelClientLib/README.md), which provide the functionality of 
+There are also [`WebTunnelAgentLib`](WebTunnel/WebTunnelAgentLib/README.md) and
+[`WebTunnelClientLib`](WebTunnel/WebTunnelClientLib/README.md), which provide the functionality of
 `WebTunnelAgent` and `remote-client`, respetively, in a C API, suitable for integration into applications (not written in C++).
 
-The macchina.io REMOTE SDK, like the [POCO C++ Libraries](https://github.com/pocoproject/poco) the SDK is based on, 
+The macchina.io REMOTE SDK, like the [POCO C++ Libraries](https://github.com/pocoproject/poco) the SDK is based on,
 is licensed under the [Boost Software License](https://spdx.org/licenses/BSL-1.0).
 
 
@@ -221,7 +225,7 @@ increases their size.
 You should run `xxx-yyy-linux-strip` on the resulting executables to reduce their
 size before deploying them to the device.
 
-NOTE: See [README_iOS.md](README_iOS.md) for iOS builds 
+NOTE: See [README_iOS.md](README_iOS.md) for iOS builds
 and [README_Android.md](README_Android.md) for Android builds.
 
 ### Installing
