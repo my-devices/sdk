@@ -555,7 +555,17 @@ protected:
 			else
 			{
 				const std::string target = args[0];
-				if (_reflectorURI.empty())
+				try
+				{
+					Poco::Net::SocketAddress targetAddr(target);
+				}
+				catch (Poco::Exception&)
+				{
+					std::cerr << "Invalid target name specified. The host name is malformed or the port number is missing." << std::endl;
+					rc = Poco::Util::Application::EXIT_USAGE;
+				}
+
+				if (rc == Poco::Util::Application::EXIT_OK && _reflectorURI.empty())
 				{
 					std::string::size_type pos1 = target.find('.');
 					if (pos1 != std::string::npos)
