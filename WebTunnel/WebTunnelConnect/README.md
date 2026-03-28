@@ -2,12 +2,15 @@
 
 `remote-connect` is a command-line program that sets up a TCP connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-REMOTE. The connection is then exposed via standard input/output. This enables 
+REMOTE server. The connection is then exposed via standard input/output. This enables 
 `remote-connect` to be used in a similar way to `netcat` (`nc`).
 
 Additionally, `remote-connect` can be used with the `ProxyCommand` configuration
 directive of OpenSSH, enabling an alternative way of connecting to a remote device
 via SSH in addition to the `remote-ssh` command.
+
+An interesting use case is using `remote-connect` with Visual Studio Code's Remote-SSH
+feature to do remote development on a device connected to the macchina.io REMOTE server.
 
 ## Running remote-connect
 
@@ -21,7 +24,7 @@ At startup, `remote-connect` will look for a configuration file named
 in the current user's home directory, and read it if it's present. 
 
 To run `remote-connect`, you'll need to specify the host name of the remote device to connect
-to, as well as the port number, e.g. 8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:22.
+to, as well as the port number, e.g. `8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:22`.
 
 Username and password for the macchina.io REMOTE server must be either passed via command-line 
 options, via a configuration file, or via environment variables 
@@ -45,6 +48,7 @@ This has some advantages over the `remote-ssh` program. Most importantly, other 
 use `ssh` to connect to a device can now be used with remote devices via macchina.io REMOTE,
 by providing a `ProxyCommand` configuration directive, either on the command-line or via
 the OpenSSH configuration file (`~/.ssh/config`).
+An example for such a program is Visual Studio Code, with the Remote-SSH feature.
 
 #### Command Line
 
