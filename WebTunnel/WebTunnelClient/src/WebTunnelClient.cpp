@@ -67,32 +67,6 @@ public:
 };
 
 
-class JWTWebSocketFactory: public Poco::WebTunnel::WebSocketFactory
-{
-public:
-	JWTWebSocketFactory(const std::string& jwt, Poco::Timespan timeout = Poco::Timespan(30, 0)):
-		_jwt(jwt),
-		_timeout(timeout)
-	{
-	}
-
-	Poco::Net::WebSocket* createWebSocket(const Poco::URI& uri, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response)
-	{
-		Poco::SharedPtr<Poco::Net::HTTPClientSession> pSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri);
-		pSession->setTimeout(_timeout);
-		if (!_jwt.empty())
-		{
-			request.set(Poco::Net::HTTPRequest::AUTHORIZATION, Poco::format("bearer %s", _jwt));
-		}
-		return new Poco::Net::WebSocket(*pSession, request, response);
-	}
-
-private:
-	std::string _jwt;
-	Poco::Timespan _timeout;
-};
-
-
 class WebTunnelClient: public Poco::Util::ServerApplication
 {
 public:
@@ -107,6 +81,7 @@ protected:
 		{
 			loadConfiguration(); // load default configuration files, if present
 		}
+		loadUserConfiguration("remote-credentials"s);
 		Poco::Util::ServerApplication::initialize(self);
 		Poco::Net::HTTPSessionInstantiator::registerInstantiator();
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -470,7 +445,7 @@ protected:
 			Poco::WebTunnel::WebSocketFactory::Ptr pWSF;
 			if (!_token.empty())
 			{
-				pWSF = new JWTWebSocketFactory(_token, connectTimeout);
+				pWSF = new Poco::WebTunnel::JWTWebSocketFactory(_token, connectTimeout);
 			}
 			else
 			{
@@ -503,7 +478,7 @@ private:
 	std::string _bindAddress = "localhost"s;
 	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
 	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
-	std::string _token;
+	std::string _token = Poco::Environment::get("REMOTE_TOKEN"s, ""s);;
 	std::string _command;
 	SSLInitializer _sslInitializer;
 };

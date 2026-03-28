@@ -143,7 +143,7 @@ public:
 			{
 				StdIO::write(_buffer.begin(), n);
 			}
-			else 
+			else
 			{
 				_peerClosed = true;
 				if (n < 0)
@@ -201,6 +201,7 @@ protected:
 		{
 			loadConfiguration(); // load default configuration files, if present
 		}
+		loadUserConfiguration("remote-credentials"s);
 		Poco::Util::Application::initialize(self);
 		Poco::Net::HTTPSessionInstantiator::registerInstantiator();
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -394,7 +395,7 @@ protected:
 		Poco::AutoPtr<ProxyHandler> pProxyHandler = Poco::makeAuto<ProxyHandler>();
 		SocketDispatcher dispatcher;
 		dispatcher.addSocket(socket, pProxyHandler, Poco::Net::PollSet::POLL_READ);
-	
+
 		Poco::Buffer<char> buffer(8192);
 		int n = StdIO::read(buffer.begin(), buffer.size());
 		while (n > 0 && !pProxyHandler->peerClosed())

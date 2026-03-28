@@ -1,16 +1,18 @@
 //
-// WebTunnelVNC.cpp
+// WebTunnelLogin.cpp
 //
-// Copyright (c) 2015-2026, Applied Informatics Software Engineering GmbH.
+// Copyright (c) 2026, Applied Informatics Software Engineering GmbH.
 // All rights reserved.
 //
 // SPDX-License-Identifier:	BSL-1.0
 //
 
 
-#include "Poco/WebTunnel/LocalPortForwarder.h"
 #include "Poco/WebTunnel/Version.h"
 #include "Poco/Net/HTTPClientSession.h"
+#include "Poco/Net/HTTPRequest.h"
+#include "Poco/Net/HTTPResponse.h"
+#include "Poco/Net/HTMLForm.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPSessionInstantiator.h"
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -26,19 +28,22 @@
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/IntValidator.h"
+#include "Poco/Dynamic/Var.h"
 #include "Poco/NumberParser.h"
-#include "Poco/NumberFormatter.h"
-#include "Poco/Process.h"
-#include "Poco/Environment.h"
-#include "Poco/Format.h"
-#include "Poco/String.h"
+#include "Poco/StreamCopier.h"
+#include "Poco/DateTime.h"
+#include "Poco/DateTimeFormatter.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
+#include "Poco/FileStream.h"
+#include "Poco/Format.h"
 #include <iostream>
 #if defined(POCO_OS_FAMILY_WINDOWS)
 #include <windows.h>
 #elif defined(POCO_OS_FAMILY_UNIX)
 #include <termios.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 
@@ -68,21 +73,20 @@ public:
 };
 
 
-class WebTunnelVNC: public Poco::Util::Application
+class WebTunnelLogin: public Poco::Util::Application
 {
 public:
-	WebTunnelVNC() = default;
+	WebTunnelLogin() = default;
 
-	~WebTunnelVNC() = default;
+	~WebTunnelLogin() = default;
 
 protected:
 	void initialize(Poco::Util::Application& self)
 	{
-		if (!loadUserConfiguration("remote-vnc"s) && !loadUserConfiguration("remote-client"s))
+		if (!loadUserConfiguration("remote-login"s))
 		{
 			loadConfiguration(); // load default configuration files, if present
 		}
-		loadUserConfiguration("remote-credentials"s);
 		Poco::Util::Application::initialize(self);
 		Poco::Net::HTTPSessionInstantiator::registerInstantiator();
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -117,74 +121,70 @@ protected:
 		Poco::Util::Application::defineOptions(options);
 
 		options.addOption(
-			Option("help", "h"s, "Display help information on command line arguments."s)
+			Option("help"s, "h"s, "Display help information on command line arguments."s)
 				.required(false)
 				.repeatable(false)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleHelp)));
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleHelp)));
 
 		options.addOption(
 			Option("version"s, "v"s, "Display version information and exit."s)
 				.required(false)
 				.repeatable(false)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleVersion)));
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleVersion)));
 
 		options.addOption(
 			Option("config-file"s, "c"s, "Load configuration data from a file."s)
 				.required(false)
 				.repeatable(true)
 				.argument("file"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleConfig)));
-
-		options.addOption(
-			Option("local-port"s, "L"s, "Specify local port number (default: ephemeral)."s)
-				.required(false)
-				.repeatable(false)
-				.argument("port"s)
-				.validator(new Poco::Util::IntValidator(1, 65535))
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleLocalPort)));
-
-		options.addOption(
-			Option("remote-port"s, "R"s, "Specify remote port number (default: VNC/5900)."s)
-				.required(false)
-				.repeatable(false)
-				.argument("port"s)
-				.validator(new Poco::Util::IntValidator(1, 65535))
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleRemotePort)));
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleConfig)));
 
 		options.addOption(
 			Option("username"s, "u"s, "Specify username for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("username"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleUsername)));
+				.argument("username")
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleUsername)));
 
 		options.addOption(
 			Option("password"s, "p"s, "Specify password for macchina.io REMOTE server."s)
 				.required(false)
 				.repeatable(false)
-				.argument("password"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handlePassword)));
+				.argument("password")
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handlePassword)));
 
 		options.addOption(
-			Option("token"s, "t"s, "Specify token (JWT) for authenticating against macchina.io REMOTE server."s)
+			Option("reflector-uri"s, "R"s, "Specify macchina.io REMOTE reflector server URL."s)
 				.required(false)
 				.repeatable(false)
-				.argument("token"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleToken)));
+				.argument("url"s)
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleReflectorURI)));
 
 		options.addOption(
 			Option("proxy"s, "P"s, "Specify a HTTP proxy server to connect through, e.g. \"http://proxy.nowhere.com:8080\"."s)
 				.required(false)
 				.repeatable(false)
 				.argument("url"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleProxy)));
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleProxy)));
 
 		options.addOption(
 			Option("define"s, "D"s, "Define or override a configuration property."s)
 				.required(false)
 				.repeatable(true)
 				.argument("name=value"s)
-				.callback(OptionCallback<WebTunnelVNC>(this, &WebTunnelVNC::handleDefine)));
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleDefine)));
+
+		options.addOption(
+			Option("status"s, "s"s, "Check existing login status."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleStatus)));
+
+		options.addOption(
+			Option("clear"s, "C"s, "Clear login token."s)
+				.required(false)
+				.repeatable(false)
+				.callback(OptionCallback<WebTunnelLogin>(this, &WebTunnelLogin::handleClear)));
 	}
 
 	void handleHelp(const std::string& name, const std::string& value)
@@ -202,16 +202,6 @@ protected:
 		loadConfiguration(value);
 	}
 
-	void handleLocalPort(const std::string& name, const std::string& value)
-	{
-		_localPort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
-	}
-
-	void handleRemotePort(const std::string& name, const std::string& value)
-	{
-		_remotePort = static_cast<Poco::UInt16>(Poco::NumberParser::parseUnsigned(value));
-	}
-
 	void handleUsername(const std::string& name, const std::string& value)
 	{
 		_username = value;
@@ -222,9 +212,9 @@ protected:
 		_password = value;
 	}
 
-	void handleToken(const std::string& name, const std::string& value)
+	void handleReflectorURI(const std::string& name, const std::string& value)
 	{
-		_token = value;
+		_reflectorURI = Poco::URI(value);
 	}
 
 	void handleProxy(const std::string& name, const std::string& value)
@@ -239,26 +229,29 @@ protected:
 		defineProperty(value);
 	}
 
+	void handleStatus(const std::string& name, const std::string& value)
+	{
+		_statusRequested = true;
+	}
+
+	void handleClear(const std::string& name, const std::string& value)
+	{
+		_clearRequested = true;
+	}
+
 	void displayHelp()
 	{
 		HelpFormatter helpFormatter(options());
 		helpFormatter.setCommand(commandName());
-		helpFormatter.setUsage("OPTIONS <Remote-URI> [-- VNC-OPTIONS]"s);
+		helpFormatter.setUsage("OPTIONS"s);
 		helpFormatter.setHeader("\n"
-			"macchina.io REMOTE VNC Client.\n"
-			"Copyright (c) 2015-2026 by Applied Informatics Software Engineering GmbH.\n"
+			"macchina.io REMOTE Login.\n"
+			"Copyright (c) 2026 by Applied Informatics Software Engineering GmbH.\n"
 			"All rights reserved.\n\n"
-			"This application is used to launch a VNC connection to a remote\n"
-			"host via the macchina.io REMOTE server.\n\n"
-			"<Remote-URI> specifies the URI of the remote device via the\n"
-			"macchina.io REMOTE server, e.g.:\n"
-#if defined(WEBTUNNEL_ENABLE_TLS)
-			"https://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io"
-#else
-			"http://8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io"
-#endif
-			"\n\n"
-			"The following command-line options are supported:"s
+			"This application is used to obtain an authentication token from "
+			"the macchina.io REMOTE server. This token is stored locally and "
+			"can then be used by the other macchina.io REMOTE client programs "
+			"like remote-client, remote-ssh or remote-connect."s
 		);
 		helpFormatter.setFooter(
 			"For more information, please visit the macchina.io REMOTE "
@@ -282,6 +275,42 @@ protected:
 		config().setString(name, value);
 	}
 
+	void displayStatus()
+	{
+		loadUserConfiguration("remote-credentials"s);
+		std::string token = config().getString("remote.token"s, ""s);
+		Poco::Int64 expires = config().getInt64("remote.tokenExpires"s, 0);
+		if (!token.empty() && expires != 0)
+		{
+			Poco::Timestamp now;
+			Poco::Timestamp expiresTS = Poco::Timestamp::fromEpochTime(expires);
+			if (expiresTS > now)
+			{
+				Poco::Int64 seconds = (expiresTS - now)/Poco::Timestamp::resolution();
+				std::cout << "Token is valid, expires " << Poco::DateTimeFormatter::format(expiresTS, Poco::DateTimeFormat::SORTABLE_FORMAT) << " (in " << seconds << " seconds)." << std::endl;
+			}
+			else
+			{
+				std::cout << "Token has expired." << std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "No valid login." << std::endl;
+		}
+	}
+
+	void clearLogin()
+	{
+		Poco::Path p(Poco::Path::home());
+		p.setFileName(".remote-credentials.properties"s);
+		Poco::File f(p.toString());
+		if (f.exists())
+		{
+			f.remove();
+		}
+	}
+
 	void promptLogin()
 	{
 		if (_username.empty())
@@ -297,6 +326,15 @@ protected:
 			echo(true);
 			std::cout << std::endl;
 		}
+	}
+
+	void promptTOTP()
+	{
+		std::cout << "One-Time Password: " << std::flush;
+		echo(false);
+		std::getline(std::cin, _totp);
+		echo(true);
+		std::cout << std::endl;
 	}
 
 	void echo(bool status)
@@ -315,31 +353,114 @@ protected:
 #endif
 	}
 
+	enum LoginStatus
+	{
+		LOGIN_OK,
+		LOGIN_TOTP,
+		LOGIN_FAILED
+	};
+
+	struct TokenResult
+	{
+		LoginStatus status;
+		std::string token;
+		Poco::Int64 expires;
+	};
+
+	TokenResult requestToken()
+	{
+		TokenResult result;
+		Poco::SharedPtr<Poco::Net::HTTPClientSession> pSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(_reflectorURI);
+		pSession->setTimeout(_connectTimeout);
+
+		Poco::Net::HTMLForm params;
+		params.set("username"s, _username);
+		params.set("password"s, _password);
+		params.set("application"s, _application);
+		if (!_totp.empty())
+		{
+			params.set("totp"s, _totp);
+		}
+		Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, "/my-devices/api/token", Poco::Net::HTTPRequest::HTTP_1_1);
+		params.prepareSubmit(request);
+		params.write(pSession->sendRequest(request));
+		Poco::Net::HTTPResponse response;
+		std::istream& responseStream = pSession->receiveResponse(response);
+		if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+		{
+			std::string json;
+			Poco::StreamCopier::copyToString(responseStream, json);
+			Poco::Dynamic::Var tokenHolder = Poco::Dynamic::Var::parse(json);
+			result.status = LOGIN_OK;
+			result.token = tokenHolder["token"].toString();
+			result.expires = tokenHolder["expires"].convert<Poco::Int64>();
+		}
+		else if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+		{
+			if (response.get("X-Authenticate"s, ""s) == "TOTP"s)
+			{
+				result.status = LOGIN_TOTP;
+			}
+			else
+			{
+				result.status = LOGIN_FAILED;
+			}
+		}
+		else
+		{
+			result.status = LOGIN_FAILED;
+		}
+		return result;
+	}
+
+	void saveToken(const std::string& token, Poco::Int64 expires)
+	{
+		Poco::Path p(Poco::Path::home());
+		p.setFileName(".remote-credentials.properties"s);
+		Poco::FileOutputStream file(p.toString());
+		Poco::DateTime now;
+		Poco::Timestamp expireTS = Poco::Timestamp::fromEpochTime(expires);
+		file
+			<< "# Token obtained " << Poco::DateTimeFormatter::format(now, Poco::DateTimeFormat::SORTABLE_FORMAT) << " from " << _reflectorURI.toString() << "\n"
+			<< "remote.token = " << token << "\n"
+			<< "# Token expires " << Poco::DateTimeFormatter::format(expireTS, Poco::DateTimeFormat::SORTABLE_FORMAT) << "\n"
+			<< "remote.tokenExpires = " << expires << "\n";
+		file.close();
+#if defined(POCO_OS_FAMILY_UNIX)
+		::chmod(p.toString().c_str(), S_IRUSR | S_IWUSR);
+#endif
+	}
+
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
+
 		if (_versionRequested)
 		{
 			std::cout << Poco::WebTunnel::formatVersion(WEBTUNNEL_VERSION) << std::endl;
 		}
-		else if (_helpRequested || args.empty())
+		else if (_statusRequested)
+		{
+			displayStatus();
+		}
+		else if (_clearRequested)
+		{
+			clearLogin();
+		}
+		else if (_helpRequested)
 		{
 			displayHelp();
 		}
 		else
 		{
-			Poco::Timespan connectTimeout = Poco::Timespan(config().getInt("webtunnel.connectTimeout"s, 30), 0);
-			Poco::Timespan remoteTimeout = Poco::Timespan(config().getInt("webtunnel.remoteTimeout"s, 300), 0);
-			Poco::Timespan localTimeout = Poco::Timespan(config().getInt("webtunnel.localTimeout"s, 7200), 0);
+			_connectTimeout = Poco::Timespan(config().getInt("remote.connectTimeout"s, 30), 0);
 
-			if (_username.empty())
+			if (_reflectorURI.empty() && config().has("remote.reflectorURI"s))
 			{
-				_username = config().getString("remote.username"s, ""s);
+				_reflectorURI = config().getString("remote.reflectorURI"s);
 			}
-			if (_password.empty())
-			{
-				_password = config().getString("remote.password"s, ""s);
-			}
+
+			_application = config().getString("remote.jwt.application"s, "WebTunnelLogin"s);
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
 			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
@@ -389,7 +510,6 @@ protected:
 
 			if (config().getBool("http.proxy.enable"s, false))
 			{
-				logger().information("Proxy enable"s);
 				Poco::Net::HTTPClientSession::ProxyConfig proxyConfig;
 				proxyConfig.host = config().getString("http.proxy.host"s, ""s);
 				proxyConfig.port = config().getUInt16("http.proxy.port"s, 80);
@@ -409,50 +529,23 @@ protected:
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
-			if (_token.empty())
+			promptLogin();
+			auto result = requestToken();
+			if (result.status == LOGIN_TOTP)
 			{
-				_token = config().getString("remote.token"s, ""s);
+				promptTOTP();
+				result = requestToken();
 			}
-
-			Poco::URI uri(args[0]);
-			Poco::WebTunnel::WebSocketFactory::Ptr pWSF;
-			if (!_token.empty())
+			if (result.status == LOGIN_OK)
 			{
-				pWSF = new Poco::WebTunnel::JWTWebSocketFactory(_token, connectTimeout);
-			}
-			else
-			{
-				pWSF = new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout);
-			}
-			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, pWSF);
-			forwarder.setRemoteTimeout(remoteTimeout);
-			forwarder.setLocalTimeout(localTimeout);
-
-			Poco::UInt16 localPort = forwarder.localPort();
-			std::string defaultVNCExecutable;
-#if defined(__APPLE__)
-			defaultVNCExecutable = "open";
-#else
-			defaultVNCExecutable = "vncviewer";
-#endif
-			std::string vncExecutable = config().getString("vncviewer.executable"s, defaultVNCExecutable);
-			Poco::Process::Args vncArgs;
-			if (vncExecutable == "open")
-			{
-				vncArgs.push_back("-W"s);
-				vncArgs.push_back("-n"s);
-				vncArgs.push_back("vnc://localhost:"s + Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
+				Poco::Timestamp expireTS = Poco::Timestamp::fromEpochTime(result.expires);
+				std::cout << "Login successful, token valid until " << Poco::DateTimeFormatter::format(expireTS, Poco::DateTimeFormat::SORTABLE_FORMAT) << "." << std::endl;
+				saveToken(result.token, result.expires);
 			}
 			else
 			{
-				vncArgs.push_back("localhost:"s + Poco::NumberFormatter::format(static_cast<unsigned>(localPort)));
+				std::cerr << "Login failed." << std::endl;
 			}
-			vncArgs.insert(vncArgs.end(), ++args.begin(), args.end());
-
-			logger().debug("Launching VNC client: %s"s, vncExecutable);
-			Poco::ProcessHandle ph = Poco::Process::launch(vncExecutable, vncArgs);
-			rc = ph.wait();
-			logger().debug("VNC client terminated with exit code %d"s, rc);
 		}
 		return rc;
 	}
@@ -460,13 +553,16 @@ protected:
 private:
 	bool _helpRequested = false;
 	bool _versionRequested = false;
-	Poco::UInt16 _localPort = 0;
-	Poco::UInt16 _remotePort = 5900;
-	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
-	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
-	std::string _token = Poco::Environment::get("REMOTE_TOKEN"s, ""s);
+	bool _statusRequested = false;
+	bool _clearRequested = false;
+	Poco::URI _reflectorURI = Poco::URI("https://remote.macchina.io"s);
+	std::string _username;
+	std::string _password;
+	std::string _application;
+	std::string _totp;
+	Poco::Timespan _connectTimeout;
 	SSLInitializer _sslInitializer;
 };
 
 
-POCO_APP_MAIN(WebTunnelVNC)
+POCO_APP_MAIN(WebTunnelLogin)

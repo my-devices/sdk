@@ -39,7 +39,7 @@
 //      Ax: alpha releases
 //      Bx: beta releases
 //
-#define WEBTUNNEL_VERSION 0x02040100U
+#define WEBTUNNEL_VERSION 0x02050000U
 
 
 namespace Poco {

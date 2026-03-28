@@ -89,6 +89,25 @@ private:
 };
 
 
+class JWTWebSocketFactory: public Poco::WebTunnel::WebSocketFactory
+	/// The JWTWebSocketFactory uses the Poco::Net::HTTPSessionFactory
+	/// to create the Poco::Net::HTTPClientSession, and sets up the
+	/// Poco::Net::HTTPRequest for OAuth 2 bearer token authentication using
+	/// the given token.
+{
+public:
+	JWTWebSocketFactory(const std::string& jwt, Poco::Timespan timeout = Poco::Timespan(30, 0));
+		/// Creates the DefaultWebSocketFactory using the given bearer token.
+
+	// WebSocketFactory
+	Poco::Net::WebSocket* createWebSocket(const Poco::URI& uri, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response);
+
+private:
+	std::string _jwt;
+	Poco::Timespan _timeout;
+};
+
+
 class WebTunnel_API LocalPortForwarder
 	/// This class forwards a local port to a remote host, using a
 	/// WebSocket tunnel connection.

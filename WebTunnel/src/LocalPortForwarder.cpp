@@ -22,6 +22,7 @@
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPSessionFactory.h"
 #include "Poco/Net/HTTPBasicCredentials.h"
+#include "Poco/Net/OAuth20Credentials.h"
 #include "Poco/Net/NetException.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
@@ -128,6 +129,31 @@ Poco::Net::WebSocket* DefaultWebSocketFactory::createWebSocket(const Poco::URI& 
 	if (!_username.empty())
 	{
 		Poco::Net::HTTPBasicCredentials creds(_username, _password);
+		creds.authenticate(request);
+	}
+	return new Poco::Net::WebSocket(*pSession, request, response);
+}
+
+
+//
+// JWTWebSocketFactory
+//
+
+
+JWTWebSocketFactory::JWTWebSocketFactory(const std::string& jwt, Poco::Timespan timeout):
+	_jwt(jwt),
+	_timeout(timeout)
+{
+}
+
+
+Poco::Net::WebSocket* JWTWebSocketFactory::createWebSocket(const Poco::URI& uri, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response)
+{
+	Poco::SharedPtr<Poco::Net::HTTPClientSession> pSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(uri);
+	pSession->setTimeout(_timeout);
+	if (!_jwt.empty())
+	{
+		Poco::Net::OAuth20Credentials creds(_jwt);
 		creds.authenticate(request);
 	}
 	return new Poco::Net::WebSocket(*pSession, request, response);
@@ -465,8 +491,8 @@ public:
 		}
 		catch (Poco::Net::NetException&)
 		{
-			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;	
-			notifyClientDisconnected(_pConnectionPair->streamSocket);		
+			_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
+			notifyClientDisconnected(_pConnectionPair->streamSocket);
 			_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 		}
 	}
@@ -495,7 +521,7 @@ public:
 			{
 				_pConnectionPair->streamSocketFlags |= LocalPortForwarder::CF_ERROR;
 				notifyClientDisconnected(_pConnectionPair->streamSocket);
-				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);			
+				_pDispatcher->removeSocket(_pConnectionPair->streamSocket);
 			}
 		}
 	}

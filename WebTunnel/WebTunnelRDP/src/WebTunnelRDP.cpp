@@ -84,6 +84,7 @@ protected:
 		{
 			loadConfiguration(); // load default configuration files, if present
 		}
+		loadUserConfiguration("remote-credentials"s);
 		Poco::Util::Application::initialize(self);
 		Poco::Net::HTTPSessionInstantiator::registerInstantiator();
 #if defined(WEBTUNNEL_ENABLE_TLS)
@@ -167,6 +168,13 @@ protected:
 				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handlePassword)));
 
 		options.addOption(
+			Option("token"s, "t"s, "Specify token (JWT) for authenticating against macchina.io REMOTE server."s)
+				.required(false)
+				.repeatable(false)
+				.argument("token"s)
+				.callback(OptionCallback<WebTunnelRDP>(this, &WebTunnelRDP::handleToken)));
+
+		options.addOption(
 			Option("proxy"s, "P"s, "Specify a HTTP proxy server to connect through, e.g. \"http://proxy.nowhere.com:8080\"."s)
 				.required(false)
 				.repeatable(false)
@@ -228,6 +236,11 @@ protected:
 	void handlePassword(const std::string& name, const std::string& value)
 	{
 		_password = value;
+	}
+
+	void handleToken(const std::string& name, const std::string& value)
+	{
+		_token = value;
 	}
 
 	void handleProxy(const std::string& name, const std::string& value)
@@ -353,6 +366,10 @@ protected:
 			{
 				_password = config().getString("remote.password"s, ""s);
 			}
+			if (_token.empty())
+			{
+				_token = config().getString("remote.token"s, ""s);
+			}
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
 			bool acceptUnknownCert = config().getBool("tls.acceptUnknownCertificate"s, true);
@@ -422,10 +439,22 @@ protected:
 				Poco::Net::HTTPClientSession::setGlobalProxyConfig(proxyConfig);
 			}
 
-			promptLogin();
+			if (_token.empty())
+			{
+				promptLogin();
+			}
 
 			Poco::URI uri(args[0]);
-			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout));
+			Poco::WebTunnel::WebSocketFactory::Ptr pWSF;
+			if (!_token.empty())
+			{
+				pWSF = new Poco::WebTunnel::JWTWebSocketFactory(_token, connectTimeout);
+			}
+			else
+			{
+				pWSF = new Poco::WebTunnel::DefaultWebSocketFactory(_username, _password, connectTimeout);
+			}
+			Poco::WebTunnel::LocalPortForwarder forwarder(_localPort, _remotePort, uri, pWSF);
 			forwarder.setRemoteTimeout(remoteTimeout);
 			forwarder.setLocalTimeout(localTimeout);
 
@@ -491,6 +520,7 @@ private:
 	Poco::UInt16 _remotePort = 3389;
 	std::string _username = Poco::Environment::get("REMOTE_USERNAME"s, ""s);
 	std::string _password = Poco::Environment::get("REMOTE_PASSWORD"s, ""s);
+	std::string _token = Poco::Environment::get("REMOTE_TOKEN"s, ""s);
 	std::string _remoteUsername;
 	SSLInitializer _sslInitializer;
 };
