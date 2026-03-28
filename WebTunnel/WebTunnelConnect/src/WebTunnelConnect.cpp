@@ -109,7 +109,7 @@ int StdIO::read(char* buffer, std::size_t bufferSize)
 int StdIO::write(const char* buffer, std::size_t length)
 {
 #if defined(POCO_OS_FAMILY_WINDOWS)
-	BOOL ok = ::WriteFile(_out, buffer, n, nullptr, nullptr);
+	BOOL ok = ::WriteFile(_out, buffer, static_cast<DWORD>(length), nullptr, nullptr);
 	return ok ? static_cast<int>(length) : -1;
 #else
 	return ::write(1, buffer, static_cast<int>(length));
@@ -138,7 +138,7 @@ public:
 	{
 		try
 		{
-			int n = socket.receiveBytes(_buffer.begin(), _buffer.size());
+			int n = socket.receiveBytes(_buffer.begin(), static_cast<int>(_buffer.size()));
 			if (n > 0)
 			{
 				StdIO::write(_buffer.begin(), n);
