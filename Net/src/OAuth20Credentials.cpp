@@ -85,6 +85,15 @@ void OAuth20Credentials::authenticate(HTTPRequest& request)
 }
 
 
+void OAuth20Credentials::proxyAuthenticate(HTTPRequest& request)
+{
+	std::string auth(_scheme);
+	auth += ' ';
+	auth += _bearerToken;
+	request.set(HTTPRequest::PROXY_AUTHORIZATION, auth);
+}
+
+
 void OAuth20Credentials::extractBearerToken(const HTTPRequest& request)
 {
 	if (request.hasCredentials())

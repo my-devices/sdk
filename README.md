@@ -51,6 +51,10 @@ Furthermore, the following executables are included:
   - [`remote-sftp`](WebTunnel/WebTunnelSFTP/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SFTP (Secure/SSH File Transfer Protocol) client using that tunnel connection.
+  - [`remote-connect`](WebTunnel/WebTunnelConnect/README.md): This enables an alternative method of
+    connecting to a remote device via SSH, using the `ProxyCommand` configuration keyword of OpenSSL.
+    It can also be used in a similar way to the `nc` (or `netcat`) utility, opening a TCP connection
+    to a remote device that can then read from or written to via standard input/output.
   - [`remote-vnc`](WebTunnel/WebTunnelVNC/README.md): This is a variant of `remote-client` that first
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to a remote device
     running a VNC (Virtual Network Computing) server, then launches a VNC remote desktop client using

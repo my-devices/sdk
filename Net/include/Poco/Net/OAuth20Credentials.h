@@ -96,6 +96,10 @@ public:
 		/// Adds an Authorization header containing the bearer token to
 		/// the HTTPRequest.
 
+	void proxyAuthenticate(HTTPRequest& request);
+		/// Adds an Proxy-Authorization header containing the bearer token to
+		/// the HTTPRequest.
+
 	static const std::string SCHEME;
 
 protected:
