@@ -9,6 +9,9 @@ device, `remote-ssh`, like `remote-client`, runs on a PC or Mac that you want to
 device. You'll have to build the [macchina.io REMOTE SDK](../../README.md)
 for your machine to get the `remote-ssh` program.
 
+NOTE: An alternative to using `remote-ssh` is using [`remote-connect`](../WebTunnelConnect/README.md) 
+with the OpenSSH `ProxyCommand` configuration directive.
+
 ## Running remote-ssh
 
 `remote-ssh` usually does not need a configuration file, most parameters can be passed
