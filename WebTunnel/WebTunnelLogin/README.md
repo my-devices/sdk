@@ -17,14 +17,9 @@ token will be used for authentication against the macchina.io REMOTE server.
 The main advantage of `remote-login` over using environment variables or
 configuration files to store the credentials is that only the token is
 stored on the local machine. The token has a limited validity, typically
-24 hours, but depending on the macchina.io REMOTE server configuration.
+24 hours, controlled through the macchina.io REMOTE server configuration.
 
 ## Running remote-login
-
-`remote-login` usually does not need a configuration file, any parameters can be passed
-via command-line arguments. Some settings can be set using a configuration file
-(see the `remote-client` [documentation](../WebTunnelClient/README.md) for more
-information on configuration files).
 
 At startup, `remote-login` will look for a configuration file named
 `.remote-login.properties`  in the current user's home directory, and read it if it's present.
@@ -58,14 +53,14 @@ To clear the token (and delete the `.remote-credentials.properties` file), run:
 
 ```
 remote-login --clear
-``
-
-## Configuration
+```
 
 ### Command-Line Arguments Help
 
 You can run `remote-ssh` without command-line options (or with `--help`
 or `/help` on Windows) to see a help screen with available command-line options.
+
+## Configuration
 
 ### SSL/TLS Configuration
 
