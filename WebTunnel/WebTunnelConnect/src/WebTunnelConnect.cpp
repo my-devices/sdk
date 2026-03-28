@@ -31,7 +31,7 @@
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/IntValidator.h"
 #include "Poco/NumberParser.h"
-#include "Poco/Process.h"
+#include "Poco/StreamCopier.h"
 #include "Poco/Environment.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
@@ -82,10 +82,16 @@ public:
 
 private:
 #if defined(POCO_OS_FAMILY_WINDOWS)
-	static HANDLE _in = ::GetStdHandle(STD_INPUT_HANDLE);
-	static HANDLE _out = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	static HANDLE _in;
+	static HANDLE _out;
 #endif
 };
+
+
+#if defined(POCO_OS_FAMILY_WINDOWS)
+HANDLE StdIO::_in = ::GetStdHandle(STD_INPUT_HANDLE);
+HANDLE StdIO::_out = ::GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
 
 
 int StdIO::read(char* buffer, std::size_t bufferSize)
@@ -103,7 +109,7 @@ int StdIO::read(char* buffer, std::size_t bufferSize)
 int StdIO::write(const char* buffer, std::size_t length)
 {
 #if defined(POCO_OS_FAMILY_WINDOWS)
-	BOOL ok = ::WriteFile(_out, _buffer.begin(), n, nullptr, nullprt);
+	BOOL ok = ::WriteFile(_out, buffer, n, nullptr, nullptr);
 	return ok ? static_cast<int>(length) : -1;
 #else
 	return ::write(1, buffer, static_cast<int>(length));
