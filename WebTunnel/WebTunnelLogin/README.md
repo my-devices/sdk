@@ -57,7 +57,7 @@ remote-login --clear
 
 ### Command-Line Arguments Help
 
-You can run `remote-ssh` without command-line options (or with `--help`
+You can run `remote-login` without command-line options (or with `--help`
 or `/help` on Windows) to see a help screen with available command-line options.
 
 ## Configuration
