@@ -1156,6 +1156,10 @@ void SecureSocketImpl::stateServerHandshakeStart()
 	_initServerContext = true;
 	_recvBuffer.setCapacity(IO_BUFFER_SIZE);
 	_recvBufferOffset = 0;
+	_extraBuffer.resize(IO_BUFFER_SIZE);
+	_extraBufferOffset = 0;
+	_extraSecBuffer.pvBuffer = 0;
+	_extraSecBuffer.cbBuffer = 0;
 	setState(ST_SERVER_HSK_LOOP_INIT);
 }
 
@@ -1269,6 +1273,14 @@ void SecureSocketImpl::stateServerHandshakeEnd()
 		throw SSLException("Failed to query stream sizes", Utility::formatError(securityStatus));
 
 	_ioBufferSize = _streamSizes.cbHeader + _streamSizes.cbMaximumMessage + _streamSizes.cbTrailer;
+	if (_ioBufferSize != _recvBuffer.size() && _recvBufferOffset <= _ioBufferSize) 
+	{
+		_recvBuffer.resize(_ioBufferSize);
+	}
+	if (_ioBufferSize != _extraBuffer.size() && _extraBufferOffset <= _ioBufferSize)
+	{
+		_extraBuffer.resize(_ioBufferSize);
+	}
 	setState(ST_SERVER_VERIFY);
 }
 

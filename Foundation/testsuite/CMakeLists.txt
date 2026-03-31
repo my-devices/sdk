@@ -15,15 +15,6 @@ POCO_SOURCES_AUTO(TEST_SRCS ${SRCS_G})
 file(GLOB_RECURSE HDRS_G "src/*.h")
 POCO_HEADERS_AUTO(TEST_SRCS ${HDRS_G})
 
-# WinDriver depends on WinTestRunner which depends on MFC, and we don't want that
-POCO_SOURCES_AUTO_PLAT(TEST_SRCS OFF
-	src/WinDriver.cpp
-)
-
-POCO_SOURCES_AUTO_PLAT(TEST_SRCS WINCE
-	src/WinCEDriver.cpp
-)
-
 add_executable(Foundation-testrunner ${TEST_SRCS})
 if(ANDROID)
 	add_test(

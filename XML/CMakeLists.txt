@@ -23,7 +23,7 @@ if(POCO_UNBUNDLED)
 	find_package(EXPAT REQUIRED)
 else()
 	POCO_SOURCES(SRCS expat
-		src/xmlparse.cpp
+		src/xmlparse.c
 		src/xmlrole.c
 		src/xmltok.c
 		src/xmltok_impl.c
@@ -65,7 +65,7 @@ else()
 	endif()
 	target_compile_definitions(XML
 		PUBLIC XML_DTD
-		PRIVATE XML_NS HAVE_EXPAT_CONFIG_H)
+		PRIVATE XML_NS XML_GE HAVE_EXPAT_CONFIG_H)
 endif()
 
 POCO_INSTALL(XML)

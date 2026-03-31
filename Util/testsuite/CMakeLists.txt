@@ -13,14 +13,6 @@ POCO_SOURCES_AUTO_PLAT(TEST_SRCS WIN32
 	src/WindowsTestSuite.cpp
 )
 
-POCO_SOURCES_AUTO_PLAT(TEST_SRCS OFF
-	src/WinDriver.cpp
-)
-
-POCO_SOURCES_AUTO_PLAT(TEST_SRCS WINCE
-	src/WinCEDriver.cpp
-)
-
 add_executable(Util-testrunner ${TEST_SRCS})
 if(ANDROID)
 	add_test(
