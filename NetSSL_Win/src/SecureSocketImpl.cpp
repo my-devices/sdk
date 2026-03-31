@@ -12,6 +12,8 @@
 //
 
 
+#define ENABLE_PRINT_STATE
+
 #include "Poco/Net/SecureSocketImpl.h"
 #include "Poco/Net/SSLException.h"
 #include "Poco/Net/SSLManager.h"
@@ -72,15 +74,15 @@ SecureSocketImpl::SecureSocketImpl(Poco::AutoPtr<SocketImpl> pSocketImpl, Contex
 	_sendBufferPending(0),
 	_recvBuffer(IO_BUFFER_SIZE),
 	_recvBufferOffset(0),
+	_extraBuffer(IO_BUFFER_SIZE),
+	_extraBufferOffset(0),
 	_ioBufferSize(0),
 	_streamSizes(),
 	_outSecBuffer(&_securityFunctions, true),
 	_inSecBuffer(&_securityFunctions, false),
 	_extraSecBuffer(),
 	_securityStatus(SEC_E_INCOMPLETE_MESSAGE),
-	_state(ST_INITIAL),
-	_needData(true),
-	_needHandshake(false)
+	_state(ST_INITIAL)
 {
 	SecInvalidateHandle(&_hCreds);
 	SecInvalidateHandle(&_hContext);
@@ -89,6 +91,8 @@ SecureSocketImpl::SecureSocketImpl(Poco::AutoPtr<SocketImpl> pSocketImpl, Contex
 	_streamSizes.cbHeader         = 0;
 	_streamSizes.cbMaximumMessage = 0;
 	_streamSizes.cbTrailer        = 0;
+
+	_extraSecBuffer.BufferType = SECBUFFER_EXTRA;
 
 	_overflowBuffer.resize(0);
 
@@ -310,7 +314,6 @@ int SecureSocketImpl::available() const
 void SecureSocketImpl::acceptSSL()
 {
 	setState(ST_ACCEPTING);
-	_needHandshake = true;
 }
 
 
@@ -381,18 +384,23 @@ int SecureSocketImpl::sendRawBytes(const void* buffer, int length, int flags)
 
 int SecureSocketImpl::receiveRawBytes(void* buffer, int length, int flags)
 {
-	return _pSocket->receiveBytes(buffer, length, flags);
+	int extra = _extraBufferOffset >= length ? length : _extraBufferOffset;
+	if (extra > 0)
+	{
+		std::memcpy(buffer, _extraBuffer.begin(), extra);
+		std::memmove(_extraBuffer.begin(), _extraBuffer.begin() + extra, _extraBufferOffset - extra);
+		_extraBufferOffset -= extra;
+		return extra;
+	}
+	else
+	{
+		return _pSocket->receiveBytes(buffer, length, flags);
+	}
 }
 
 
 int SecureSocketImpl::sendBytes(const void* buffer, int length, int flags)
 {
-	if (_needHandshake)
-	{
-		doHandshake();
-		_needHandshake = false;
-	}
-
 	if (_state == ST_ERROR) return 0;
 
 	if (_state != ST_DONE)
@@ -455,8 +463,8 @@ int SecureSocketImpl::sendBytes(const void* buffer, int length, int flags)
 		if (FAILED(securityStatus) && securityStatus != SEC_E_CONTEXT_EXPIRED)
 			throw SSLException("Failed to encrypt message", Utility::formatError(securityStatus));
 
-		poco_assert_dbg (_streamSizes.cbHeader == msg[0].cbBuffer);
-		poco_assert_dbg (_streamSizes.cbTrailer == msg[2].cbBuffer);
+		poco_assert_dbg (_streamSizes.cbHeader >= msg[0].cbBuffer);
+		poco_assert_dbg (_streamSizes.cbTrailer >= msg[2].cbBuffer);
 		poco_assert_dbg (dataSize == msg[1].cbBuffer);
 
 		_sendBufferPending += msg[0].cbBuffer + msg[1].cbBuffer + msg[2].cbBuffer;
@@ -485,12 +493,6 @@ int SecureSocketImpl::sendBytes(const void* buffer, int length, int flags)
 
 int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 {
-	if (_needHandshake)
-	{
-		doHandshake();
-		_needHandshake = false;
-	}
-
 	if (_state == ST_ERROR) return 0;
 	if (_state != ST_DONE)
 	{
@@ -508,7 +510,7 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 		}
 	}
 
-	int rc(0);
+	int rc = 0;
 	std::size_t overflowSize = _overflowBuffer.size();
 	if (overflowSize > 0) // any remaining data from previous calls?
 	{
@@ -534,11 +536,6 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 	}
 	else
 	{
-		// adjust buffer size to optimize memory usage
-		if (_ioBufferSize != _recvBuffer.capacity() && _recvBufferOffset < _ioBufferSize)
-		{
-			_recvBuffer.setCapacity(_ioBufferSize);
-		}
 		bool needData = _recvBufferOffset == 0;
 		bool cont = true;
 		do
@@ -557,8 +554,20 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 			else needData = true;
 
 			int bytesDecoded = 0;
-			_extraSecBuffer.pvBuffer = 0;
-			_extraSecBuffer.cbBuffer = 0;
+			int recLength = recordLength(_recvBuffer.begin(), _recvBufferOffset);
+			if (recLength <= 0) 
+			{
+				needData = true;
+				continue;
+			}
+			if (recLength < _recvBufferOffset)
+			{
+				poco_assert_dbg (_extraBufferOffset == 0);
+				DWORD extra = _recvBufferOffset - recLength;
+				std::memcpy(_extraBuffer.begin(), _recvBuffer.begin() + recLength, extra);
+				_recvBufferOffset = recLength;
+				_extraBufferOffset = extra;
+			}
 			SECURITY_STATUS securityStatus = decodeBufferFull(_recvBuffer.begin(), _recvBufferOffset, reinterpret_cast<char*>(buffer), length, bytesDecoded);
 			if (_extraSecBuffer.cbBuffer > 0)
 			{
@@ -570,9 +579,6 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 				_recvBufferOffset = 0;
 				cont = false;
 			}
-
-			_extraSecBuffer.pvBuffer = 0;
-			_extraSecBuffer.cbBuffer = 0;
 
 			if (bytesDecoded > 0)
 			{
@@ -597,21 +603,17 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 			{
 				continue;
 			}
-
-			if (securityStatus == SEC_I_CONTEXT_EXPIRED)
+			else if (securityStatus == SEC_I_CONTEXT_EXPIRED)
 			{
 				_shutdownFlags |= TLS_SHUTDOWN_RECEIVED;
 				break;
 			}
-
-			if (securityStatus != SEC_E_OK && securityStatus != SEC_I_RENEGOTIATE)
+			else if (securityStatus != SEC_E_OK && securityStatus != SEC_I_RENEGOTIATE)
 			{
 				break;
 			}
-
-			if (securityStatus == SEC_I_RENEGOTIATE)
+			else if (securityStatus == SEC_I_RENEGOTIATE)
 			{
-				_needData = false;
 				setState(ST_CLIENT_HSK_LOOP_INIT);
 				if (!_pSocket->getBlocking())
 					return bytesDecoded > 0 ? bytesDecoded : SecureStreamSocket::ERR_SSL_WOULD_BLOCK;
@@ -621,14 +623,8 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 				if (securityStatus != SEC_E_OK)
 					break;
 
-				if (_extraSecBuffer.pvBuffer)
-				{
-					std::memmove(_recvBuffer.begin(), _extraSecBuffer.pvBuffer, _extraSecBuffer.cbBuffer);
-					_recvBufferOffset = _extraSecBuffer.cbBuffer;
-				}
-
-				_extraSecBuffer.pvBuffer = 0;
-				_extraSecBuffer.cbBuffer = 0;
+				needData = _recvBufferOffset == 0;
+				cont = needData;
 			}
 		}
 		while (cont);
@@ -657,8 +653,7 @@ SECURITY_STATUS SecureSocketImpl::decodeMessage(BYTE* pBuffer, DWORD bufSize, Au
 		{
 			if (!pDataBuffer && msg[i].BufferType == SECBUFFER_DATA)
 				pDataBuffer = &msg[i];
-
-			if (!pExtraBuffer && msg[i].BufferType == SECBUFFER_EXTRA)
+			else if (!pExtraBuffer && msg[i].BufferType == SECBUFFER_EXTRA)
 				pExtraBuffer = &msg[i];
 		}
 	}
@@ -748,7 +743,11 @@ SECURITY_STATUS SecureSocketImpl::decodeBufferFull(BYTE* pBuffer, DWORD bufSize,
 
 		if (securityStatus == SEC_I_RENEGOTIATE)
 		{
-			_needData = false;
+			if (bufSize > 0)
+			{
+				_extraSecBuffer.cbBuffer = bufSize;
+				_extraSecBuffer.pvBuffer = pBuffer;
+			}
 			return securityStatus;
 		}
 	}
@@ -808,11 +807,6 @@ void SecureSocketImpl::connectSSL(bool completeHandshake)
 	if (completeHandshake)
 	{
 		doHandshake();
-		_needHandshake = false;
-	}
-	else
-	{
-		_needHandshake = true;
 	}
 }
 
@@ -850,8 +844,12 @@ void SecureSocketImpl::stateClientHandshakeStart()
 	// get initial security token
 	_outSecBuffer.reset(true);
 	_outSecBuffer.setSecBufferToken(0, 0, 0);
-	_recvBuffer.setCapacity(IO_BUFFER_SIZE);
+	_recvBuffer.resize(IO_BUFFER_SIZE);
 	_recvBufferOffset = 0;
+	_extraBuffer.resize(IO_BUFFER_SIZE);
+	_extraBufferOffset = 0;
+	_extraSecBuffer.pvBuffer = 0;
+	_extraSecBuffer.cbBuffer = 0;
 
 	TimeStamp ts;
 	DWORD contextAttributes(0);
@@ -883,10 +881,6 @@ void SecureSocketImpl::stateClientHandshakeStart()
 			throw SSLException("Handshake failed", Utility::formatError(_securityStatus));
 		}
 	}
-
-	_extraSecBuffer.pvBuffer = 0;
-	_extraSecBuffer.cbBuffer = 0;
-	_needData = true;
 
 	setState(ST_CLIENT_HSK_SEND_TOKEN);
 }
@@ -945,46 +939,6 @@ void SecureSocketImpl::stateClientHandshakeLoopInit()
 }
 
 
-int SecureSocketImpl::getRecordLength(const BYTE* pRec, int len)
-{
-	// TLS Record Header:
-	// struct {
-    //     ContentType type;        /* 1 byte */
-    //     ProtocolVersion version; /* 2 bytes */
-    //     uint16 length;           /* must be <= 2^14 */
-    //     opaque fragment[TLSPlaintext.length];
-    // } TLSPlaintext;
-
-	if (len >= 5)
-	{
-		Poco::UInt16 recLen = (pRec[3] << 8) + pRec[4];
-		if (recLen <= 16384)
-		{
-			return recLen + 5;
-		}
-		else
-		{
-			return -1;
-		}
-	}
-	return 0;
-}
-
-
-bool SecureSocketImpl::bufferHasCompleteRecords(const BYTE* pBuffer, int length)
-{
-	const BYTE* pEnd = pBuffer + length;
-	int recLen = getRecordLength(pBuffer, length);
-	while (recLen > 0 && length >= recLen)
-	{
-		pBuffer += recLen;
-		length -= recLen;
-		recLen = getRecordLength(pBuffer, length);
-	}
-	return pBuffer == pEnd;
-}
-
-
 void SecureSocketImpl::stateClientHandshakeLoopRecv()
 {
 	poco_assert (IO_BUFFER_SIZE > _recvBufferOffset);
@@ -1002,7 +956,6 @@ void SecureSocketImpl::stateClientHandshakeLoopRecv()
 		{
 			setState(ST_CLIENT_HSK_LOOP_PROCESS);
 		}
-		
 	}
 }
 
@@ -1045,7 +998,6 @@ void SecureSocketImpl::stateClientHandshakeLoopProcess()
 	}
 	else if (_securityStatus == SEC_E_INCOMPLETE_MESSAGE)
 	{
-		_needData = true;
 		setState(ST_CLIENT_HSK_LOOP_INIT);
 	}
 	else if (FAILED(_securityStatus))
@@ -1082,14 +1034,14 @@ void SecureSocketImpl::stateClientHandshakeLoopDone()
 	}
 	else
 	{
-		setState(ST_CLIENT_VERIFY);
+		setState(ST_CLIENT_HSK_END);
 	}
 }
 
 
 void SecureSocketImpl::stateClientHandshakeSendFinal()
 {
-	sendOutSecBufferAndAdvanceState(ST_CLIENT_VERIFY);
+	sendOutSecBufferAndAdvanceState(ST_CLIENT_HSK_END);
 }
 
 
@@ -1124,28 +1076,49 @@ void SecureSocketImpl::drainExtraBuffer()
 		std::memmove(_recvBuffer.begin(), _recvBuffer.begin() + (_recvBufferOffset - _inSecBuffer[1].cbBuffer), _inSecBuffer[1].cbBuffer);
 		_recvBufferOffset = _inSecBuffer[1].cbBuffer;
 	}
-	else _recvBufferOffset = 0;
+	else 
+	{
+		_recvBufferOffset = 0;
+	}
+}
+
+
+void SecureSocketImpl::stateClientHandshakeEnd()
+{
+	SECURITY_STATUS securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_STREAM_SIZES, &_streamSizes);
+	if (securityStatus != SEC_E_OK)
+		throw SSLException("Failed to query stream sizes", Utility::formatError(securityStatus));
+
+	_ioBufferSize = _streamSizes.cbHeader + _streamSizes.cbMaximumMessage + _streamSizes.cbTrailer;
+	if (_ioBufferSize != _recvBuffer.size() && _recvBufferOffset <= _ioBufferSize) 
+	{
+		_recvBuffer.resize(_ioBufferSize);
+	}
+	if (_ioBufferSize != _extraBuffer.size() && _extraBufferOffset <= _ioBufferSize)
+	{
+		_extraBuffer.resize(_ioBufferSize);
+	}
+	setState(ST_CLIENT_VERIFY);
 }
 
 
 void SecureSocketImpl::stateClientVerify()
 {
-	poco_assert_dbg(!_pPeerCertificate);
+	// With TLS 1.3, this may be entered multiple times.
+	// Only verify certificate once, but we still need to query stream sizes.
+
 	poco_assert_dbg(!_peerHostName.empty());
 
 	try
 	{
-		SECURITY_STATUS securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_REMOTE_CERT_CONTEXT, (PVOID) &_pPeerCertificate);
-		if (securityStatus != SEC_E_OK)
-			throw SSLException("Failed to obtain peer certificate", Utility::formatError(securityStatus));
+		if (!_pPeerCertificate)
+		{
+			SECURITY_STATUS securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_REMOTE_CERT_CONTEXT, (PVOID) &_pPeerCertificate);
+			if (securityStatus != SEC_E_OK)
+				throw SSLException("Failed to obtain peer certificate", Utility::formatError(securityStatus));
 
-		clientVerifyCertificate(_peerHostName);
-
-		securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_STREAM_SIZES, &_streamSizes);
-		if (securityStatus != SEC_E_OK)
-			throw SSLException("Failed to query stream sizes", Utility::formatError(securityStatus));
-
-		_ioBufferSize = _streamSizes.cbHeader + _streamSizes.cbMaximumMessage + _streamSizes.cbTrailer;
+			clientVerifyCertificate(_peerHostName);
+		}
 		setState(ST_DONE);
 	}
 	catch (...)
@@ -1275,11 +1248,22 @@ void  SecureSocketImpl::stateServerHandshakeLoopDone()
 	_securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_STREAM_SIZES, &_streamSizes);
 	if (_securityStatus != SEC_E_OK) throw SSLException("Cannot query stream sizes", Utility::formatError(_securityStatus));
 	_ioBufferSize = _streamSizes.cbHeader + _streamSizes.cbMaximumMessage + _streamSizes.cbTrailer;
+	setState(ST_SERVER_HSK_END);
+}
+
+
+void SecureSocketImpl::stateServerHandshakeEnd()
+{
+	SECURITY_STATUS securityStatus = _securityFunctions.QueryContextAttributesW(&_hContext, SECPKG_ATTR_STREAM_SIZES, &_streamSizes);
+	if (securityStatus != SEC_E_OK)
+		throw SSLException("Failed to query stream sizes", Utility::formatError(securityStatus));
+
+	_ioBufferSize = _streamSizes.cbHeader + _streamSizes.cbMaximumMessage + _streamSizes.cbTrailer;
 	setState(ST_SERVER_VERIFY);
 }
 
 
-void SecureSocketImpl::stateServerHandshakeVerify()
+void SecureSocketImpl::stateServerVerify()
 {
 	SECURITY_STATUS securityStatus;
 	if (_clientAuthRequired)
@@ -1302,6 +1286,46 @@ void SecureSocketImpl::stateServerHandshakeVerify()
 		}
 	}
 	setState(ST_DONE);
+}
+
+
+int SecureSocketImpl::recordLength(const BYTE* pRec, int len)
+{
+	// TLS Record Header:
+	// struct {
+    //     ContentType type;        /* 1 byte */
+    //     ProtocolVersion version; /* 2 bytes */
+    //     uint16 length;           /* must be <= 2^14 */
+    //     opaque fragment[TLSPlaintext.length];
+    // } TLSPlaintext;
+
+	if (len >= 5)
+	{
+		Poco::UInt16 recLen = (pRec[3] << 8) + pRec[4];
+		if (recLen <= 16384)
+		{
+			return recLen + 5;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	return 0;
+}
+
+
+bool SecureSocketImpl::bufferHasCompleteRecords(const BYTE* pBuffer, int length)
+{
+	const BYTE* pEnd = pBuffer + length;
+	int recLen = recordLength(pBuffer, length);
+	while (recLen > 0 && length >= recLen)
+	{
+		pBuffer += recLen;
+		length -= recLen;
+		recLen = recordLength(pBuffer, length);
+	}
+	return pBuffer == pEnd;
 }
 
 
@@ -1655,7 +1679,6 @@ int SecureSocketImpl::serverShutdown(PCredHandle phCreds, CtxtHandle* phContext)
 	if (!SecIsValidHandle(phContext))
 	{
 		// handshake has never been done
-		poco_assert_dbg (_needHandshake);
 		return SEC_E_OK;
 	}
 
@@ -1714,7 +1737,7 @@ bool SecureSocketImpl::stateMachine()
 #ifdef ENABLE_PRINT_STATE
 
 
-#define CASE_PRINT_ENUM(enum) case enum: std::cout << #enum; break;
+#define CASE_PRINT_ENUM(enum) case enum: std::cerr << #enum; break;
 
 
 void SecureSocketImpl::printState(const std::string& message)
@@ -1726,7 +1749,7 @@ void SecureSocketImpl::printState(const std::string& message)
 	static Poco::FastMutex mutex;
 	Poco::FastMutex::ScopedLock lock(mutex);
 
-	std::cout << message << "  thread=" << threadId << "  state=";
+	std::cerr << message << "  thread=" << threadId << "  state=";
 	switch (_state)
 	{
 		CASE_PRINT_ENUM(ST_INITIAL)
@@ -1740,6 +1763,7 @@ void SecureSocketImpl::printState(const std::string& message)
 		CASE_PRINT_ENUM(ST_CLIENT_HSK_LOOP_DONE)
 		CASE_PRINT_ENUM(ST_CLIENT_HSK_SEND_FINAL)
 		CASE_PRINT_ENUM(ST_CLIENT_HSK_SEND_ERROR)
+		CASE_PRINT_ENUM(ST_CLIENT_HSK_END)
 		CASE_PRINT_ENUM(ST_CLIENT_VERIFY)
 		CASE_PRINT_ENUM(ST_ACCEPTING)
 		CASE_PRINT_ENUM(ST_SERVER_HSK_START)
@@ -1748,16 +1772,17 @@ void SecureSocketImpl::printState(const std::string& message)
 		CASE_PRINT_ENUM(ST_SERVER_HSK_LOOP_PROCESS)
 		CASE_PRINT_ENUM(ST_SERVER_HSK_LOOP_SEND)
 		CASE_PRINT_ENUM(ST_SERVER_HSK_LOOP_DONE)
+		CASE_PRINT_ENUM(ST_SERVER_HSK_END)
 		CASE_PRINT_ENUM(ST_SERVER_VERIFY)
 		CASE_PRINT_ENUM(ST_DONE)
 		CASE_PRINT_ENUM(ST_ERROR)
 	}
 
-	std::cout << "  securityStatus=" << Utility::formatError(_securityStatus) << "  hCreds="<< SecIsValidHandle(&_hCreds) << "  hContext=" << SecIsValidHandle(&_hContext) << "  recvBufOff=" << _recvBufferOffset << std::endl;
+	std::cerr << "  securityStatus=" << Utility::formatError(_securityStatus) << "  hCreds="<< SecIsValidHandle(&_hCreds) << "  hContext=" << SecIsValidHandle(&_hContext) << "  recvBufOff=" << _recvBufferOffset << std::endl;
 }
 
 
-#endif 
+#endif // ENABLE_PRINT_STATE
 
 
 StateMachine& StateMachine::instance()
@@ -1782,6 +1807,7 @@ StateMachine::StateMachine():
 	_states[SecureSocketImpl::ST_CLIENT_HSK_LOOP_DONE]       = &SecureSocketImpl::stateClientHandshakeLoopDone;
 	_states[SecureSocketImpl::ST_CLIENT_HSK_SEND_FINAL]      = &SecureSocketImpl::stateClientHandshakeSendFinal;
 	_states[SecureSocketImpl::ST_CLIENT_HSK_SEND_ERROR]      = &SecureSocketImpl::stateClientHandshakeSendError;
+	_states[SecureSocketImpl::ST_CLIENT_HSK_END]             = &SecureSocketImpl::stateClientHandshakeEnd;
 	_states[SecureSocketImpl::ST_CLIENT_VERIFY]              = &SecureSocketImpl::stateClientVerify;
 		
 	_states[SecureSocketImpl::ST_ACCEPTING]                  = &SecureSocketImpl::stateServerAccepted;
@@ -1791,7 +1817,8 @@ StateMachine::StateMachine():
 	_states[SecureSocketImpl::ST_SERVER_HSK_LOOP_PROCESS]    = &SecureSocketImpl::stateServerHandshakeLoopProcess;
 	_states[SecureSocketImpl::ST_SERVER_HSK_LOOP_SEND]       = &SecureSocketImpl::stateServerHandshakeLoopSend;
 	_states[SecureSocketImpl::ST_SERVER_HSK_LOOP_DONE]       = &SecureSocketImpl::stateServerHandshakeLoopDone;
-	_states[SecureSocketImpl::ST_SERVER_VERIFY]              = &SecureSocketImpl::stateServerHandshakeVerify;
+	_states[SecureSocketImpl::ST_SERVER_HSK_END]             = &SecureSocketImpl::stateServerHandshakeEnd;
+	_states[SecureSocketImpl::ST_SERVER_VERIFY]              = &SecureSocketImpl::stateServerVerify;
 
 	_states[SecureSocketImpl::ST_DONE]                       = &SecureSocketImpl::stateIllegal;
 	_states[SecureSocketImpl::ST_ERROR]                      = &SecureSocketImpl::stateError;
