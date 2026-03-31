@@ -12,8 +12,6 @@
 //
 
 
-#define ENABLE_PRINT_STATE
-
 #include "Poco/Net/SecureSocketImpl.h"
 #include "Poco/Net/SSLException.h"
 #include "Poco/Net/SSLManager.h"
@@ -307,7 +305,7 @@ void SecureSocketImpl::abort()
 
 int SecureSocketImpl::available() const
 {
-	return static_cast<int>(_overflowBuffer.size() + _recvBufferOffset);
+	return static_cast<int>(_overflowBuffer.size() + _recvBufferOffset + _extraBufferOffset);
 }
 
 
@@ -407,7 +405,7 @@ int SecureSocketImpl::sendBytes(const void* buffer, int length, int flags)
 	{
 		if (_pSocket->getBlocking())
 		{
-			doHandshake();
+			if (doHandshake() != SEC_E_OK) throw SSLException("Handshake failure");
 		}
 		else
 		{
@@ -498,7 +496,7 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 	{
 		if (_pSocket->getBlocking())
 		{
-			doHandshake();
+			if (doHandshake() != SEC_E_OK) throw SSLException("Handshake failure");
 		}
 		else
 		{
@@ -551,23 +549,11 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 				else
 					_recvBufferOffset += numBytes;
 			}
-			else needData = true;
-
-			int bytesDecoded = 0;
-			int recLength = recordLength(_recvBuffer.begin(), _recvBufferOffset);
-			if (recLength <= 0) 
+			else 
 			{
 				needData = true;
-				continue;
 			}
-			if (recLength < _recvBufferOffset)
-			{
-				poco_assert_dbg (_extraBufferOffset == 0);
-				DWORD extra = _recvBufferOffset - recLength;
-				std::memcpy(_extraBuffer.begin(), _recvBuffer.begin() + recLength, extra);
-				_recvBufferOffset = recLength;
-				_extraBufferOffset = extra;
-			}
+			int bytesDecoded = 0;
 			SECURITY_STATUS securityStatus = decodeBufferFull(_recvBuffer.begin(), _recvBufferOffset, reinterpret_cast<char*>(buffer), length, bytesDecoded);
 			if (_extraSecBuffer.cbBuffer > 0)
 			{
@@ -604,7 +590,7 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 				continue;
 			}
 			else if (securityStatus == SEC_I_CONTEXT_EXPIRED)
-			{
+			{				
 				_shutdownFlags |= TLS_SHUTDOWN_RECEIVED;
 				break;
 			}
@@ -614,14 +600,39 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 			}
 			else if (securityStatus == SEC_I_RENEGOTIATE)
 			{
+				// We need to pass data to InitializeSecurityContext() record by record, due to an apparent
+				// bug in SChannel TLS 1.3 handling. After a successful handshake, the server
+				// will send additional post-handshake messages (e.g., NewSessionTicket),
+				// which are recognized by DecryptMessage() and reported with a
+				// SEC_I_RENEGOTIATE return value. The message will be unwrapped and
+				// made available in the _extraSecBuffer. This message must then be passed
+				// to InitializeSecurityContext(). The problem now is that if receiveRawBytes()
+				// returns two such post-handshake messages in a single read, as can happen
+				// in some cases, DecryptMessage() will only upwrap the first one and keep the 
+				// second one as is. If both messages are then passed to InitializeSecurityContext(), 
+				// only the first one will be processed and the second one will be silently discarded
+				// (not even passed back in SECBUFFER_EXTRA). 
+				// The next call to DecryptMessage() with regular data then fails with SEC_E_DECRYPT_FAILURE.
+				// 
+				// Passing received data record by record fixes this issue.
+
+				int recLength = recordLength(_recvBuffer.begin(), _recvBufferOffset);
+				if (recLength <= 0)  throw SSLException("Renegotiation with incomplete record"); // should not happen
+				if (recLength < _recvBufferOffset)
+				{
+					poco_assert_dbg (_extraBufferOffset == 0);
+					DWORD extra = _recvBufferOffset - recLength;
+					std::memcpy(_extraBuffer.begin(), _recvBuffer.begin() + recLength, extra);
+					_recvBufferOffset = recLength;
+					_extraBufferOffset = extra;
+				}
+
 				setState(ST_CLIENT_HSK_LOOP_INIT);
+
 				if (!_pSocket->getBlocking())
 					return bytesDecoded > 0 ? bytesDecoded : SecureStreamSocket::ERR_SSL_WOULD_BLOCK;
 
-				securityStatus = doHandshake();
-
-				if (securityStatus != SEC_E_OK)
-					break;
+				if (doHandshake() != SEC_E_OK) throw SSLException("Handshake failure");
 
 				needData = _recvBufferOffset == 0;
 				cont = needData;
@@ -629,7 +640,6 @@ int SecureSocketImpl::receiveBytes(void* buffer, int length, int flags)
 		}
 		while (cont);
 	}
-
 	return rc;
 }
 
@@ -806,7 +816,7 @@ void SecureSocketImpl::connectSSL(bool completeHandshake)
 	setState(ST_CONNECTING);
 	if (completeHandshake)
 	{
-		doHandshake();
+		if (doHandshake() != SEC_E_OK) throw SSLException("Handshake failure");
 	}
 }
 
@@ -1357,7 +1367,7 @@ int SecureSocketImpl::completeHandshake()
 {
 	if (_pSocket->getBlocking())
 	{
-		doHandshake();
+		if (doHandshake() != SEC_E_OK) throw SSLException("Handshake failure");
 		return 0;
 	}
 	else
