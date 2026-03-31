@@ -126,7 +126,7 @@ public:
 
 	bool wantRead(SocketDispatcher& dispatcher)
 	{
-		return true;
+		return !_peerClosed;
 	}
 
 	bool wantWrite(SocketDispatcher& dispatcher)
@@ -146,6 +146,7 @@ public:
 			else
 			{
 				_peerClosed = true;
+				dispatcher.updateSocket(socket, 0);
 				if (n < 0)
 				{
 					_logger.error("Error reading from peer."s);
@@ -168,6 +169,7 @@ public:
 		{
 			_logger.error("Socket error: %s"s, pException->displayText());
 			_peerClosed = true;
+			dispatcher.updateSocket(socket, 0);
 		}
 	}
 
