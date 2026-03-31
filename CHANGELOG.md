@@ -1,6 +1,24 @@
 # macchina.io REMOTE SDK Changes
 
 
+## Release 2.5.0 (2026-04-??)
+
+- New `remote-connect` utility, which can be used with OpenSSH's `ProxyCommand`
+  as an alternative way to connect to a remote device with SSH.
+  Or use it in a similar way to `netcat` (`nc`), but with remote TCP servers.
+- New `remote-login` utility, which allows to obtain an authentication
+  token from the macchina.io REMOTE server. That token is stored locally
+  and can be used by the other command-line tools (like `remote-ssh`, etc.)
+  to connect to a device without having to enter the macchina.io REMOTE
+  server username and password each time.
+  This is also a more secure alternative to storing the username and
+  password in a configuration file or in environment variables.
+- All `remote-*` tools now uniformly support token-based authentication.
+- Windows builds using the *SChannel* TLS implementation instead of
+  *OpenSSL* now finally support TLS 1.3.
+- Upgrade internal components.
+
+
 ## Release 2.4.0 (2026-02-02)
 
 - WebTunnelAgent: allow specifying a designated OpenVPN port number in the
