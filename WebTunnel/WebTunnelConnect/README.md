@@ -2,7 +2,7 @@
 
 `remote-connect` is a command-line program that sets up a TCP connection from your
 local machine (e.g., your PC, Mac, etc.) to a device connected to the macchina.io
-REMOTE server. The connection is then exposed via standard input/output. This enables 
+REMOTE server. The connection is then exposed via standard input/output. This enables
 `remote-connect` to be used in a similar way to `netcat` (`nc`).
 
 Additionally, `remote-connect` can be used with the `ProxyCommand` configuration
@@ -17,19 +17,19 @@ feature to do remote development on a device connected to the macchina.io REMOTE
 `remote-connect` usually does not need a configuration file, most parameters can be passed
 via command-line arguments. Some settings can be set using a configuration file
 (see the `remote-client` [documentation](../WebTunnelClient/README.md) for more
-information on configuration files). 
+information on configuration files).
 
-At startup, `remote-connect` will look for a configuration file named 
+At startup, `remote-connect` will look for a configuration file named
 `.remote-connect.properties` or `.remote-client.properties`
-in the current user's home directory, and read it if it's present. 
+in the current user's home directory, and read it if it's present.
 
 To run `remote-connect`, you'll need to specify the host name of the remote device to connect
 to, as well as the port number, e.g. `8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:22`.
 
-Username and password for the macchina.io REMOTE server must be either passed via command-line 
-options, via a configuration file, or via environment variables 
-`REMOTE_USERNAME` and `REMOTE_PASSWORD`. 
-`remote-connect` will not prompt for username and password, and will fail to connect if 
+Username and password for the macchina.io REMOTE server must be either passed via command-line
+options, via a configuration file, or via environment variables
+`REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+`remote-connect` will not prompt for username and password, and will fail to connect if
 username and password are not specified.
 
 Example:
@@ -55,7 +55,7 @@ An example for such a program is Visual Studio Code, with the Remote-SSH feature
 ```
 export REMOTE_USERNAME=johndoe
 export REMOTE_PASSWORD=s3cr3t
-ssh -o 'ProxyCommand remote-connect 8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:80' pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
+ssh -o 'ProxyCommand remote-connect 8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:22' pi@8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io
 ```
 
 #### Configuration File
