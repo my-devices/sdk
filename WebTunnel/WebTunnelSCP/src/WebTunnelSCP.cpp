@@ -352,6 +352,28 @@ protected:
 			return std::string();
 	}
 
+	void checkToken(Poco::Int64 expires)
+	{
+		if (!_token.empty() && expires != 0)
+		{
+			Poco::Timestamp now;
+			Poco::Timestamp expiresTS = Poco::Timestamp::fromEpochTime(expires);
+			if (expiresTS > now)
+			{
+				int seconds = static_cast<int>((expiresTS - now)/Poco::Timestamp::resolution());
+				if (seconds < 600)
+				{
+					std::cerr << "Your login token will expire in " << seconds << " seconds. Please run remote-login in time to obtain a new token." << std::endl;
+				}
+			}
+			else 
+			{
+				std::cerr << "Your login token has expired. Please run remote-login to obtain a new token." << std::endl;
+				_token.clear();
+			}
+		}
+	}
+
 	int main(const std::vector<std::string>& args)
 	{
 		int rc = Poco::Util::Application::EXIT_OK;
@@ -380,6 +402,7 @@ protected:
 			if (_token.empty())
 			{
 				_token = config().getString("remote.token"s, ""s);
+				checkToken(config().getInt64("remote.tokenExpires"s, 0));
 			}
 
 #if defined(WEBTUNNEL_ENABLE_TLS)
