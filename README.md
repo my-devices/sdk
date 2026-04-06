@@ -52,7 +52,7 @@ Furthermore, the following executables are included:
     creates a tunnel connection from your local machine (Windows, macOS or Linux) to the remote device,
     then launches a SFTP (Secure/SSH File Transfer Protocol) client using that tunnel connection.
   - [`remote-connect`](WebTunnel/WebTunnelConnect/README.md): This enables an alternative method of
-    connecting to a remote device via SSH, using the `ProxyCommand` configuration keyword of OpenSSL.
+    connecting to a remote device via SSH, using the `ProxyCommand` configuration keyword of OpenSSH.
     It can also be used in a similar way to the `nc` (or `netcat`) utility, opening a TCP connection
     to a remote device that can then read from or written to via standard input/output.
   - [`remote-vnc`](WebTunnel/WebTunnelVNC/README.md): This is a variant of `remote-client` that first
@@ -107,9 +107,9 @@ instructions.
 
 ### Libraries
 
-The macchina.io REMOTE SDK requires OpenSSL 1.0 or newer
+The macchina.io REMOTE SDK requires OpenSSL 1.1.1 or newer
 on Linux and macOS systems.
-We recommend using OpenSSL version 1.1.1l or newer (including OpenSSL 3).
+We recommend using OpenSSL version 3.0.0 or newer.
 
 Most Unix/Linux systems already have OpenSSL preinstalled. If your system
 does not have OpenSSL, please get it from <https://www.openssl.org> or
@@ -180,7 +180,7 @@ $ cmake --build . --config Release
 
 On macOS, it's necessary to tell CMake where to find the OpenSSL headers
 and libraries by setting the `OPENSSL_ROOT_DIR` CMake variable.
-For example, if OpenSSL 1.1.x has been installed with Homebrew,
+For example, if OpenSSL has been installed with Homebrew,
 the `cmake` invocation becomes:
 
 ```

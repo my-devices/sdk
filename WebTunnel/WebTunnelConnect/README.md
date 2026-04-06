@@ -43,7 +43,7 @@ to send a HTTP request to the device via standard input.
 
 ### Using remote-connect with OpenSSH
 
-The OpenSSH `ProxyCommand` can be used to have the OpenSSL client connect via `remote-connect`.
+The OpenSSH `ProxyCommand` can be used to have the OpenSSH client connect via `remote-connect`.
 This has some advantages over the `remote-ssh` program. Most importantly, other programs that
 use `ssh` to connect to a device can now be used with remote devices via macchina.io REMOTE,
 by providing a `ProxyCommand` configuration directive, either on the command-line or via
