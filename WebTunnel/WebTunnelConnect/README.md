@@ -26,11 +26,12 @@ in the current user's home directory, and read it if it's present.
 To run `remote-connect`, you'll need to specify the host name of the remote device to connect
 to, as well as the port number, e.g. `8ba57423-ec1a-4f31-992f-a66c240cbfa0.remote.macchina.io:22`.
 
-Username and password for the macchina.io REMOTE server must be either passed via command-line
-options, via a configuration file, or via environment variables
-`REMOTE_USERNAME` and `REMOTE_PASSWORD`.
+Username and password or an authentication token for the macchina.io REMOTE server must be either passed 
+via command-line options, via a configuration file or [`remote-login`](../WebTunnelLogin/README.md), 
+or via environment variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`.
 `remote-connect` will not prompt for username and password, and will fail to connect if
 username and password are not specified.
+The recommended way to authenticate `remote-connect` is by using `remote-login`.
 
 Example:
 
