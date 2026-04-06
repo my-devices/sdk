@@ -58,6 +58,9 @@ remote SSH login name.
 
 The macchina.io REMOTE username and password can also be supplied via environment
 variables `REMOTE_USERNAME` and `REMOTE_PASSWORD`, or via a configuration file.
+Alternatively, an OAuth 2 token can be specified, either via the
+`REMOTE_TOKEN` environment variable, or via a configuration file or the [`remote-login`](../WebTunnelLogin/README.md)
+program.
 
 Like [`remote-client`](../WebTunnelClient/README.md), `remote-ssh` can also connect through a 
 [proxy server](../WebTunnelClient/README.md#connecting-trough-a-http-proxy).
