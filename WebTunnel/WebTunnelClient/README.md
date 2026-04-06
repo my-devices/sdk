@@ -132,8 +132,8 @@ The following settings can be provided via a configuration file:
   - `remote.username`: The username for the macchina.io REMOTE server.
   - `remote.password`: The password for the macchina.io REMOTE server.
   - `remote.token`: A token (JSON Web Token) for authenticating against the macchina.io REMOTE server.
-    If a token is given, username and password are not required. The `remote-login` program
-    will create a configuration file containing the token, which is read by all
+    If a token is given, username and password are not required. The [`remote-login`](../WebTunnelLogin/README.md)
+    program will create a configuration file containing the token, which is read by all
     client applications.
 
 Credentials specified in command-line arguments or via environment variables
