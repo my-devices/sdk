@@ -8,16 +8,6 @@ include $(POCO_BASE)/build/rules/global
 
 COMMONFLAGS += -DXML_NS -DXML_DTD -DXML_GE -DHAVE_EXPAT_CONFIG_H -DEXPAT_POCO
 
-ifeq ($(OSNAME),Linux)
-COMMONFLAGS += -DHAVE_GETRANDOM
-else
-ifeq ($(OSNAME),Darwin)
-COMMONFLAGS += -DHAVE_ARC4RANDOM_BUF
-else
-COMMONFLAGS += -DXML_DEV_URANDOM
-endif
-endif
-
 objects = AbstractContainerNode AbstractNode Attr AttrMap Attributes \
 	AttributesImpl CDATASection CharacterData ChildNodesList Comment \
 	ContentHandler DOMBuilder DOMException DOMImplementation DOMObject \
@@ -33,6 +23,19 @@ objects = AbstractContainerNode AbstractNode Attr AttrMap Attributes \
 	XMLString XMLWriter XMLStreamParser XMLStreamParserException ValueTraits
 
 expat_objects = xmlparse xmlrole xmltok
+
+ifeq ($(OSNAME),Linux)
+COMMONFLAGS += -DHAVE_GETRANDOM
+expat_objects += random_getrandom
+else
+ifeq ($(OSNAME),Darwin)
+COMMONFLAGS += -DHAVE_ARC4RANDOM_BUF
+expat_objects += random_arc4random_buf
+else
+COMMONFLAGS += -DXML_DEV_URANDOM
+expat_objects += random_dev_urandom
+endif
+endif
 
 ifdef POCO_UNBUNDLED
 	SYSLIBS += -lexpat
